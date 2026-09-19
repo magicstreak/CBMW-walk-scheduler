@@ -125,53 +125,61 @@
             flex-grow: 1;
         }
 
-        /* Base Slot Styling - Neutral when Available */
+        /* Base Slot Styling */
         .slot {
             padding: 6px 8px;
             font-size: 0.75rem;
-            font-weight: 600;
             border-radius: 6px;
             cursor: pointer;
             transition: all 0.2s ease;
-            border: 1px solid #e2e8f0;
-            background-color: #f8fafc;
-            color: #475569;
             text-align: left;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        .slot:hover:not(.past) {
-            background-color: #cbd5e1;
-            color: #1e293b;
-            border-color: #94a3b8;
-        }
-
         /* Past State Styling */
         .slot.past {
-            background-color: #f1f5f9;
-            color: #94a3b8;
-            border-color: #e2e8f0;
+            background-color: #f1f5f9 !important;
+            color: #94a3b8 !important;
+            border-color: #e2e8f0 !important;
             cursor: not-allowed;
             opacity: 0.6;
+            box-shadow: none !important;
         }
 
-        /* Booked State Styling - Reveals True Grade Color (Pale/Desaturated) */
+        /* --- AVAILABLE SLOTS STYLE (Palered Grade Specific Color) --- */
+        .slot.available {
+            font-weight: 500;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+        }
+        .slot.available.grade-E  { background-color: rgba(22, 163, 74, 0.12);  color: var(--color-E);  border-color: rgba(22, 163, 74, 0.25); }
+        .slot.available.grade-M  { background-color: rgba(37, 99, 235, 0.12);  color: var(--color-M);  border-color: rgba(37, 99, 235, 0.25); }
+        .slot.available.grade-MS { background-color: rgba(220, 38, 38, 0.12);  color: var(--color-MS); border-color: rgba(220, 38, 38, 0.25); }
+        .slot.available.grade-S  { background-color: rgba(17, 24, 39, 0.08);   color: var(--color-S);  border-color: rgba(17, 24, 39, 0.2); }
+        .slot.available.grade-VS { background-color: rgba(124, 58, 237, 0.12); color: var(--color-VS); border-color: rgba(124, 58, 237, 0.25); }
+
+        .slot.available:hover:not(.past) {
+            filter: brightness(0.95);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* --- BOOKED SLOTS STYLE (Bolder Solid Grade Specific Color) --- */
         .slot.booked {
-            border-style: dashed;
-            cursor: pointer; /* Click to edit */
+            font-weight: 700;
+            color: #ffffff;
+            border: 1px solid transparent;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.15);
         }
+        .slot.booked.grade-E  { background-color: var(--color-E);  border-color: var(--color-E); }
+        .slot.booked.grade-M  { background-color: var(--color-M);  border-color: var(--color-M); }
+        .slot.booked.grade-MS { background-color: var(--color-MS); border-color: var(--color-MS); }
+        .slot.booked.grade-S  { background-color: var(--color-S);  border-color: var(--color-S); }
+        .slot.booked.grade-VS { background-color: var(--color-VS); border-color: var(--color-VS); }
 
-        .slot.booked.grade-E { background-color: rgba(22, 163, 74, 0.12); color: var(--color-E); border-color: var(--color-E); }
-        .slot.booked.grade-M { background-color: rgba(37, 99, 235, 0.12); color: var(--color-M); border-color: var(--color-M); }
-        .slot.booked.grade-MS { background-color: rgba(220, 38, 38, 0.12); color: var(--color-MS); border-color: var(--color-MS); }
-        .slot.booked.grade-S { background-color: rgba(17, 24, 39, 0.08); color: var(--color-S); border-color: var(--color-S); }
-        .slot.booked.grade-VS { background-color: rgba(124, 58, 237, 0.12); color: var(--color-VS); border-color: var(--color-VS); }
-
-        .slot.booked:hover {
-            opacity: 0.85;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        .slot.booked:hover:not(.past) {
+            filter: brightness(1.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
 
         /* Modal Overlay styling */
