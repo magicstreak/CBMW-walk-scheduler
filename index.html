@@ -556,7 +556,7 @@
                         if (existingBooking) {
                             // If booked: reveal true grade color style, display grade + walk number
                             slotEl.classList.add('booked', `grade-${grade}`);
-                            slotEl.innerText = `${grade}: ${existingBooking.walk_number}´Booked`;
+                            slotEl.innerText = `${grade}: ${existingBooking.walk_number} Booked`;
                             slotEl.title = `Leader: ${existingBooking.leader_name}\nComments: ${existingBooking.comments}`;
                             
                             // Edit existing slot upon click
@@ -565,7 +565,7 @@
                             });
                         } else {
                             // If vacant: display default shortcode text
-                            slotEl.innerText = grade;
+                            slotEl.innerText = grade + ` Available`;
                             if (isPast) {
                                 slotEl.classList.add('past');
                             } else {
