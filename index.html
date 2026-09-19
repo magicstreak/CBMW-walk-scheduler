@@ -31,7 +31,27 @@
             flex-direction: column;
             align-items: center;
         }
+/* Top Page Header Styling */
+        .page-header {
+            text-align: center;
+            margin-bottom: 32px;
+            width: 100%;
+            max-width: 950px;
+        }
 
+        .page-header h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin: 0 0 8px 0;
+            letter-spacing: -0.03em;
+        }
+
+        .page-header p {
+            font-size: 1.05rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
         .calendar-container {
             width: 100%;
             max-width: 1000px;
@@ -413,7 +433,11 @@
     </style>
 </head>
 <body>
-
+<!-- Added Header and Instruction Section -->
+    <header class="page-header">
+        <h1>CBMW Walk Scheduler</h1>
+        <p>Click on a slot to schedule or edit a walk.</p>
+    </header>
     <div class="calendar-container">
         <div class="calendar-header">
             <button class="nav-btn" id="prev-month">&larr; Previous</button>
