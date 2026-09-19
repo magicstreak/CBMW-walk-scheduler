@@ -556,7 +556,7 @@
                         if (existingBooking) {
                             // If booked: reveal true grade color style, display grade + walk number
                             slotEl.classList.add('booked', `grade-${grade}`);
-                            slotEl.innerText = `${grade}: ${existingBooking.walk_number}`;
+                            slotEl.innerText = `${grade}: ${existingBooking.walk_number}´Booked`;
                             slotEl.title = `Leader: ${existingBooking.leader_name}\nComments: ${existingBooking.comments}`;
                             
                             // Edit existing slot upon click
