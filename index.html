@@ -170,19 +170,24 @@
         }
 
         /* --- AVAILABLE SLOTS STYLE (Palered Grade Specific Color) --- */
+        /* --- AVAILABLE SLOTS STYLE (Pale Grade Background, Neutral Gray Text & Border) --- */
         .slot.available {
             font-weight: 500;
-            border: 1px solid rgba(0, 0, 0, 0.08);
+            color: #64748b !important;       /* Slate-Gray text for readability */
+            border: 1px solid #cbd5e1;       /* Soft Gray border outline */
         }
-        .slot.available.grade-E  { background-color: rgba(22, 163, 74, 0.12);  color: var(--color-E);  border-color: rgba(22, 163, 74, 0.25); }
-        .slot.available.grade-M  { background-color: rgba(37, 99, 235, 0.12);  color: var(--color-M);  border-color: rgba(37, 99, 235, 0.25); }
-        .slot.available.grade-MS { background-color: rgba(220, 38, 38, 0.12);  color: var(--color-MS); border-color: rgba(220, 38, 38, 0.25); }
-        .slot.available.grade-S  { background-color: rgba(17, 24, 39, 0.08);   color: var(--color-S);  border-color: rgba(17, 24, 39, 0.2); }
-        .slot.available.grade-VS { background-color: rgba(124, 58, 237, 0.12); color: var(--color-VS); border-color: rgba(124, 58, 237, 0.25); }
+        
+        /* Retain individual low-opacity background color tints under the neutral text */
+        .slot.available.grade-E  { background-color: rgba(22, 163, 74, 0.12); }
+        .slot.available.grade-M  { background-color: rgba(37, 99, 235, 0.12); }
+        .slot.available.grade-MS { background-color: rgba(220, 38, 38, 0.12); }
+        .slot.available.grade-S  { background-color: rgba(17, 24, 39, 0.06); }
+        .slot.available.grade-VS { background-color: rgba(124, 58, 237, 0.12); }
 
         .slot.available:hover:not(.past) {
-            filter: brightness(0.95);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            background-color: #cbd5e1 !important; /* Shorthand hover background update */
+            color: #1e293b !important;            /* Darker slate-gray text on hover */
+            border-color: #94a3b8;
         }
 
         /* --- BOOKED SLOTS STYLE (Bolder Solid Grade Specific Color) --- */
