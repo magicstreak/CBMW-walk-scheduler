@@ -638,7 +638,7 @@
 
             const firstDayIndex = new Date(year, month, 1).getDay();
             const totalDays = new Date(year, month + 1, 0).getDate();
-            const today = new Date(2026, 8, 19); // Reference standard boundary for 2026 updates
+            const today = new Date(); // Reference standard boundary for 2026 updates
 
             for (let i = 0; i < firstDayIndex; i++) {
                 const emptyCell = document.createElement('div');
