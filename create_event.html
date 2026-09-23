@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hike Card Shortcode Generator</title>
+    <style>
+        :root {
+            --bg-color: #f0f4f8;
+            --card-bg: #ffffff;
+            --primary-color: #2b6cb0;
+            --primary-hover: #2c5282;
+            --text-color: #2d3748;
+            --border-color: #cbd5e0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.5;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #1a365d;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 14px;
+            color: #4a5568;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 15px;
+            font-family: inherit;
+        }
+
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 70px;
+        }
+
+        .output-container {
+            margin-top: 30px;
+        }
+
+        .output-box {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 18px;
+            border-radius: 6px;
+            position: relative;
+            margin-top: 8px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #4a5568;
+            color: #fff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: #718096;
+        }
+        
+        .toast {
+            display: none;
+            color: #38a169;
+            font-size: 14px;
+            margin-top: 8px;
+            font-weight: 600;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Hike Card Shortcode Generator</h2>
+    
+    <div class="grid">
+        <!-- Title -->
+        <div class="form-group full-width">
+            <label for="title">Hike Title</label>
+            <input type="text" id="title" value="Ѧ La Muntanya Sud d’Alcala and part Forada Ridge Ѧ">
+        </div>
+
+        <!-- Date & Time -->
+        <div class="form-group">
+            <label for="date">Date</label>
+            <input type="text" id="date" value="Wednesday 03 Feb 2027">
+        </div>
+        <div class="form-group">
+            <label for="time">Meeting Time</label>
+            <input type="text" id="time" value="10 am">
+        </div>
+
+        <!-- Distance & Ascent -->
+        <div class="form-group">
+            <label for="distance">Distance</label>
+            <input type="text" id="distance" value="5 km">
+        </div>
+        <div class="form-group">
+            <label for="ascent">Ascent</label>
+            <input type="text" id="ascent" value="400m">
+        </div>
+
+        <!-- Duration & Grade -->
+        <div class="form-group">
+            <label for="duration">Duration</label>
+            <input type="text" id="duration" value="5 hrs">
+        </div>
+        <div class="form-group">
+            <label for="grade">Grade</label>
+            <input type="text" id="grade" value="MS/B">
+        </div>
+
+        <!-- Leader & Phone Strings -->
+        <div class="form-group">
+            <label for="leader">Leader Name</label>
+            <input type="text" id="leader" value="David Harbach">
+        </div>
+        <div class="form-group">
+            <label for="phone">Phone Number(s) <span style="font-weight:normal; font-size:12px;">(Hit Enter for multiple numbers)</span></label>
+            <textarea id="phone">(+34) 608 304 342&#10;(+34) 629 283 186 (Carol)</textarea>
+        </div>
+
+        <!-- Maps & Meet URLs -->
+        <div class="form-group full-width">
+            <label for="map">Route Map URL (e.g. Wikiloc/Bitly)</label>
+            <input type="text" id="map" value="http://bit.ly">
+        </div>
+        <div class="form-group full-width">
+            <label for="meet_url">Google Maps Meeting Coordinates URL</label>
+            <input type="text" id="meet_url" value="https://google.com">
+        </div>
+
+        <!-- Description -->
+        <div class="form-group full-width">
+            <label for="desc">Hike Description</label>
+            <textarea id="desc">A lovely walk over wide tracks, a short section of road and marked paths. The walk visits a nevera, a landing strip and part of the Forada ridge with splendid views of the Gallinera valley</textarea>
+        </div>
+
+        <!-- Directions -->
+        <div class="form-group full-width">
+            <label for="directions">Driving / Parking Directions</label>
+            <textarea id="directions">Park at edge of village near swimming pool. From the Orba to Pego road near Pego take the CV712 signed to Vall d'Ebo. Continue past Vall d'Ebo to Alcala de la Jovada.</textarea>
+        </div>
+
+        <!-- Rules -->
+        <div class="form-group full-width">
+            <label for="rules">Rules / Restrictions</label>
+            <input type="text" id="rules" value="No dogs">
+        </div>
+    </div>
+
+    <!-- Generated Output -->
+    <div class="output-container">
+        <label>Formatted Output Shortcode:</label>
+        <div class="output-box"><span id="shortcodeOutput"></span><button class="copy-btn" id="copyBtn">Copy</button></div>
+        <div class="toast" id="copyToast">Copied shortcode to clipboard!</div>
+    </div>
+</div>
+
+<script>
+    // Grab all input elements
+    const fields = [
+        'title', 'date', 'time', 'distance', 'ascent', 'duration', 
+        'grade', 'leader', 'phone', 'map', 'meet_url', 'desc', 'directions', 'rules'
+    ];
+
+    const outputElement = document.getElementById('shortcodeOutput');
+    const copyBtn = document.getElementById('copyBtn');
+    const copyToast = document.getElementById('copyToast');
+
+    // Generate the exact shortcode structure dynamically
+    function generateShortcode() {
+        let shortcode = '[hike_card';
+        
+        fields.forEach(field => {
+            const element = document.getElementById(field);
+            let value = element.value;
+
+            // Strip out literal newlines or clean up spacing if necessary, 
+            // but preserve standard string mapping
+            if(field === 'phone') {
+                // Generates the double mapping system required by your layout format
+                shortcode += ` phone_raw="${value}"`;
+                shortcode += ` phone_disp="${value}"`;
+            } else if (field === 'meet_url') {
+                // Maps meet_url to both meet_url and meet_name as shown in your layout template
+                shortcode += ` meet_url="${value}"`;
+                shortcode += ` meet_name="${value}"`;
+            } else {
+                shortcode += ` ${field}="${value}"`;
+            }
+        });
+
+        shortcode += ']';
+        outputElement.textContent = shortcode;
+    }
+
+    // Copy to clipboard system
+    function copyToClipboard() {
+        navigator.clipboard.writeText(outputElement.textContent).then(() => {
+            copyToast.style.display = 'block';
+            setTimeout(() => {
+                copyToast.style.display = 'none';
+            }, 2500);
+        });
+    }
+
+    // Attach real-time input event listeners to all boxes
+    fields.forEach(field => {
+        document.getElementById(field).addEventListener('input', generateShortcode);
+    });
+
+    copyBtn.addEventListener('click', copyToClipboard);
+
+    // Initial run to show prefilled state example
+    generateShortcode();
+</script>
+
+</body>
+</html>
