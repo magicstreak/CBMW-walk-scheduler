@@ -513,6 +513,10 @@
                     <label for="input-comments">Comments</label>
                     <textarea id="input-comments" name="comments" placeholder="Add specific walk rules or route updates..."></textarea>
                 </div>
+                <div class="form-group">
+                    <label for="input-start-time">Start Time</label>
+                    <textarea id="input-start-time" name="start_time" placeholder="10:00"></textarea>
+                </div>
                 
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" id="close-modal">Cancel</button>
@@ -725,6 +729,7 @@
                     <td><span class="badge" style="background-color: ${badgeColor}">${record.walk_grade}</span></td>
                     <td><code>${record.walk_number}</code></td>
                     <td>${record.leader_name}</td>
+                    <td>${record.start_time}</td>
                     <td><small>${record.comments || '-'}</small></td>
                     <td>
                         <button class="btn btn-danger btn-sm" data-key="${key}">Cancel</button>
@@ -751,6 +756,7 @@
                 document.getElementById('input-walk-no').value = existingData.walk_number;
                 document.getElementById('input-leader').value = existingData.leader_name;
                 document.getElementById('input-comments').value = existingData.comments || '';
+                document.getElementById('input-start-time').value = existingData.start_time;
             } else {
                 modalHeading.innerText = "Book Walk Slot";
                 bookingForm.reset();
@@ -777,7 +783,8 @@
                 walk_grade: gradeStr,
                 walk_number: document.getElementById('input-walk-no').value.trim(),
                 leader_name: document.getElementById('input-leader').value.trim(),
-                comments: document.getElementById('input-comments').value.trim()
+                comments: document.getElementById('input-comments').value.trim(),
+                start_time: document.getElementById('input-start-time').value.trim()
             };
 
             saveBookingRecord(compositeKey, payload);
@@ -799,7 +806,9 @@
                     `"${r.walk_grade}"`,
                     `"${r.walk_number.replace(/"/g, '""')}"`,
                     `"${r.leader_name.replace(/"/g, '""')}"`,
-                    `"${(r.comments || '').replace(/"/g, '""')}"`
+                    `"${r.start_time.replace(/"/g, '""')}"`,
+                    `"${(r.comments || '').replace(/"/g, '""')}"`,
+                    
                 ].join(",");
                 csvContent += row + "\n";
             });
