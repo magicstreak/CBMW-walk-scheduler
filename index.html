@@ -499,6 +499,10 @@
                     <input type="text" id="input-date" name="date" readonly>
                 </div>
                 <div class="form-group">
+                    <label for="input-start-time">Start Time</label>
+                    <input type='text' id="input-start-time" name="start_time" placeholder="10:00">
+                </div>
+                <div class="form-group">
                     <label for="input-grade">Walk Grade</label>
                     <input type="text" id="input-grade" name="walk_grade" readonly>
                 </div>
@@ -514,11 +518,6 @@
                     <label for="input-comments">Comments</label>
                     <textarea id="input-comments" name="comments" placeholder="Add specific walk rules or route updates..."></textarea>
                 </div>
-                <div class="form-group">
-                    <label for="input-start-time">Start Time</label>
-                    <textarea id="input-start-time" name="start_time" placeholder="10:00"></textarea>
-                </div>
-                
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" id="close-modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">Submit Booking</button>
@@ -727,7 +726,7 @@
 
                 tr.innerHTML = `
                     <td><strong>${record.date}</strong></td>
-                    <td>${record.start_time}</td>
+                    <td>${record.start_time || '-'}</td>
                     <td><span class="badge" style="background-color: ${badgeColor}">${record.walk_grade}</span></td>
                     <td><code>${record.walk_number}</code></td>
                     <td>${record.leader_name}</td>
