@@ -474,6 +474,7 @@
                 <thead>
                     <tr>
                         <th>Date</th>
+                        <th>Start Time</th>
                         <th>Grade</th>
                         <th>Walk Number</th>
                         <th>Leader Name</th>
@@ -726,10 +727,10 @@
 
                 tr.innerHTML = `
                     <td><strong>${record.date}</strong></td>
+                    <td>${record.start_time}</td>
                     <td><span class="badge" style="background-color: ${badgeColor}">${record.walk_grade}</span></td>
                     <td><code>${record.walk_number}</code></td>
                     <td>${record.leader_name}</td>
-                    <td>${record.start_time}</td>
                     <td><small>${record.comments || '-'}</small></td>
                     <td>
                         <button class="btn btn-danger btn-sm" data-key="${key}">Cancel</button>
