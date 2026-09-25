@@ -732,11 +732,18 @@
                     <td><code>${record.walk_number}</code></td>
                     <td>${record.leader_name}</td>
                     <td><small>${record.comments || '-'}</small></td>
+                     <td>
+                        <button class="btn btn-btn-success btn-sm" data-key="${key}">Edit</button>
+                    </td>
                     <td>
                         <button class="btn btn-danger btn-sm" data-key="${key}">Cancel</button>
                     </td>
                 `;
 
+                tr.querySelector('.btn-success').addEventListener('click', (e) => {
+                    const targetKey = e.target.getAttribute('data-key');
+                    openBookingModal(record.date, record.walk_grade, record);
+                 });
                 tr.querySelector('.btn-danger').addEventListener('click', (e) => {
                     const targetKey = e.target.getAttribute('data-key');
                     if (confirm(`Cancel reservation for walk ${globalBookings[targetKey].walk_number}?`)) {
