@@ -667,7 +667,8 @@
 
                 // Dynamic generation matching constraints strictly (Wednesdays = 3, Saturdays = 6)
                 if (dayOfWeek === 3 || dayOfWeek === 6) {
-                    const dateISO = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+               //     const dateISO = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    const dateISO = `${day}-${String(month + 1).padStart(2, '0')}-${String(year).padStart(2, '0')}`;
                     const isPast = specificDate < today;
 
                     grades.forEach(grade => {
