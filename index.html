@@ -466,6 +466,7 @@
             <div style="display: flex; gap: 8px;">
                 <button class="btn btn-success" id="export-csv">Export to CSV</button>
                 <button class="btn btn-warning" id="clear-all">Clear All Bookings</button>
+                <button class="btn btn-sucess" id="publish">Publish Shedule</button>
             </div>
         </div>
         <div class="table-wrapper">
@@ -473,6 +474,7 @@
                 <thead>
                     <tr>
                         <th>Date</th>
+                        <th>Start Time</th>
                         <th>Grade</th>
                         <th>Walk Number</th>
                         <th>Leader Name</th>
@@ -497,6 +499,10 @@
                     <input type="text" id="input-date" name="date" readonly>
                 </div>
                 <div class="form-group">
+                    <label for="input-start-time">Start Time</label>
+                    <input type='time' id="input-start-time" name="start_time" placeholder="10:00">
+                </div>
+                <div class="form-group">
                     <label for="input-grade">Walk Grade</label>
                     <input type="text" id="input-grade" name="walk_grade" readonly>
                 </div>
@@ -512,7 +518,6 @@
                     <label for="input-comments">Comments</label>
                     <textarea id="input-comments" name="comments" placeholder="Add specific walk rules or route updates..."></textarea>
                 </div>
-                
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" id="close-modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">Submit Booking</button>
@@ -568,7 +573,7 @@
         }
 
         const grades = ["E", "M", "MS", "S", "VS"];
-        let currentDate = new Date(2026, 8, 19); // Hardlocked explicitly to base calendar tracking metrics year 2026
+        let currentDate = new Date(); // Hardlocked explicitly to base calendar tracking metrics year 2026
         let globalBookings = {};
 
         const monthNames = [
@@ -638,7 +643,7 @@
 
             const firstDayIndex = new Date(year, month, 1).getDay();
             const totalDays = new Date(year, month + 1, 0).getDate();
-            const today = new Date(2026, 8, 19); // Reference standard boundary for 2026 updates
+            const today = new Date(); // Reference standard boundary for 2026 updates
 
             for (let i = 0; i < firstDayIndex; i++) {
                 const emptyCell = document.createElement('div');
@@ -662,7 +667,8 @@
 
                 // Dynamic generation matching constraints strictly (Wednesdays = 3, Saturdays = 6)
                 if (dayOfWeek === 3 || dayOfWeek === 6) {
-                    const dateISO = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+               //     const dateISO = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    const dateISO = `${day}-${String(month + 1).padStart(2, '0')}-${String(year).padStart(2, '0')}`;
                     const isPast = specificDate < today;
 
                     grades.forEach(grade => {
@@ -721,6 +727,7 @@
 
                 tr.innerHTML = `
                     <td><strong>${record.date}</strong></td>
+                    <td>${record.start_time || '-'}</td>
                     <td><span class="badge" style="background-color: ${badgeColor}">${record.walk_grade}</span></td>
                     <td><code>${record.walk_number}</code></td>
                     <td>${record.leader_name}</td>
@@ -750,6 +757,7 @@
                 document.getElementById('input-walk-no').value = existingData.walk_number;
                 document.getElementById('input-leader').value = existingData.leader_name;
                 document.getElementById('input-comments').value = existingData.comments || '';
+                document.getElementById('input-start-time').value = existingData.start_time;
             } else {
                 modalHeading.innerText = "Book Walk Slot";
                 bookingForm.reset();
@@ -776,7 +784,8 @@
                 walk_grade: gradeStr,
                 walk_number: document.getElementById('input-walk-no').value.trim(),
                 leader_name: document.getElementById('input-leader').value.trim(),
-                comments: document.getElementById('input-comments').value.trim()
+                comments: document.getElementById('input-comments').value.trim(),
+                start_time: document.getElementById('input-start-time').value.trim()
             };
 
             saveBookingRecord(compositeKey, payload);
@@ -798,7 +807,9 @@
                     `"${r.walk_grade}"`,
                     `"${r.walk_number.replace(/"/g, '""')}"`,
                     `"${r.leader_name.replace(/"/g, '""')}"`,
-                    `"${(r.comments || '').replace(/"/g, '""')}"`
+                    `"${r.start_time.replace(/"/g, '""')}"`,
+                    `"${(r.comments || '').replace(/"/g, '""')}"`,
+                    
                 ].join(",");
                 csvContent += row + "\n";
             });
