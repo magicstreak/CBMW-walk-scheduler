@@ -15,10 +15,10 @@
             
             /* Grade Colors */
             --color-E: #16a34a;
-            --color-M: #2563eb;
+            --color-M: #3773f5;
             --color-MS: #dc2626;
-            --color-S: #111827;
-            --color-VS: #7c3aed;
+            --color-VS: #111827;
+            --color-S: #2d1655;
         }
 
         body {
@@ -189,7 +189,6 @@
             box-shadow: none !important;
         }
 
-        /* --- AVAILABLE SLOTS STYLE (Palered Grade Specific Color) --- */
         /* --- AVAILABLE SLOTS STYLE (Pale Grade Background, Neutral Gray Text & Border) --- */
         .slot.available {
             font-weight: 500;
@@ -201,8 +200,8 @@
         .slot.available.grade-E  { background-color: rgba(22, 163, 74, 0.12); }
         .slot.available.grade-M  { background-color: rgba(37, 99, 235, 0.12); }
         .slot.available.grade-MS { background-color: rgba(220, 38, 38, 0.12); }
-        .slot.available.grade-S  { background-color: rgba(17, 24, 39, 0.06); }
-        .slot.available.grade-VS { background-color: rgba(124, 58, 237, 0.12); }
+        .slot.available.grade-VS  { background-color: rgba(17, 24, 39, 0.06); }
+        .slot.available.grade-S { background-color: rgba(124, 58, 237, 0.12); }
 
         .slot.available:hover:not(.past) {
             background-color: #cbd5e1 !important; /* Shorthand hover background update */
@@ -430,6 +429,78 @@
         .btn-warning:hover {
             background-color: #d97706;
         }
+         /* --- Toggle Switch Styling --- */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .switch-label {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        /* Hide default HTML checkbox */
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        /* The slider background */
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #0284c7; /* Color for Leaders View */
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        /* The moving circle indicator */
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        /* When checked, change background and slide the circle */
+        input:checked + .slider {
+            background-color: #b91c1c; /* Color for Admin View */
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* --- Content Visibility Styling --- */
+        .card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+          /* Utility class to hard-hide elements */
+        .hidden {
+            display: none !important;
+        }
+        
     </style>
 </head>
 <body>
@@ -438,6 +509,17 @@
         <h1>CBMW Walk Scheduler</h1>
         <p>Click on a slot to schedule or edit a walk.</p>
     </header>
+
+     <!-- Toggle Switch Wrapper -->
+    <div class="toggle-container">
+        <span class="switch-label">Leaders View</span>
+        <label class="switch">
+            <input type="checkbox" id="viewToggle">
+            <span class="slider"></span>
+        </label>
+        <span class="switch-label">Admin View</span>
+    </div>
+
     <div class="calendar-container">
         <div class="calendar-header">
             <button class="nav-btn" id="prev-month">&larr; Previous</button>
@@ -460,13 +542,13 @@
         <div class="days-grid" id="days-grid"></div>
     </div>
 
-    <div class="admin-container">
+    <div class="admin-container hidden">
         <div class="admin-header">
             <h3>Administration Dashboard</h3>
             <div style="display: flex; gap: 8px;">
                 <button class="btn btn-success" id="export-csv">Export to CSV</button>
                 <button class="btn btn-warning" id="clear-all">Clear All Bookings</button>
-                <button class="btn btn-sucess" id="publish">Publish Shedule</button>
+                <button class="btn btn-success" id="publish">Publish Schedule</button>
             </div>
         </div>
         <div class="table-wrapper">
@@ -531,17 +613,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // CONFIGURATION STEPS FOR COLLABORATIVE MODE:
-        // Paste your own verified credentials below inside this config variable block.
-       // const firebaseConfig = {
-     //       apiKey: "YOUR_API_KEY",
-   //         authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-   //         databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-  ///          projectId: "YOUR_PROJECT_ID",
-  //          storageBucket: "YOUR_PROJECT_ID.appspot.com",
-//            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-//            appId: "YOUR_APP_ID"
- //       };
         const firebaseConfig = {
           apiKey: "AIzaSyC0hEmdWHSlBkdnxrQiNt_RITYsbj3wvi0",
           authDomain: "cbmw-walk-scheduler.firebaseapp.com",
@@ -843,6 +914,24 @@
         document.getElementById('close-modal').addEventListener('click', closeModal);
         document.getElementById('clear-all').addEventListener('click', clearAllRecords);
 
+        //Toggle the Admin panel depending on the Active View 
+        document.addEventListener('DOMContentLoaded', function() {
+            const viewToggle = document.getElementById('viewToggle');
+            const container = document.querySelector('.admin-container');
+
+             // This ensures both elements are successfully found by JavaScript
+            if (viewToggle && container) {
+               viewToggle.addEventListener('change', function() {
+                 // If it's NOT admin view, force add 'hidden'. If it IS admin view, force remove 'hidden'.
+                 container.classList.toggle('hidden', !viewToggle.checked);
+          
+          
+                });
+            } else {
+                 console.error("Could not find viewToggle or admin-container in the HTML.");
+            }
+        });
+        
         // Run Initial Setup Data Pipelines
         initDataSync();
     </script>
