@@ -824,8 +824,16 @@
         </table>
       </div>
     </div>
-    <!-- ======================================================= STATISTICS DASHBOARD ======================================================= -->
-    <div class="stats-container collapsible-container">
+    <!-- =======================================================
+     STATISTICS DASHBOARD
+     ======================================================= -->
+
+    <div
+      class="stats-container collapsible-container"
+      id="statistics-dashboard"
+    >
+      <!-- MAIN STATISTICS HEADER -->
+
       <div class="stats-header collapsible-header">
         <div>
           <h3>Walking Statistics</h3>
@@ -836,130 +844,278 @@
         </div>
 
         <button
-          class="collapse-button"
           type="button"
-          aria-label="Collapse statistics"
+          class="collapse-button"
+          aria-label="Collapse statistics dashboard"
         >
-          ⌃
+          <span class="collapse-icon"> ⌃ </span>
         </button>
       </div>
+
+      <!-- MAIN STATISTICS CONTENT -->
+
       <div class="collapsible-content">
-        <!-- FILTER -->
+        <!-- =================================================
+             PUEBLO FILTER
+             ================================================= -->
+
         <div class="stats-filter">
           <label for="pueblo-filter"> Filter statistics by Pueblo </label>
+
           <select id="pueblo-filter">
             <option value="ALL">All Pueblos</option>
           </select>
         </div>
-        <!-- TOTALS -->
+
+        <!-- =================================================
+             STACKED STATISTIC CARDS
+             ================================================= -->
+
         <div class="stats-summary">
-          <div class="stat-card">
+          <div class="stat-card total-card">
             <div class="stat-label">Total Walks</div>
+
             <div class="stat-value" id="stat-total">0</div>
           </div>
+
           <div class="stat-card">
-            <div class="stat-label">E</div>
+            <div class="stat-label">E — Easy</div>
+
             <div class="stat-value" style="color: var(--color-E)" id="stat-E">
               0
             </div>
           </div>
+
           <div class="stat-card">
-            <div class="stat-label">M</div>
+            <div class="stat-label">M — Moderate</div>
+
             <div class="stat-value" style="color: var(--color-M)" id="stat-M">
               0
             </div>
           </div>
+
           <div class="stat-card">
-            <div class="stat-label">MS</div>
+            <div class="stat-label">MS — Moderate Strenuous</div>
+
             <div class="stat-value" style="color: var(--color-MS)" id="stat-MS">
               0
             </div>
           </div>
+
           <div class="stat-card">
-            <div class="stat-label">S</div>
+            <div class="stat-label">S — Strenuous</div>
+
             <div class="stat-value" style="color: var(--color-S)" id="stat-S">
               0
             </div>
           </div>
+
           <div class="stat-card">
-            <div class="stat-label">VS</div>
+            <div class="stat-label">VS — Very Strenuous</div>
+
             <div class="stat-value" style="color: var(--color-VS)" id="stat-VS">
               0
             </div>
           </div>
         </div>
-        <!-- CHART + LEADER TABLE -->
-        <div class="stats-grid">
-          <!-- MONTHLY CHART -->
-          <div class="stats-card">
-            <h4>Walks by Month & Grade</h4>
-            <p>Monthly distribution of walking grades</p>
+
+        <!-- =================================================
+             MONTHLY CHART
+             ================================================= -->
+
+        <div
+          class="stats-section collapsible-container"
+          id="monthly-stats-section"
+        >
+          <div class="stats-section-header collapsible-header">
+            <div class="stats-section-title">
+              <h4>Walks by Month & Grade</h4>
+
+              <p>Monthly distribution of walking grades</p>
+            </div>
+
+            <button
+              type="button"
+              class="collapse-button"
+              aria-label="Collapse monthly chart"
+            >
+              <span class="collapse-icon"> ⌃ </span>
+            </button>
+          </div>
+
+          <div class="stats-section-content collapsible-content">
             <div class="chart-container">
               <canvas id="monthlyChart"></canvas>
             </div>
           </div>
-          <!-- LEADER TABLE -->
-          <div class="stats-card">
-            <h4>Walks by Leader</h4>
-            <p>Number of walks led by each leader</p>
+        </div>
+
+        <!-- =================================================
+             LEADER TABLE
+             ================================================= -->
+
+        <div
+          class="stats-section collapsible-container"
+          id="leader-stats-section"
+        >
+          <div class="stats-section-header collapsible-header">
+            <div class="stats-section-title">
+              <h4>Walks by Leader</h4>
+
+              <p>Click a heading to sort</p>
+            </div>
+
+            <button
+              type="button"
+              class="collapse-button"
+              aria-label="Collapse leader statistics"
+            >
+              <span class="collapse-icon"> ⌃ </span>
+            </button>
+          </div>
+
+          <div class="stats-section-content collapsible-content">
             <div class="table-wrapper">
               <table class="leader-table">
                 <thead>
                   <tr>
-                    <th>Leader</th>
-                    <th style="text-align: center">E</th>
-                    <th style="text-align: center">M</th>
-                    <th style="text-align: center">MS</th>
-                    <th style="text-align: center">S</th>
-                    <th style="text-align: center">VS</th>
-                    <th style="text-align: center">Total</th>
+                    <th class="sortable-header" data-leader-sort="leader">
+                      Leader
+                      <span class="sort-indicator"> ↑ </span>
+                    </th>
+
+                    <th
+                      class="sortable-header"
+                      data-leader-sort="E"
+                      style="text-align: center"
+                    >
+                      E
+                      <span class="sort-indicator"> ↕ </span>
+                    </th>
+
+                    <th
+                      class="sortable-header"
+                      data-leader-sort="M"
+                      style="text-align: center"
+                    >
+                      M
+                      <span class="sort-indicator"> ↕ </span>
+                    </th>
+
+                    <th
+                      class="sortable-header"
+                      data-leader-sort="MS"
+                      style="text-align: center"
+                    >
+                      MS
+                      <span class="sort-indicator"> ↕ </span>
+                    </th>
+
+                    <th
+                      class="sortable-header"
+                      data-leader-sort="S"
+                      style="text-align: center"
+                    >
+                      S
+                      <span class="sort-indicator"> ↕ </span>
+                    </th>
+
+                    <th
+                      class="sortable-header"
+                      data-leader-sort="VS"
+                      style="text-align: center"
+                    >
+                      VS
+                      <span class="sort-indicator"> ↕ </span>
+                    </th>
+
+                    <th
+                      class="sortable-header"
+                      data-leader-sort="total"
+                      style="text-align: center"
+                    >
+                      Total
+                      <span class="sort-indicator"> ↕ </span>
+                    </th>
                   </tr>
                 </thead>
+
                 <tbody id="leader-stats-body"></tbody>
               </table>
             </div>
           </div>
         </div>
-        <!-- RAW DATA -->
-        <div class="stats-card">
-          <h4>Walk Data</h4>
-          <p><span id="stats-count"> 0 </span> walks shown</p>
-          <div class="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th class="sortable-header" data-sort="walk_number">
-                    Walk #
-                    <span class="sort-indicator">↕</span>
-                  </th>
-                  <th class="sortable-header" data-sort="date">
-                    Date
-                    <span class="sort-indicator">↕</span>
-                  </th>
-                  <th class="sortable-header" data-sort="time">
-                    Time
-                    <span class="sort-indicator">↕</span>
-                  </th>
-                  <th class="sortable-header" data-sort="walk_grade">
-                    Grade
-                    <span class="sort-indicator">↕</span>
-                  </th>
-                  <th class="sortable-header" data-sort="owner">
-                    Owner
-                    <span class="sort-indicator">↕</span>
-                  </th>
-                  <th class="sortable-header" data-sort="leader_name">
-                    Leader
-                    <span class="sort-indicator">↕</span>
-                  </th>
-                  <th class="sortable-header" data-sort="pueblo">
-                    Pueblo
-                    <span class="sort-indicator">↕</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody id="stats-data-body"></tbody>
-            </table>
+
+        <!-- =================================================
+             RAW WALK DATA
+             ================================================= -->
+
+        <div class="stats-section collapsible-container" id="walk-data-section">
+          <div class="stats-section-header collapsible-header">
+            <div class="stats-section-title">
+              <h4>Walk Data</h4>
+
+              <p>
+                <span id="stats-count"> 0 </span>
+
+                walks shown — click a heading to sort
+              </p>
+            </div>
+
+            <button
+              type="button"
+              class="collapse-button"
+              aria-label="Collapse walk data"
+            >
+              <span class="collapse-icon"> ⌃ </span>
+            </button>
+          </div>
+
+          <div class="stats-section-content collapsible-content">
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th class="sortable-header" data-sort="walk_number">
+                      Walk #
+                      <span class="sort-indicator"> ↕ </span>
+                    </th>
+
+                    <th class="sortable-header" data-sort="date">
+                      Date
+                      <span class="sort-indicator"> ↕ </span>
+                    </th>
+
+                    <th class="sortable-header" data-sort="time">
+                      Time
+                      <span class="sort-indicator"> ↕ </span>
+                    </th>
+
+                    <th class="sortable-header" data-sort="walk_grade">
+                      Grade
+                      <span class="sort-indicator"> ↕ </span>
+                    </th>
+
+                    <th class="sortable-header" data-sort="owner">
+                      Owner
+                      <span class="sort-indicator"> ↕ </span>
+                    </th>
+
+                    <th class="sortable-header" data-sort="leader_name">
+                      Leader
+                      <span class="sort-indicator"> ↕ </span>
+                    </th>
+
+                    <th class="sortable-header" data-sort="pueblo">
+                      Pueblo
+                      <span class="sort-indicator"> ↕ </span>
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody id="stats-data-body"></tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
@@ -1678,41 +1834,72 @@ WALK DATA TABLE SORTING
 
       updateSortIndicators();
       /* =========================================================
-   COLLAPSIBLE CONTAINERS
+   COLLAPSIBLE STATISTICS SECTIONS
+   ========================================================= */
+
+      function setupCollapsibleSection(container, header, button) {
+        function toggleSection(event) {
+          /*
+           * Prevent an inner section click from
+           * bubbling to an outer section.
+           */
+
+          if (event) {
+            event.stopPropagation();
+          }
+
+          const collapsed = container.classList.toggle("collapsed");
+
+          button.setAttribute(
+            "aria-label",
+            collapsed ? "Expand section" : "Collapse section",
+          );
+        }
+
+        header.addEventListener("click", toggleSection);
+
+        /*
+         * Stop the button from causing
+         * a second header click.
+         */
+
+        button.addEventListener("click", (event) => {
+          event.stopPropagation();
+
+          toggleSection();
+        });
+      }
+
+      /* =========================================================
+   MAIN STATISTICS DASHBOARD
+   ========================================================= */
+
+      const statisticsDashboard = document.getElementById(
+        "statistics-dashboard",
+      );
+
+      setupCollapsibleSection(
+        statisticsDashboard,
+
+        statisticsDashboard.querySelector(".stats-header"),
+
+        statisticsDashboard.querySelector(".stats-header .collapse-button"),
+      );
+
+      /* =========================================================
+   INNER STATISTICS SECTIONS
    ========================================================= */
 
       document
-        .querySelectorAll(".collapsible-container")
-        .forEach((container) => {
-          const header = container.querySelector(".collapsible-header");
+        .querySelectorAll("#statistics-dashboard .stats-section")
+        .forEach((section) => {
+          setupCollapsibleSection(
+            section,
 
-          const button = container.querySelector(".collapse-button");
+            section.querySelector(".stats-section-header"),
 
-          function toggleCollapse() {
-            const isCollapsed = container.classList.toggle("collapsed");
-
-            button.setAttribute(
-              "aria-label",
-              isCollapsed ? "Expand section" : "Collapse section",
-            );
-          }
-
-          /*
-           * Clicking the header or the button
-           * will open/close the section.
-           */
-
-          header.addEventListener("click", toggleCollapse);
-
-          /*
-           * Prevent the button click from
-           * triggering the header twice.
-           */
-
-          button.addEventListener("click", (event) => {
-            event.stopPropagation();
-            toggleCollapse();
-          });
+            section.querySelector(".stats-section-header .collapse-button"),
+          );
         });
     </script>
   </body>
