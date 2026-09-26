@@ -361,6 +361,31 @@
             font-weight: 700;
         }
 
+        /* Stats Section Styling */
+        .stats-container {
+            width: 100%;
+            max-width: 1000px;
+            background: #fff;
+            padding: 28px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+        }
+
+        .stats-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .stats-header h3 {
+            margin: 0;
+            font-size: 1.35rem;
+            font-weight: 700;
+        }
         .table-wrapper {
             overflow-x: auto;
             border: 1px solid var(--border);
@@ -570,7 +595,11 @@
             </table>
         </div>
     </div>
-
+    <div class="stats-container">
+        <div class="stats-header">
+            <h3>Statistics Dashboard</h3>
+        </div>
+    </div>
     <!-- Booking Modal -->
     <div class="modal-overlay" id="booking-modal">
         <div class="modal-content">
