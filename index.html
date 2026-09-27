@@ -817,6 +817,15 @@
       <div class="admin-header">
         <h3>Administration Dashboard</h3>
         <div style="display: flex; gap: 8px; flex-wrap: wrap">
+
+          <!-- ======================================================= VIEW TOGGLE ======================================================= -->
+    <div class="toggle-container">
+      <span class="switch-label">Open</span>
+      <label class="switch">
+        <input type="checkbox" id="modeToggle" /> <span class="slider"></span>
+      </label>
+      <span class="switch-label">Pause</span>
+    </div>
           <button class="btn btn-success" id="add-walk-to-schedule">Add Walk</button>
           <button class="btn btn-success" id="export-csv">Export to CSV</button>
           <button class="btn btn-danger" id="clear-all">
@@ -1333,7 +1342,8 @@
           updateStatistics();
         }
       }
-      /* ========================================================= CALENDAR ========================================================= */ function renderCalendar() {
+      /* ========================================================= CALENDAR ========================================================= */
+    function renderCalendar() {
         daysGrid.innerHTML = "";
         const year = currentDate.getFullYear();
         const month = currentDate.getMonth();
