@@ -819,10 +819,10 @@
         <div style="display: flex; gap: 8px; flex-wrap: wrap">
           <button class="btn btn-success" id="add-walk-to-schedule">Add Walk</button>
           <button class="btn btn-success" id="export-csv">Export to CSV</button>
-          <button class="btn btn-warning" id="clear-all">
+          <button class="btn btn-danger" id="clear-all">
             Clear All Bookings
           </button>
-          <button class="btn btn-success" id="publish">Publish Schedule</button>
+          <button class="btn btn-success" id="publish">Build Programme</button>
         </div>
       </div>
       <div class="table-wrapper">
@@ -1442,41 +1442,51 @@
         existingData = null,
         admin = false
       ) {
-        document.getElementById("input-date").value = dateString;
-        const gradeAtt = document.getElementById("input-grade");
-        
-        if(admin){
-          document.getElementById("input-date").removeAttribute('readonly');
-          gradeAtt.value = "M";
-          gradeAtt.disabled=false;
-
-        }else{
-          document.getElementById("input-date").setAttribute('readonly', 'true'); 
-          gradeAtt.value = grade;
-          gradeAtt.disabled=true;
+        // 1. Reset the form FIRST so custom default injections aren't immediately wiped out
+        if (!existingData) {
+          bookingForm.reset();
         }
+        document.getElementById("input-date").value = dateString;
+        // 2. Cache DOM Elements for performance and cleaner code
+        const dateInput = document.getElementById("input-date");
+        const gradeAtt = document.getElementById("input-grade");
+        const commentsInput = document.getElementById("input-comments");
+        const notesInput = document.getElementById("input-notes");
+
+        // 3. Handle Admin Permissions & Locks
+        if (admin) {
+          dateInput.removeAttribute('readonly');
+          gradeAtt.value = "M";
+          gradeAtt.disabled = false;
+        } else {
+          dateInput.setAttribute('readonly', 'true'); 
+          gradeAtt.value = grade;
+          gradeAtt.disabled = true;
+        }
+
+        // 4. Populate Form Data
         if (existingData) {
           modalHeading.innerText = "Edit Walk Parameters";
-          document.getElementById("input-walk-no").value =
-            existingData.walk_number || "";
-          document.getElementById("input-leader").value =
-            existingData.leader_name || "";
-          document.getElementById("input-owner").value =
-            existingData.owner || "";
-          document.getElementById("input-pueblo").value =
-            existingData.pueblo || "";
-          document.getElementById("input-comments").value =
-            existingData.comments || "";
-          document.getElementById("input-notes").value =
-            existingData.notes || "";  
-          document.getElementById("input-start-time").value =
-            existingData.start_time || "";
+          document.getElementById("input-walk-no").value = existingData.walk_number || "";
+          document.getElementById("input-leader").value = existingData.leader_name || "";
+          document.getElementById("input-owner").value = existingData.owner || "";
+          document.getElementById("input-pueblo").value = existingData.pueblo || "";
+          document.getElementById("input-start-time").value = existingData.start_time || "";
+          
+          // Clean textareas of stringified whitespaces or fallback cleanly to expose placeholders
+          commentsInput.value = (existingData.comments && existingData.comments.trim()) || "";
+          notesInput.value = (existingData.notes && existingData.notes.trim()) || "";
         } else {
-          bookingForm.reset();
           modalHeading.innerText = "Book Walk Slot";
-          document.getElementById("input-date").value = dateString;
-          document.getElementById("input-grade").value = grade;
+          dateInput.value = dateString;
+          gradeAtt.value = grade;
+          
+          // Explicitly guarantee textareas are empty string to force placeholder visibility
+          commentsInput.value = "";
+          notesInput.value = "";
         }
+
+        // 5. Open Modal
         modal.classList.add("active");
       }
       function closeModal() {
@@ -1766,7 +1776,7 @@
         /* ========================================================= ADD A WALK TO THE SCHEDULER ========================================================= */ document
         .getElementById("add-walk-to-schedule")
         .addEventListener("click", () => {
-          openBookingModal("", "",null,true);
+          openBookingModal("", "","",true);
         });
       /* ========================================================= CALENDAR NAVIGATION ========================================================= */ document
         .getElementById("prev-month")
