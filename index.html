@@ -1181,17 +1181,25 @@
           </div>
           <div class="form-group">
             <label> Owner </label>
-            <input type="text" id="input-owner" placeholder="e.g. CBMW" />
+            <input type="text" id="input-owner" placeholder="put the owner of the walk if different from Leader" />
           </div>
           <div class="form-group">
             <label> Pueblo </label>
-            <input type="text" id="input-pueblo" placeholder="e.g. Moraira" />
+            <input type="text" id="input-pueblo" placeholder="e.g. Pego" />
           </div>
           <div class="form-group">
-            <label> Comments </label>
+            <label>Programme Comments </label>
             <textarea
               id="input-comments"
-              placeholder="Add specific walk rules or route updates..."
+              placeholder="Add comments to be included in the programme e.g. option lunch, walking pace that are not included in the walk description"
+            >
+            </textarea>
+          </div>
+          <div class="form-group">
+            <label>Notes for the Programme Team</label>
+            <textarea
+              id="input-notes"
+              placeholder="Add comments that may be helpful to the team creating the programme"
             >
             </textarea>
           </div>
@@ -1459,6 +1467,8 @@
             existingData.pueblo || "";
           document.getElementById("input-comments").value =
             existingData.comments || "";
+          document.getElementById("input-notes").value =
+            existingData.notes || "";  
           document.getElementById("input-start-time").value =
             existingData.start_time || "";
         } else {
@@ -1488,6 +1498,7 @@
             owner: document.getElementById("input-owner").value.trim(),
             pueblo: document.getElementById("input-pueblo").value.trim(),
             comments: document.getElementById("input-comments").value.trim(),
+            notes: document.getElementById("input-notes").value.trim(),
             start_time: document
               .getElementById("input-start-time")
               .value.trim(),
