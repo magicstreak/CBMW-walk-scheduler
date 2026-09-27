@@ -817,6 +817,7 @@
       <div class="admin-header">
         <h3>Administration Dashboard</h3>
         <div style="display: flex; gap: 8px; flex-wrap: wrap">
+          <button class="btn btn-success" id="add-walk-to-schedule">Add Walk</button>
           <button class="btn btn-success" id="export-csv">Export to CSV</button>
           <button class="btn btn-warning" id="clear-all">
             Clear All Bookings
@@ -1419,13 +1420,22 @@
           adminTableBody.appendChild(tr);
         });
       }
-      /* ========================================================= MODAL ========================================================= */ function openBookingModal(
+      /* ========================================================= MODAL ========================================================= */
+      function openBookingModal(
         dateString,
         grade,
         existingData = null,
+        admin = false
       ) {
         document.getElementById("input-date").value = dateString;
         document.getElementById("input-grade").value = grade;
+        if(admin){
+          document.getElementById("input-date").removeAttribute('readonly');
+          document.getElementById("input-grade").removeAttribute('readonly');
+        }else{
+          document.getElementById("input-date").setAttribute('readonly', 'true'); 
+          document.getElementById("input-grade").setAttribute('readonly', 'true');       
+        }
         if (existingData) {
           modalHeading.innerText = "Edit Walk Parameters";
           document.getElementById("input-walk-no").value =
@@ -1730,6 +1740,11 @@
           link.click();
           document.body.removeChild(link);
           URL.revokeObjectURL(url);
+        });
+        /* ========================================================= ADD A WALK TO THE SCHEDULER ========================================================= */ document
+        .getElementById("add-walk-to-schedule")
+        .addEventListener("click", () => {
+          openBookingModal("", "",null,true);
         });
       /* ========================================================= CALENDAR NAVIGATION ========================================================= */ document
         .getElementById("prev-month")
