@@ -1,4 +1,4 @@
-<!doctype html>
+ú<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -1391,7 +1391,7 @@
                   openBookingModal(dateISO, grade, bookedData),
                 );
               } else {
-                slotEl.classList.add("available");
+                slotEl.classList.add("available hidden");
                 slotEl.innerText = `${grade} Available`;
                 slotEl.addEventListener("click", () =>
                   openBookingModal(dateISO, grade),
@@ -1811,10 +1811,12 @@
             .querySelector(".admin-container")
             .classList.toggle("hidden", !this.checked);
         });
-        .getElementById("modeToggle")
+        document.getElementById("modeToggle")
         .addEventListener("change", function () {
           alert("here");
-            
+            document.querySelector(".calendar-container")
+            .classList.toggle("hidden", !this.checked);
+          renderCalendar();
           
         });
       
