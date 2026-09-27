@@ -817,11 +817,12 @@
       <div class="admin-header">
         <h3>Administration Dashboard</h3>
         <div style="display: flex; gap: 8px; flex-wrap: wrap">
+          <button class="btn btn-success" id="add-walk-to-schedule">Add Walk</button>
           <button class="btn btn-success" id="export-csv">Export to CSV</button>
-          <button class="btn btn-warning" id="clear-all">
+          <button class="btn btn-danger" id="clear-all">
             Clear All Bookings
           </button>
-          <button class="btn btn-success" id="publish">Publish Schedule</button>
+          <button class="btn btn-success" id="publish">Build Programme</button>
         </div>
       </div>
       <div class="table-wrapper">
@@ -856,10 +857,10 @@
 
       <div class="stats-header collapsible-header">
         <div>
-          <h3>Walking Statistics Dashboard</h3>
+          <h3>Programme Stats Dashboard</h3>
 
           <p style="margin: 5px 0 0; color: var(--text-muted)">
-            Live statistics from the scheduled walks
+            Statistics for the scheduled walk programme
           </p>
         </div>
 
@@ -945,7 +946,7 @@
         <div class="stats-section collapsible-container" id="walk-data-section">
           <div class="stats-section-header collapsible-header">
             <div class="stats-section-title">
-              <h4>Walk Data</h4>
+              <h4>Overview of Scheduled Walks</h4>
 
               <p>
                 <span id="stats-count"> 0 </span>
@@ -1020,7 +1021,7 @@
         >
           <div class="stats-section-header collapsible-header">
             <div class="stats-section-title">
-              <h4>Walks by Month & Grade</h4>
+              <h4>Walks Scheduled by Month & Grade</h4>
 
               <p>Monthly distribution of walking grades</p>
             </div>
@@ -1051,9 +1052,7 @@
         >
           <div class="stats-section-header collapsible-header">
             <div class="stats-section-title">
-              <h4>Walks by Leader</h4>
-
-              <p>Click a heading to sort</p>
+              <h4>Walks Scheduled by Leader & Grade</h4>
             </div>
 
             <button
@@ -1149,11 +1148,18 @@
           </div>
           <div class="form-group">
             <label> Start Time </label>
-            <input type="time" id="input-start-time" />
+            <input type="time" id="input-start-time" value="10:00"/>
           </div>
           <div class="form-group">
             <label> Walk Grade </label>
-            <input type="text" id="input-grade" readonly />
+            <select id="input-grade">
+              <option value="E">E</option>
+              <option value="M">M</option>
+              <option value="MS">MS</option>
+              <option value="S">S</option>
+              <option value="VS">VS</option>
+            </select>
+
           </div>
           <div class="form-group">
             <label> Walk Number </label>
@@ -1175,17 +1181,25 @@
           </div>
           <div class="form-group">
             <label> Owner </label>
-            <input type="text" id="input-owner" placeholder="e.g. CBMW" />
+            <input type="text" id="input-owner" placeholder="put the owner of the walk if different from Leader" />
           </div>
           <div class="form-group">
             <label> Pueblo </label>
-            <input type="text" id="input-pueblo" placeholder="e.g. Moraira" />
+            <input type="text" id="input-pueblo" placeholder="e.g. Pego" />
           </div>
           <div class="form-group">
-            <label> Comments </label>
+            <label>Programme Comments </label>
             <textarea
               id="input-comments"
-              placeholder="Add specific walk rules or route updates..."
+              placeholder="Add comments to be included in the programme e.g. option lunch, walking pace that are not included in the walk description"
+            >
+            </textarea>
+          </div>
+          <div class="form-group">
+            <label>Notes for the Programme Team</label>
+            <textarea
+              id="input-notes"
+              placeholder="Add comments that may be helpful to the team creating the programme"
             >
             </textarea>
           </div>
@@ -1345,9 +1359,10 @@
           const dayOfWeek = specificDate.getDay();
           const slotsContainer = document.createElement("div");
           slotsContainer.classList.add("slots-container");
+          /* * IMPORTANT: * Your existing Firebase data uses * DD-MM-YYYY. */
+          const dateISO = `${String(day).padStart(2, "0")}-${String(month + 1).padStart(2, "0")}-${year}`;
+          const isPast = specificDate < today;
           if (dayOfWeek === 3 || dayOfWeek === 6) {
-            /* * IMPORTANT: * Your existing Firebase data uses * DD-MM-YYYY. */ const dateISO = `${String(day).padStart(2, "0")}-${String(month + 1).padStart(2, "0")}-${year}`;
-            const isPast = specificDate < today;
             grades.forEach((grade) => {
               const slotEl = document.createElement("div");
               slotEl.classList.add("slot", `grade-${grade}`);
@@ -1374,7 +1389,26 @@
               }
               slotsContainer.appendChild(slotEl);
             });
+          } else {
+            // ad hoc walks that sit outside the USual Sat/Wed Schedule
+            grades.forEach((grade) => {
+              const key = `${dateISO}_${grade}`;
+              const bookedData = globalBookings[key];
+              const slotEl = document.createElement("div");
+              if (bookedData) {
+                slotEl.classList.add("slot", `grade-${grade}`);
+                slotEl.classList.add("booked");
+                slotEl.innerText = `${grade} Booked: ${bookedData.walk_number}`;
+                slotEl.title = `Leader: ${bookedData.leader_name || ""} | Pueblo: ${bookedData.pueblo || ""}`;
+                slotEl.addEventListener("click", () =>
+                  openBookingModal(dateISO, grade, bookedData),
+                );
+              }
+
+              slotsContainer.appendChild(slotEl);
+            });
           }
+
           dayCell.appendChild(slotsContainer);
           daysGrid.appendChild(dayCell);
         }
@@ -1401,33 +1435,58 @@
           adminTableBody.appendChild(tr);
         });
       }
-      /* ========================================================= MODAL ========================================================= */ function openBookingModal(
+      /* ========================================================= MODAL ========================================================= */
+      function openBookingModal(
         dateString,
         grade,
         existingData = null,
+        admin = false
       ) {
+        // 1. Reset the form FIRST so custom default injections aren't immediately wiped out
+        if (!existingData) {
+          bookingForm.reset();
+        }
         document.getElementById("input-date").value = dateString;
-        document.getElementById("input-grade").value = grade;
+        // 2. Cache DOM Elements for performance and cleaner code
+        const dateInput = document.getElementById("input-date");
+        const gradeAtt = document.getElementById("input-grade");
+        const commentsInput = document.getElementById("input-comments");
+        const notesInput = document.getElementById("input-notes");
+
+        // 3. Handle Admin Permissions & Locks
+        if (admin) {
+          dateInput.removeAttribute('readonly');
+          gradeAtt.value = "M";
+          gradeAtt.disabled = false;
+        } else {
+          dateInput.setAttribute('readonly', 'true'); 
+          gradeAtt.value = grade;
+          gradeAtt.disabled = true;
+        }
+
+        // 4. Populate Form Data
         if (existingData) {
           modalHeading.innerText = "Edit Walk Parameters";
-          document.getElementById("input-walk-no").value =
-            existingData.walk_number || "";
-          document.getElementById("input-leader").value =
-            existingData.leader_name || "";
-          document.getElementById("input-owner").value =
-            existingData.owner || "";
-          document.getElementById("input-pueblo").value =
-            existingData.pueblo || "";
-          document.getElementById("input-comments").value =
-            existingData.comments || "";
-          document.getElementById("input-start-time").value =
-            existingData.start_time || "";
+          document.getElementById("input-walk-no").value = existingData.walk_number || "";
+          document.getElementById("input-leader").value = existingData.leader_name || "";
+          document.getElementById("input-owner").value = existingData.owner || "";
+          document.getElementById("input-pueblo").value = existingData.pueblo || "";
+          document.getElementById("input-start-time").value = existingData.start_time || "";
+          
+          // Clean textareas of stringified whitespaces or fallback cleanly to expose placeholders
+          commentsInput.value = (existingData.comments && existingData.comments.trim()) || "";
+          notesInput.value = (existingData.notes && existingData.notes.trim()) || "";
         } else {
-          bookingForm.reset();
           modalHeading.innerText = "Book Walk Slot";
-          document.getElementById("input-date").value = dateString;
-          document.getElementById("input-grade").value = grade;
+          dateInput.value = dateString;
+          gradeAtt.value = grade;
+          
+          // Explicitly guarantee textareas are empty string to force placeholder visibility
+          commentsInput.value = "";
+          notesInput.value = "";
         }
+
+        // 5. Open Modal
         modal.classList.add("active");
       }
       function closeModal() {
@@ -1449,6 +1508,7 @@
             owner: document.getElementById("input-owner").value.trim(),
             pueblo: document.getElementById("input-pueblo").value.trim(),
             comments: document.getElementById("input-comments").value.trim(),
+            notes: document.getElementById("input-notes").value.trim(),
             start_time: document
               .getElementById("input-start-time")
               .value.trim(),
@@ -1712,6 +1772,11 @@
           link.click();
           document.body.removeChild(link);
           URL.revokeObjectURL(url);
+        });
+        /* ========================================================= ADD A WALK TO THE SCHEDULER ========================================================= */ document
+        .getElementById("add-walk-to-schedule")
+        .addEventListener("click", () => {
+          openBookingModal("", "","",true);
         });
       /* ========================================================= CALENDAR NAVIGATION ========================================================= */ document
         .getElementById("prev-month")
