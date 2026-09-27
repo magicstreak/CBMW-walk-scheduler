@@ -819,13 +819,15 @@
         <div style="display: flex; gap: 8px; flex-wrap: wrap">
 
           <!-- ======================================================= VIEW TOGGLE ======================================================= -->
-    <div class="toggle-container">
-      <span class="switch-label">Open</span>
-      <label class="switch">
-        <input type="checkbox" id="modeToggle" /> <span class="slider"></span>
-      </label>
-      <span class="switch-label">Pause</span>
-    </div>
+<div class="toggle-container">
+    <span class="switch-label">Open</span>
+    <label class="switch">
+      <!-- This checkbox uses the correct ID and calls modeToggle() -->
+      <input type="checkbox" id="modeToggle" onchange="modeToggle()">
+      <span class="slider"></span>
+    </label>
+    <span class="switch-label">Pause</span>
+  </div>
           <button class="btn btn-success" id="add-walk-to-schedule">Add Walk</button>
           <button class="btn btn-success" id="export-csv">Export to CSV</button>
           <button class="btn btn-danger" id="clear-all">
@@ -1345,7 +1347,9 @@
       /* ========================================================= CALENDAR ========================================================= */
     function renderCalendar() {
         daysGrid.innerHTML = "";
-        const year = currentDate.getFullYear();
+      const isPaused = document.getElementById("modeToggle") ? document.getElementById("modeToggle").checked : false;
+    alert("paused?  "+isPaused);
+      const year = currentDate.getFullYear();
         const month = currentDate.getMonth();
         calendarTitle.innerText = `${monthNames[month]} ${year}`;
         const firstDayIndex = new Date(year, month, 1).getDay();
@@ -2003,6 +2007,20 @@ WALK DATA TABLE SORTING
             section.querySelector(".stats-section-header .collapse-button"),
           );
         });
+      function modeToggle() {
+  const isPaused = document.getElementById("modeToggle").checked;
+  
+  // Optional visual indicator or alert message
+  if (isPaused) {
+    console.log("Scheduler is PAUSED. New bookings are locked.");
+  } else {
+    console.log("Scheduler is OPEN. Users can book slots.");
+  }
+  
+  // Refresh the calendar to apply the open/paused rules to cell clicks
+  renderCalendar();
+      }
+      
     </script>
   </body>
 </html>
