@@ -1052,8 +1052,6 @@
           <div class="stats-section-header collapsible-header">
             <div class="stats-section-title">
               <h4>Walks Scheduled by Leader & Grade</h4>
-
-              
             </div>
 
             <button
@@ -1345,9 +1343,10 @@
           const dayOfWeek = specificDate.getDay();
           const slotsContainer = document.createElement("div");
           slotsContainer.classList.add("slots-container");
+          /* * IMPORTANT: * Your existing Firebase data uses * DD-MM-YYYY. */
+          const dateISO = `${String(day).padStart(2, "0")}-${String(month + 1).padStart(2, "0")}-${year}`;
+          const isPast = specificDate < today;
           if (dayOfWeek === 3 || dayOfWeek === 6) {
-            /* * IMPORTANT: * Your existing Firebase data uses * DD-MM-YYYY. */ const dateISO = `${String(day).padStart(2, "0")}-${String(month + 1).padStart(2, "0")}-${year}`;
-            const isPast = specificDate < today;
             grades.forEach((grade) => {
               const slotEl = document.createElement("div");
               slotEl.classList.add("slot", `grade-${grade}`);
@@ -1374,7 +1373,26 @@
               }
               slotsContainer.appendChild(slotEl);
             });
+          } else {
+            // ad hoc walks that sit outside the USual Sat/Wed Schedule
+            grades.forEach((grade) => {
+              const key = `${dateISO}_${grade}`;
+              const bookedData = globalBookings[key];
+              const slotEl = document.createElement("div");
+              if (bookedData) {
+                slotEl.classList.add("slot", `grade-${grade}`);
+                slotEl.classList.add("booked");
+                slotEl.innerText = `${grade} Booked: ${bookedData.walk_number}`;
+                slotEl.title = `Leader: ${bookedData.leader_name || ""} | Pueblo: ${bookedData.pueblo || ""}`;
+                slotEl.addEventListener("click", () =>
+                  openBookingModal(dateISO, grade, bookedData),
+                );
+              }
+
+              slotsContainer.appendChild(slotEl);
+            });
           }
+
           dayCell.appendChild(slotsContainer);
           daysGrid.appendChild(dayCell);
         }
