@@ -1148,11 +1148,18 @@
           </div>
           <div class="form-group">
             <label> Start Time </label>
-            <input type="time" id="input-start-time" />
+            <input type="time" id="input-start-time" value="10:00"/>
           </div>
           <div class="form-group">
             <label> Walk Grade </label>
-            <input type="text" id="input-grade" readonly />
+            <select id="input-grade">
+              <option value="E">E</option>
+              <option value="M">M</option>
+              <option value="MS">MS</option>
+              <option value="S">S</option>
+              <option value="VS">VS</option>
+            </select>
+
           </div>
           <div class="form-group">
             <label> Walk Number </label>
@@ -1428,13 +1435,17 @@
         admin = false
       ) {
         document.getElementById("input-date").value = dateString;
-        document.getElementById("input-grade").value = grade;
+        const gradeAtt = document.getElementById("input-grade");
+        
         if(admin){
           document.getElementById("input-date").removeAttribute('readonly');
-          document.getElementById("input-grade").removeAttribute('readonly');
+          gradeAtt.value = "M";
+          gradeAtt.disabled=false;
+
         }else{
           document.getElementById("input-date").setAttribute('readonly', 'true'); 
-          document.getElementById("input-grade").setAttribute('readonly', 'true');       
+          gradeAtt.value = grade;
+          gradeAtt.disabled=true;
         }
         if (existingData) {
           modalHeading.innerText = "Edit Walk Parameters";
