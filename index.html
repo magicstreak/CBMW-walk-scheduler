@@ -266,6 +266,7 @@
     .slot.unavailable {
       display: none;
     }
+
     .slot.available.grade-E {
       background-color: rgba(22, 163, 74, 0.12);
     }
@@ -827,7 +828,7 @@
           <span class="switch-label">Open</span>
           <label class="switch">
             <!-- This checkbox uses the correct ID and calls modeToggle() -->
-            <input type="checkbox" id="modeToggle" onchange="modeToggle()">
+            <input type="checkbox" id="modeCheckBox">
             <span class="slider"></span>
           </label>
           <span class="switch-label">Pause</span>
@@ -1158,7 +1159,7 @@
           <button type="button" class="btn btn-secondary" id="close-modal">
             Cancel
           </button>
-          <button type="submit" class="btn btn-primary">
+          <button type="submit" class="btn btn-primary" id="submit-booking">
             Submit Booking
           </button>
         </div>
@@ -1287,7 +1288,7 @@
     /* ========================================================= CALENDAR ========================================================= */
     function renderCalendar() {
       daysGrid.innerHTML = "";
-      const isPaused = document.getElementById("modeToggle") ? document.getElementById("modeToggle").checked : false;
+      const isPaused = document.getElementById("modeCheckBox") ? document.getElementById("modeCheckBox").checked : false;
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth();
       calendarTitle.innerText = `${monthNames[month]} ${year}`;
@@ -1334,11 +1335,11 @@
                 openBookingModal(dateISO, grade, bookedData),
               );
             } else {
-             
+
               if (isPaused)
-                 slotEl.classList.add("unavailable");
+                slotEl.classList.add("unavailable");
               else {
-                 slotEl.classList.add("available");
+                slotEl.classList.add("available");
                 slotEl.innerText = `${grade} Available`;
                 slotEl.addEventListener("click", () =>
                   openBookingModal(dateISO, grade),
@@ -1371,7 +1372,8 @@
         daysGrid.appendChild(dayCell);
       }
     }
-      /* ========================================================= ADMIN TABLE ========================================================= */ function renderAdminTable() {
+      /* ========================================================= ADMIN TABLE ========================================================= */ 
+    function renderAdminTable() {
       adminTableBody.innerHTML = "";
       const sortedKeys = Object.keys(globalBookings).sort();
       if (!sortedKeys.length) {
@@ -1393,6 +1395,16 @@
         adminTableBody.appendChild(tr);
       });
     }
+    // Wait for the window to load, then attach the listener
+window.addEventListener('DOMContentLoaded', () => {
+    const checkbox = document.getElementById('modeCheckBox');
+    
+    checkbox.addEventListener('change', function() {
+        console.log("Checkbox state is: ", this.checked);
+        // Put your toggle logic here
+        renderCalendar();
+    });
+});
     /* ========================================================= MODAL ========================================================= */
     function openBookingModal(
       dateString,
@@ -1404,7 +1416,9 @@
       if (!existingData) {
         bookingForm.reset();
       }
-      const isPaused = document.getElementById("modeToggle") ? document.getElementById("modeToggle").checked : false;
+      const isPaused = document.getElementById("modeCheckBox") ? document.getElementById("modeCheckBox").checked : false;
+      const adminView = document.getElementById("viewToggle") ? document.getElementById("viewToggle").checked : false;
+
       document.getElementById("input-date").value = dateString;
       // 2. Cache DOM Elements for performance and cleaner code
       const dateInput = document.getElementById("input-date");
@@ -1444,7 +1458,11 @@
         commentsInput.value = "";
         notesInput.value = "";
       }
-
+       const button = document.getElementById("submit-booking");
+       button.disabled = false;
+      if(isPaused && !adminView){       
+          button.disabled = true;
+      }
       // 5. Open Modal
       modal.classList.add("active");
     }
@@ -1760,13 +1778,7 @@
           .querySelector(".admin-container")
           .classList.toggle("hidden", !this.checked);
       });
-    document.getElementById("modeToggle")
-      .addEventListener("change", function () {
-        document.querySelector(".calendar-container")
-          .classList.toggle("hidden", !this.checked);
-        renderCalendar();
-
-      });
+   
 
       /* ========================================================= START ========================================================= */ initDataSync();
     /* =========================================================
@@ -1951,19 +1963,7 @@ WALK DATA TABLE SORTING
           section.querySelector(".stats-section-header .collapse-button"),
         );
       });
-    function modeToggle() {
-      const isPaused = document.getElementById("modeToggle").checked;
-alert("in modeToggle");
-      // Optional visual indicator or alert message
-      if (isPaused) {
-        console.log("Scheduler is PAUSED. New bookings are locked.");
-      } else {
-        console.log("Scheduler is OPEN. Users can book slots.");
-      }
-
-      // Refresh the calendar to apply the open/paused rules to cell clicks
-      renderCalendar();
-    }
+    
 
   </script>
 </body>
