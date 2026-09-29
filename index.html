@@ -1286,92 +1286,236 @@
       }
     }
     /* ========================================================= CALENDAR ========================================================= */
-    function renderCalendar() {
-      daysGrid.innerHTML = "";
-      const isPaused = document.getElementById("modeCheckBox") ? document.getElementById("modeCheckBox").checked : false;
-      const year = currentDate.getFullYear();
-      const month = currentDate.getMonth();
-      calendarTitle.innerText = `${monthNames[month]} ${year}`;
-      const firstDayIndex = new Date(year, month, 1).getDay();
-      const totalDays = new Date(year, month + 1, 0).getDate();
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      for (let i = 0; i < firstDayIndex; i++) {
-        const emptyCell = document.createElement("div");
-        emptyCell.classList.add("day-cell", "empty");
-        daysGrid.appendChild(emptyCell);
-      }
-      for (let day = 1; day <= totalDays; day++) {
-        const dayCell = document.createElement("div");
-        dayCell.classList.add("day-cell");
-        const dayNoDiv = document.createElement("div");
-        dayNoDiv.classList.add("day-number");
-        dayNoDiv.innerText = day;
-        dayCell.appendChild(dayNoDiv);
-        const specificDate = new Date(year, month, day);
-        specificDate.setHours(0, 0, 0, 0);
-        const dayOfWeek = specificDate.getDay();
-        const slotsContainer = document.createElement("div");
-        slotsContainer.classList.add("slots-container");
-        /* * IMPORTANT: * Your existing Firebase data uses * DD-MM-YYYY. */
-        const dateISO = `${String(day).padStart(2, "0")}-${String(month + 1).padStart(2, "0")}-${year}`;
-        const isPast = specificDate < today;
-        if (dayOfWeek === 3 || dayOfWeek === 6) {
-          grades.forEach((grade) => {
-            const slotEl = document.createElement("div");
-            slotEl.classList.add("slot", `grade-${grade}`);
-            const compositeKey = `${dateISO}_${grade}`;
-            const bookedData = globalBookings[compositeKey];
-            if (isPast) {
-              slotEl.classList.add("past");
-              slotEl.innerText = bookedData
-                ? `${grade} Booked: ${bookedData.walk_number}`
-                : grade;
-            } else if (bookedData) {
-              slotEl.classList.add("booked");
-              slotEl.innerText = `${grade} Booked: ${bookedData.walk_number}`;
-              slotEl.title = `Leader: ${bookedData.leader_name || ""} | Pueblo: ${bookedData.pueblo || ""}`;
-              slotEl.addEventListener("click", () =>
-                openBookingModal(dateISO, grade, bookedData),
-              );
-            } else {
+      function renderCalendar() {
+        daysGrid.innerHTML = "";
 
-              if (isPaused)
-                slotEl.classList.add("unavailable");
-              else {
-                slotEl.classList.add("available");
-                slotEl.innerText = `${grade} Available`;
-                slotEl.addEventListener("click", () =>
-                  openBookingModal(dateISO, grade),
-                );
-              }
-            }
-            slotsContainer.appendChild(slotEl);
-          });
-        } else {
-          // ad hoc walks that sit outside the USual Sat/Wed Schedule
-          grades.forEach((grade) => {
-            const key = `${dateISO}_${grade}`;
-            const bookedData = globalBookings[key];
-            const slotEl = document.createElement("div");
-            if (bookedData) {
-              slotEl.classList.add("slot", `grade-${grade}`);
-              slotEl.classList.add("booked");
-              slotEl.innerText = `${grade} Booked: ${bookedData.walk_number}`;
-              slotEl.title = `Leader: ${bookedData.leader_name || ""} | Pueblo: ${bookedData.pueblo || ""}`;
-              slotEl.addEventListener("click", () =>
-                openBookingModal(dateISO, grade, bookedData),
-              );
-            }
+        const isPaused = document.getElementById("modeCheckBox")
+          ? document.getElementById("modeCheckBox").checked
+          : false;
 
-            slotsContainer.appendChild(slotEl);
-          });
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+
+        calendarTitle.innerText = `${monthNames[month]} ${year}`;
+
+        const firstDayIndex = new Date(year, month, 1).getDay();
+        const totalDays = new Date(year, month + 1, 0).getDate();
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // Empty cells before the first day of the month
+        for (let i = 0; i < firstDayIndex; i++) {
+          const emptyCell = document.createElement("div");
+          emptyCell.classList.add("day-cell", "empty");
+          daysGrid.appendChild(emptyCell);
         }
 
-        dayCell.appendChild(slotsContainer);
-        daysGrid.appendChild(dayCell);
+        // Render each day
+        for (let day = 1; day <= totalDays; day++) {
+
+          const dayCell = document.createElement("div");
+          dayCell.classList.add("day-cell");
+
+          // Day number
+          const dayNoDiv = document.createElement("div");
+          dayNoDiv.classList.add("day-number");
+          dayNoDiv.innerText = day;
+          dayCell.appendChild(dayNoDiv);
+
+          const specificDate = new Date(year, month, day);
+          specificDate.setHours(0, 0, 0, 0);
+
+          const dayOfWeek = specificDate.getDay();
+
+          // Firebase date format: DD-MM-YYYY
+          const dateISO =
+            `${String(day).padStart(2, "0")}-` +
+            `${String(month + 1).padStart(2, "0")}-` +
+            `${year}`;
+
+          const isPast = specificDate < today;
+
+          const slotsContainer = document.createElement("div");
+          slotsContainer.classList.add("slots-container");
+
+          // ============================================================
+          // STANDARD WEDNESDAY / SATURDAY
+          // ============================================================
+
+          if (dayOfWeek === 3 || dayOfWeek === 6) {
+
+            grades.forEach((grade) => {
+
+              /*
+              * Find ALL booking keys matching:
+              *
+              * DD-MM-YYYY_GRADE_WALKID
+              *
+              * Example:
+              * 29-09-2026_E_walk001
+              * 29-09-2026_E_walk002
+              */
+
+              const keyPrefix = `${dateISO}_${grade}_`;
+
+              const matchingBookings = Object.entries(globalBookings || {})
+                .filter(([key]) => key.startsWith(keyPrefix));
+
+
+              // --------------------------------------------------------
+              // There are bookings for this date/grade
+              // --------------------------------------------------------
+
+              if (matchingBookings.length > 0) {
+
+                matchingBookings.forEach(([key, bookedData]) => {
+
+                  const slotEl = document.createElement("div");
+
+                  slotEl.classList.add(
+                    "slot",
+                    `grade-${grade}`,
+                    "booked"
+                  );
+
+                  /*
+                  * Get the Walk ID from:
+                  *
+                  * DD-MM-YYYY_GRADE_WALKID
+                  */
+                  const walkID = key.substring(keyPrefix.length);
+
+                  slotEl.innerText =
+                    `${grade} Booked: ${bookedData.walk_number || walkID}`;
+
+                  slotEl.title =
+                    `Leader: ${bookedData.leader_name || ""} | ` +
+                    `Pueblo: ${bookedData.pueblo || ""}`;
+
+                  if (isPast) {
+                    slotEl.classList.add("past");
+                  } else {
+                    slotEl.addEventListener("click", () =>
+                      openBookingModal(
+                        dateISO,
+                        grade,
+                        bookedData,
+                        walkID
+                      )
+                    );
+                  }
+
+                  slotsContainer.appendChild(slotEl);
+                });
+
+              }
+
+              // --------------------------------------------------------
+              // No bookings - show available slot
+              // --------------------------------------------------------
+
+              else {
+
+                const slotEl = document.createElement("div");
+
+                slotEl.classList.add(
+                  "slot",
+                  `grade-${grade}`
+                );
+
+                if (isPast) {
+
+                  slotEl.classList.add("past");
+                  slotEl.innerText = grade;
+
+                } else if (isPaused) {
+
+                  slotEl.classList.add("unavailable");
+                  slotEl.innerText = `${grade} Unavailable`;
+
+                } else {
+
+                  slotEl.classList.add("available");
+                  slotEl.innerText = `${grade} Available`;
+
+                  slotEl.addEventListener("click", () =>
+                    openBookingModal(dateISO, grade)
+                  );
+                }
+
+                slotsContainer.appendChild(slotEl);
+              }
+
+            });
+          }
+
+
+          // ============================================================
+          // AD HOC WALKS
+          // ============================================================
+
+          else {
+
+            grades.forEach((grade) => {
+
+              const keyPrefix = `${dateISO}_${grade}_`;
+
+              const matchingBookings = Object.entries(globalBookings || {})
+                .filter(([key]) => key.startsWith(keyPrefix));
+
+
+              /*
+              * Ad hoc days only display slots that actually exist
+              * in Firebase.
+              */
+
+              matchingBookings.forEach(([key, bookedData]) => {
+
+                const walkID = key.substring(keyPrefix.length);
+
+                const slotEl = document.createElement("div");
+
+                slotEl.classList.add(
+                  "slot",
+                  `grade-${grade}`,
+                  "booked"
+                );
+
+                slotEl.innerText =
+                  `${grade} Booked: ${bookedData.walk_number || walkID}`;
+
+                slotEl.title =
+                  `Leader: ${bookedData.leader_name || ""} | ` +
+                  `Pueblo: ${bookedData.pueblo || ""}`;
+
+                if (isPast) {
+                  slotEl.classList.add("past");
+                } else {
+                  slotEl.addEventListener("click", () =>
+                    openBookingModal(
+                      dateISO,
+                      grade,
+                      bookedData,
+                      walkID
+                    )
+                  );
+                }
+
+                slotsContainer.appendChild(slotEl);
+              });
+
+            });
+          }
+
+
+          // Add slots to day
+          dayCell.appendChild(slotsContainer);
+
+          // Add day to calendar
+          daysGrid.appendChild(dayCell);
+        }
       }
-    }
       /* ========================================================= ADMIN TABLE ========================================================= */ 
     function renderAdminTable() {
       adminTableBody.innerHTML = "";
@@ -1385,7 +1529,7 @@
         const tr = document.createElement("tr");
         tr.innerHTML = ` <td> <strong> ${record.date} </strong> </td> <td> ${record.start_time || "-"} </td> <td> <span class="badge grade-${record.walk_grade}"> ${record.walk_grade} </span> </td> <td> ${record.walk_number || "-"} </td> <td> ${record.leader_name || "-"} </td> <td> ${record.owner || "-"} </td> <td> ${record.pueblo || "-"} </td> <td> ${record.comments || "-"} </td> <td> <button class="btn btn-success" data-key="${key}"> Edit </button> </td> <td> <button class="btn btn-danger" data-key="${key}"> Cancel </button> </td> `;
         tr.querySelector(".btn-success").addEventListener("click", () =>
-          openBookingModal(record.date, record.walk_grade, record),
+          openBookingModal(record.date, record.walk_grade, record, record.walk_number),
         );
         tr.querySelector(".btn-danger").addEventListener("click", () => {
           if (confirm(`Cancel walk ${record.walk_number}?`)) {
@@ -1410,8 +1554,15 @@ window.addEventListener('DOMContentLoaded', () => {
       dateString,
       grade,
       existingData = null,
-      admin = false
+      walkNum
     ) {
+
+      let admin = false;
+
+      if (dateString === "" && grade === "" && !existingData) {
+        admin = true;
+      }
+ 
       // 1. Reset the form FIRST so custom default injections aren't immediately wiped out
       if (!existingData) {
         bookingForm.reset();
@@ -1476,11 +1627,12 @@ window.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const dateStr = document.getElementById("input-date").value;
         const gradeStr = document.getElementById("input-grade").value;
-        const compositeKey = `${dateStr}_${gradeStr}`;
+        const walkNum = document.getElementById("input-walk-no").value;
+        const compositeKey = `${dateStr}_${gradeStr}_${walkNum}`;
         const payload = {
           date: dateStr,
           walk_grade: gradeStr,
-          walk_number: document.getElementById("input-walk-no").value.trim(),
+          walk_number: walkNum,
           leader_name: document.getElementById("input-leader").value.trim(),
           owner: document.getElementById("input-owner").value.trim(),
           pueblo: document.getElementById("input-pueblo").value.trim(),
@@ -1753,7 +1905,7 @@ window.addEventListener('DOMContentLoaded', () => {
         /* ========================================================= ADD A WALK TO THE SCHEDULER ========================================================= */ document
       .getElementById("add-walk-to-schedule")
       .addEventListener("click", () => {
-        openBookingModal("", "", "", true);
+        openBookingModal("", "", "", "", "", true);
       });
       /* ========================================================= CALENDAR NAVIGATION ========================================================= */ document
       .getElementById("prev-month")
