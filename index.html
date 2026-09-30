@@ -1109,6 +1109,8 @@
     <div class="modal-content">
       <h3 id="modal-heading">Book Walk Slot</h3>
       <form id="kv-booking-form">
+  <!-- 1. The Hidden Value Input -->
+    <input type="hidden" id="modalHiddenValue" name="uniqueId" value="">
         <div class="form-group">
           <label> Selected Date </label>
           <input type="text" id="input-date" readonly />
@@ -1260,6 +1262,7 @@
         globalBookings[key] = data;
       }
       if (isFirebaseActive) {
+
         set(ref(db, "walk_bookings/" + key), data);
       } else {
         localStorage.setItem(
@@ -1350,11 +1353,11 @@
               /*
               * Find ALL booking keys matching:
               *
-              * DD-MM-YYYY_GRADE_WALKID
+              * DD-MM-YYYY_GRADE_unique
               *
               * Example:
-              * 29-09-2026_E_walk001
-              * 29-09-2026_E_walk002
+              * 29-09-2026_E_34444
+              * 29-09-2026_E_565656
               */
 
               const keyPrefix = `${dateISO}_${grade}_`;
@@ -1384,7 +1387,7 @@
                   *
                   * DD-MM-YYYY_GRADE_WALKID
                   */
-                  const walkID = key.substring(keyPrefix.length);
+                  const walkID = bookedData.walk_number;
 
                   slotEl.innerText =
                     `${grade} Booked: ${bookedData.walk_number || walkID}`;
@@ -1556,7 +1559,7 @@ window.addEventListener('DOMContentLoaded', () => {
       existingData = null,
       walkNum
     ) {
-
+      let uniqueValue = null;
       let admin = false;
 
       if (dateString === "" && grade === "" && !existingData) {
@@ -1566,6 +1569,10 @@ window.addEventListener('DOMContentLoaded', () => {
       // 1. Reset the form FIRST so custom default injections aren't immediately wiped out
       if (!existingData) {
         bookingForm.reset();
+        uniqueValue = crypto.randomUUID();
+        document.getElementById('modalHiddenValue').value = uniqueValue || ""; // Inject the value safely
+      } else {
+        document.getElementById('modalHiddenValue').value = existingData.unique_id || ""; // Inject the value safely
       }
       const isPaused = document.getElementById("modeCheckBox") ? document.getElementById("modeCheckBox").checked : false;
       const adminView = document.getElementById("viewToggle") ? document.getElementById("viewToggle").checked : false;
@@ -1619,7 +1626,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     function closeModal() {
       modal.classList.remove("active");
-      bookingForm.reset();
+    
     }
       /* ========================================================= BOOKING FORM ========================================================= */ bookingForm.addEventListener(
       "submit",
@@ -1628,7 +1635,10 @@ window.addEventListener('DOMContentLoaded', () => {
         const dateStr = document.getElementById("input-date").value;
         const gradeStr = document.getElementById("input-grade").value;
         const walkNum = document.getElementById("input-walk-no").value;
-        const compositeKey = `${dateStr}_${gradeStr}_${walkNum}`;
+        const uniqueID = document.getElementById("modalHiddenValue").value;
+        console.log("key: ", uniqueID);
+        const compositeKey = `${dateStr}_${gradeStr}_${uniqueID}`;
+
         const payload = {
           date: dateStr,
           walk_grade: gradeStr,
@@ -1638,6 +1648,7 @@ window.addEventListener('DOMContentLoaded', () => {
           pueblo: document.getElementById("input-pueblo").value.trim(),
           comments: document.getElementById("input-comments").value.trim(),
           notes: document.getElementById("input-notes").value.trim(),
+          unique_id: uniqueID,
           start_time: document
             .getElementById("input-start-time")
             .value.trim(),
