@@ -1570,9 +1570,9 @@ window.addEventListener('DOMContentLoaded', () => {
       if (!existingData) {
         bookingForm.reset();
         uniqueValue = crypto.randomUUID();
-        console.log(uniqueValue);
-        const hiddenInput = document.getElementById('modalHiddenValue');
-        hiddenInput.value = uniqueValue; // Inject the value safely
+        document.getElementById('modalHiddenValue').value = uniqueValue || ""; // Inject the value safely
+      } else {
+        document.getElementById('modalHiddenValue').value = existingData.unique_id || ""; // Inject the value safely
       }
       const isPaused = document.getElementById("modeCheckBox") ? document.getElementById("modeCheckBox").checked : false;
       const adminView = document.getElementById("viewToggle") ? document.getElementById("viewToggle").checked : false;
@@ -1636,7 +1636,7 @@ window.addEventListener('DOMContentLoaded', () => {
         const gradeStr = document.getElementById("input-grade").value;
         const walkNum = document.getElementById("input-walk-no").value;
         const uniqueID = document.getElementById("modalHiddenValue").value;
-  
+        console.log("key: ", uniqueID);
         const compositeKey = `${dateStr}_${gradeStr}_${uniqueID}`;
 
         const payload = {
@@ -1648,6 +1648,7 @@ window.addEventListener('DOMContentLoaded', () => {
           pueblo: document.getElementById("input-pueblo").value.trim(),
           comments: document.getElementById("input-comments").value.trim(),
           notes: document.getElementById("input-notes").value.trim(),
+          unique_id: uniqueID,
           start_time: document
             .getElementById("input-start-time")
             .value.trim(),
