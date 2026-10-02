@@ -1192,6 +1192,7 @@
     };
     let db = null;
     let isFirebaseActive = false;
+
     try {
       const app = initializeApp(firebaseConfig);
       db = getDatabase(app);
@@ -1569,8 +1570,10 @@ window.addEventListener('DOMContentLoaded', () => {
       // 1. Reset the form FIRST so custom default injections aren't immediately wiped out
       if (!existingData) {
         bookingForm.reset();
-        uniqueValue = crypto.randomUUID();
-        document.getElementById('modalHiddenValue').value = uniqueValue || ""; // Inject the value safely
+          const timestamp = Date.now().toString(36); // Base36 timestamp
+          const randomStr = Math.random().toString(36).substring(2, 10); // Base36 random string
+          uniqueValue = `${timestamp}-${randomStr}`;
+          document.getElementById('modalHiddenValue').value = uniqueValue || ""; // Inject the value safely
       } else {
         document.getElementById('modalHiddenValue').value = existingData.unique_id || ""; // Inject the value safely
       }
