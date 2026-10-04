@@ -83,12 +83,25 @@
     }
 
     /* ========================================================= TOGGLE ========================================================= */
-    .toggle-container {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 30px;
-    }
+
+/* Shared layout styles for both containers */
+.mode-toggle-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 30px;
+}
+
+.mode-toggle-container[hidden] {
+    display: none;
+}
+/* Shared layout styles for both containers */
+.view-toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 30px;
+}
 
     .switch-label {
       font-weight: 600;
@@ -616,10 +629,7 @@
       margin-top: 25px;
     }
 
-    /* ========================================================= HIDDEN ========================================================= */
-    .hidden {
-      display: none !important;
-    }
+
 
     /* ========================================================= RESPONSIVE ========================================================= */
     @media (max-width: 900px) {
@@ -760,6 +770,11 @@
       font-weight: 500;
       color: var(--text-muted);
     }
+
+        /* ========================================================= HIDDEN ========================================================= */
+    .hidden {
+      display: none !important;
+    }
   </style>
 </head>
 
@@ -770,7 +785,7 @@
     <p>Click on a slot to schedule or edit a walk.</p>
   </header>
   <!-- ======================================================= VIEW TOGGLE ======================================================= -->
-  <div class="toggle-container">
+  <div class="view-toggle-container">
     <span class="switch-label"> Leaders View </span>
     <label class="switch">
       <input type="checkbox" id="viewToggle" /> <span class="slider"></span>
@@ -818,13 +833,13 @@
     <div class="days-grid" id="days-grid"></div>
   </div>
   <!-- ======================================================= ADMIN ======================================================= -->
-  <div class="admin-container hidden">
+  <div class="admin-container">
     <div class="admin-header">
-      <h3>Administration Dashboard</h3>
+      <h3>Walk Offers</h3>
       <div style="display: flex; gap: 8px; flex-wrap: wrap">
 
         <!-- ======================================================= VIEW TOGGLE ======================================================= -->
-        <div class="toggle-container">
+        <div id="mode-toggle-container" class="mode-toggle-container" hidden>
           <span class="switch-label">Open</span>
           <label class="switch">
             <!-- This checkbox uses the correct ID and calls modeToggle() -->
@@ -833,12 +848,12 @@
           </label>
           <span class="switch-label">Pause</span>
         </div>
-        <button class="btn btn-success" id="add-walk-to-schedule">Add Walk</button>
-        <button class="btn btn-success" id="export-csv">Export to CSV</button>
-        <button class="btn btn-danger" id="clear-all">
+        <button class="btn btn-success" id="add-walk-to-schedule" hidden>Add Walk</button>
+        <button class="btn btn-success" id="export-csv" hidden>Export to CSV</button>
+        <button class="btn btn-danger" id="clear-all" hidden>
           Clear All Bookings
         </button>
-        <button class="btn btn-success" id="publish">Build Programme</button>
+   
       </div>
     </div>
     <div class="table-wrapper">
@@ -1521,28 +1536,60 @@
         }
       }
       /* ========================================================= ADMIN TABLE ========================================================= */ 
-    function renderAdminTable() {
-      adminTableBody.innerHTML = "";
-      const sortedKeys = Object.keys(globalBookings).sort();
-      if (!sortedKeys.length) {
-        adminTableBody.innerHTML = ` <tr> <td colspan="10" style=" text-align:center; color:var(--text-muted) "> No walks recorded. </td> </tr> `;
-        return;
+    function renderAdminTable(admin) {
+  // 1. Guard clause: Stop early if the table body element doesn't exist
+  if (!adminTableBody) return;
+
+  // 2. Clear the table container efficiently
+  adminTableBody.innerHTML = "";
+
+  // 3. Determine the mode cleanly using a ternary operator
+  const currentMode = admin === true ? "adminView" : "view";
+  
+  // 4. Sort the booking keys alphabetically/chronologically
+  const sortedKeys = Object.keys(globalBookings).sort();
+
+  console.log(`Rendering table in [${currentMode}] mode for admin status:`, admin);
+
+  // 5. Loop through keys and append rows
+  sortedKeys.forEach((key) => {
+    const record = globalBookings[key];
+    if (!record) return;
+
+    const tr = document.createElement("tr");
+    
+    // Add classes to cells to show/hide them depending on the currentMode string
+    tr.innerHTML = `
+      <td> <strong> ${record.date} </strong> </td> 
+      <td> ${record.start_time || "-"} </td> 
+      <td> <span class="badge grade-${record.walk_grade}"> ${record.walk_grade} </span> </td> 
+      <td> ${record.walk_number || "-"} </td> 
+      <td> ${record.leader_name || "-"} </td> 
+      <td> ${record.owner || "-"} </td> 
+      <td> ${record.pueblo || "-"} </td> 
+      <td> ${record.comments || "-"} </td> 
+      <td class="action-edit"> <button class="btn btn-success"> Edit </button> </td> 
+      <td class="action-cancel"> <button class="btn btn-danger"> Cancel </button> </td> 
+    `;
+
+    // Toggle actions based on your mode string
+    tr.querySelector(".action-edit").hidden = (currentMode === "view");
+    tr.querySelector(".action-cancel").hidden = (currentMode === "view");
+
+    // Event Listeners
+    tr.querySelector(".btn-success")?.addEventListener("click", () =>
+      openBookingModal(record.date, record.walk_grade, record, record.walk_number)
+    );
+    tr.querySelector(".btn-danger")?.addEventListener("click", () => {
+      if (confirm(`Cancel walk ${record.walk_number}?`)) {
+        saveBookingRecord(key, null);
       }
-      sortedKeys.forEach((key) => {
-        const record = globalBookings[key];
-        const tr = document.createElement("tr");
-        tr.innerHTML = ` <td> <strong> ${record.date} </strong> </td> <td> ${record.start_time || "-"} </td> <td> <span class="badge grade-${record.walk_grade}"> ${record.walk_grade} </span> </td> <td> ${record.walk_number || "-"} </td> <td> ${record.leader_name || "-"} </td> <td> ${record.owner || "-"} </td> <td> ${record.pueblo || "-"} </td> <td> ${record.comments || "-"} </td> <td> <button class="btn btn-success" data-key="${key}"> Edit </button> </td> <td> <button class="btn btn-danger" data-key="${key}"> Cancel </button> </td> `;
-        tr.querySelector(".btn-success").addEventListener("click", () =>
-          openBookingModal(record.date, record.walk_grade, record, record.walk_number),
-        );
-        tr.querySelector(".btn-danger").addEventListener("click", () => {
-          if (confirm(`Cancel walk ${record.walk_number}?`)) {
-            saveBookingRecord(key, null);
-          }
-        });
-        adminTableBody.appendChild(tr);
-      });
-    }
+    });
+
+    adminTableBody.appendChild(tr);
+  });
+}
+
     // Wait for the window to load, then attach the listener
 window.addEventListener('DOMContentLoaded', () => {
     const checkbox = document.getElementById('modeCheckBox');
@@ -1940,9 +1987,16 @@ window.addEventListener('DOMContentLoaded', () => {
       /* ========================================================= ADMIN TOGGLE ========================================================= */ document
       .getElementById("viewToggle")
       .addEventListener("change", function () {
-        document
-          .querySelector(".admin-container")
-          .classList.toggle("hidden", !this.checked);
+      document.querySelectorAll("#add-walk-to-schedule, #export-csv, #clear-all")
+          .forEach(element => {
+              element.hidden = !this.checked;
+          });
+
+      const modeContainer = document.getElementById("mode-toggle-container");
+
+      modeContainer.hidden = !this.checked;
+      renderAdminTable(this.checked);
+
       });
    
 
