@@ -835,7 +835,7 @@
   <!-- ======================================================= ADMIN ======================================================= -->
   <div class="admin-container">
     <div class="admin-header">
-      <h3>Administration Dashboard</h3>
+      <h3>Walk Offers</h3>
       <div style="display: flex; gap: 8px; flex-wrap: wrap">
 
         <!-- ======================================================= VIEW TOGGLE ======================================================= -->
@@ -1995,6 +1995,7 @@ window.addEventListener('DOMContentLoaded', () => {
       const modeContainer = document.getElementById("mode-toggle-container");
 
       modeContainer.hidden = !this.checked;
+      renderAdminTable(this.checked);
 
       });
    
