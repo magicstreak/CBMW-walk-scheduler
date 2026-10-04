@@ -1521,28 +1521,60 @@
         }
       }
       /* ========================================================= ADMIN TABLE ========================================================= */ 
-    function renderAdminTable() {
-      adminTableBody.innerHTML = "";
-      const sortedKeys = Object.keys(globalBookings).sort();
-      if (!sortedKeys.length) {
-        adminTableBody.innerHTML = ` <tr> <td colspan="10" style=" text-align:center; color:var(--text-muted) "> No walks recorded. </td> </tr> `;
-        return;
+    function renderAdminTable(admin) {
+  // 1. Guard clause: Stop early if the table body element doesn't exist
+  if (!adminTableBody) return;
+
+  // 2. Clear the table container efficiently
+  adminTableBody.innerHTML = "";
+
+  // 3. Determine the mode cleanly using a ternary operator
+  const currentMode = admin === true ? "adminView" : "view";
+  
+  // 4. Sort the booking keys alphabetically/chronologically
+  const sortedKeys = Object.keys(globalBookings).sort();
+
+  console.log(`Rendering table in [${currentMode}] mode for admin status:`, admin);
+
+  // 5. Loop through keys and append rows
+  sortedKeys.forEach((key) => {
+    const record = globalBookings[key];
+    if (!record) return;
+
+    const tr = document.createElement("tr");
+    
+    // Add classes to cells to show/hide them depending on the currentMode string
+    tr.innerHTML = `
+      <td> <strong> ${record.date} </strong> </td> 
+      <td> ${record.start_time || "-"} </td> 
+      <td> <span class="badge grade-${record.walk_grade}"> ${record.walk_grade} </span> </td> 
+      <td> ${record.walk_number || "-"} </td> 
+      <td> ${record.leader_name || "-"} </td> 
+      <td> ${record.owner || "-"} </td> 
+      <td> ${record.pueblo || "-"} </td> 
+      <td> ${record.comments || "-"} </td> 
+      <td class="action-edit"> <button class="btn btn-success"> Edit </button> </td> 
+      <td class="action-cancel"> <button class="btn btn-danger"> Cancel </button> </td> 
+    `;
+
+    // Toggle actions based on your mode string
+    tr.querySelector(".action-edit").hidden = (currentMode === "view");
+    tr.querySelector(".action-cancel").hidden = (currentMode === "view");
+
+    // Event Listeners
+    tr.querySelector(".btn-success")?.addEventListener("click", () =>
+      openBookingModal(record.date, record.walk_grade, record, record.walk_number)
+    );
+    tr.querySelector(".btn-danger")?.addEventListener("click", () => {
+      if (confirm(`Cancel walk ${record.walk_number}?`)) {
+        saveBookingRecord(key, null);
       }
-      sortedKeys.forEach((key) => {
-        const record = globalBookings[key];
-        const tr = document.createElement("tr");
-        tr.innerHTML = ` <td> <strong> ${record.date} </strong> </td> <td> ${record.start_time || "-"} </td> <td> <span class="badge grade-${record.walk_grade}"> ${record.walk_grade} </span> </td> <td> ${record.walk_number || "-"} </td> <td> ${record.leader_name || "-"} </td> <td> ${record.owner || "-"} </td> <td> ${record.pueblo || "-"} </td> <td> ${record.comments || "-"} </td> <td> <button class="btn btn-success" data-key="${key}"> Edit </button> </td> <td> <button class="btn btn-danger" data-key="${key}"> Cancel </button> </td> `;
-        tr.querySelector(".btn-success").addEventListener("click", () =>
-          openBookingModal(record.date, record.walk_grade, record, record.walk_number),
-        );
-        tr.querySelector(".btn-danger").addEventListener("click", () => {
-          if (confirm(`Cancel walk ${record.walk_number}?`)) {
-            saveBookingRecord(key, null);
-          }
-        });
-        adminTableBody.appendChild(tr);
-      });
-    }
+    });
+
+    adminTableBody.appendChild(tr);
+  });
+}
+
     // Wait for the window to load, then attach the listener
 window.addEventListener('DOMContentLoaded', () => {
     const checkbox = document.getElementById('modeCheckBox');
@@ -1945,6 +1977,7 @@ window.addEventListener('DOMContentLoaded', () => {
           .forEach(button => {
             button.hidden = !this.checked;
           });
+          renderAdminTable(this.checked);
       });
    
 
