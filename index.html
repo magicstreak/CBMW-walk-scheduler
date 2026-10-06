@@ -697,6 +697,69 @@
       color: var(--primary);
     }
 
+    /* Walk Offers table: sortable headers + filter bar */
+    .admin-sortable-header {
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .admin-sortable-header:hover {
+      background: #eef2f7;
+    }
+
+    .admin-sortable-header:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: -2px;
+    }
+
+    .table-filters {
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+      padding: 14px;
+      background: var(--bg-muted);
+      border-radius: 10px;
+    }
+
+    .table-filters .filter-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 130px;
+    }
+
+    .table-filters .filter-field.grow {
+      flex: 1 1 200px;
+    }
+
+    .table-filters label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .table-filters select,
+    .table-filters input[type="search"] {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+
+    .table-filters .filter-count {
+      margin-left: auto;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
     /* =========================================================
    COLLAPSIBLE CONTAINERS
    ========================================================= */
@@ -856,20 +919,52 @@
    
       </div>
     </div>
+    <!-- ======================================================= WALK OFFERS FILTERS ======================================================= -->
+    <div class="table-filters">
+      <div class="filter-field grow">
+        <label for="admin-filter-search">Search</label>
+        <input type="search" id="admin-filter-search" placeholder="Search all columns" />
+      </div>
+      <div class="filter-field">
+        <label for="admin-filter-grade">Grade</label>
+        <select id="admin-filter-grade">
+          <option value="ALL">All grades</option>
+          <option value="E">E</option>
+          <option value="M">M</option>
+          <option value="MS">MS</option>
+          <option value="S">S</option>
+          <option value="VS">VS</option>
+        </select>
+      </div>
+      <div class="filter-field">
+        <label for="admin-filter-leader">Leader</label>
+        <select id="admin-filter-leader"><option value="ALL">All leaders</option></select>
+      </div>
+      <div class="filter-field">
+        <label for="admin-filter-owner">Owner</label>
+        <select id="admin-filter-owner"><option value="ALL">All owners</option></select>
+      </div>
+      <div class="filter-field">
+        <label for="admin-filter-pueblo">Pueblo</label>
+        <select id="admin-filter-pueblo"><option value="ALL">All pueblos</option></select>
+      </div>
+      <button type="button" class="nav-btn" id="admin-filter-clear">Clear filters</button>
+      <span class="filter-count" id="admin-filter-count"></span>
+    </div>
     <div class="table-wrapper">
       <table>
         <thead>
           <tr>
-            <th>Date</th>
-            <th>Start Time</th>
-            <th>Grade</th>
-            <th>Walk Number</th>
-            <th>Leader</th>
-            <th>Owner</th>
-            <th>Pueblo</th>
-            <th>Comments</th>
-            <th>Edit</th>
-            <th>Cancel</th>
+            <th class="admin-sortable-header" data-admin-sort="date" tabindex="0">Date <span class="sort-indicator">↕</span></th>
+            <th class="admin-sortable-header" data-admin-sort="start_time" tabindex="0">Start Time <span class="sort-indicator">↕</span></th>
+            <th class="admin-sortable-header" data-admin-sort="walk_grade" tabindex="0">Grade <span class="sort-indicator">↕</span></th>
+            <th class="admin-sortable-header" data-admin-sort="walk_number" tabindex="0">Walk Number <span class="sort-indicator">↕</span></th>
+            <th class="admin-sortable-header" data-admin-sort="leader_name" tabindex="0">Leader <span class="sort-indicator">↕</span></th>
+            <th class="admin-sortable-header" data-admin-sort="owner" tabindex="0">Owner <span class="sort-indicator">↕</span></th>
+            <th class="admin-sortable-header" data-admin-sort="pueblo" tabindex="0">Pueblo <span class="sort-indicator">↕</span></th>
+            <th class="admin-sortable-header" data-admin-sort="comments" tabindex="0">Comments <span class="sort-indicator">↕</span></th>
+            <th class="action-edit-head">Edit</th>
+            <th class="action-cancel-head">Cancel</th>
           </tr>
         </thead>
         <tbody id="admin-table-body"></tbody>
@@ -1536,7 +1631,145 @@
         }
       }
       /* ========================================================= ADMIN TABLE ========================================================= */ 
-    function renderAdminTable(admin) {
+    /* ===== Walk Offers table: sort + filter state and helpers ===== */
+    const adminGradeOrder = { E: 1, M: 2, MS: 3, S: 4, VS: 5 };
+    let adminSortColumn = "date";
+    let adminSortDirection = "asc";
+
+    function getAdminSortValue(record, column) {
+      switch (column) {
+        case "date": {
+          const d = convertDate(record.date);
+          return d ? d.getTime() : 0;
+        }
+        case "start_time":
+          return record.start_time || "";
+        case "walk_grade":
+          return adminGradeOrder[record.walk_grade] || 99;
+        case "walk_number":
+          return Number(record.walk_number) || 0;
+        case "leader_name":
+          return (record.leader_name || "").toLowerCase();
+        case "owner":
+          return (record.owner || "").toLowerCase();
+        case "pueblo":
+          return (record.pueblo || "").toLowerCase();
+        case "comments":
+          return (record.comments || "").toLowerCase();
+        default:
+          return "";
+      }
+    }
+
+    // Rebuild the Leader / Owner / Pueblo dropdowns from the data, keeping the current selection
+    function populateAdminFilters() {
+      const records = Object.values(globalBookings).filter(Boolean);
+      [
+        ["admin-filter-leader", "leader_name", "All leaders"],
+        ["admin-filter-owner", "owner", "All owners"],
+        ["admin-filter-pueblo", "pueblo", "All pueblos"],
+      ].forEach(([id, field, allLabel]) => {
+        const select = document.getElementById(id);
+        if (!select) return;
+        const current = select.value;
+        const values = [...new Set(records.map((r) => r[field]).filter(Boolean))]
+          .sort((a, b) => a.localeCompare(b));
+        select.innerHTML = "";
+        select.appendChild(new Option(allLabel, "ALL"));
+        values.forEach((v) => select.appendChild(new Option(v, v)));
+        select.value = values.includes(current) ? current : "ALL";
+      });
+    }
+
+    // Apply the filters, then sort; returns the booking keys to display
+    function getAdminVisibleKeys() {
+      const val = (id) => (document.getElementById(id) ? document.getElementById(id).value : "ALL");
+      const search = (document.getElementById("admin-filter-search")?.value || "").trim().toLowerCase();
+      const grade = val("admin-filter-grade");
+      const leader = val("admin-filter-leader");
+      const owner = val("admin-filter-owner");
+      const pueblo = val("admin-filter-pueblo");
+
+      const keys = Object.keys(globalBookings).filter((key) => {
+        const r = globalBookings[key];
+        if (!r) return false;
+        if (grade !== "ALL" && r.walk_grade !== grade) return false;
+        if (leader !== "ALL" && r.leader_name !== leader) return false;
+        if (owner !== "ALL" && r.owner !== owner) return false;
+        if (pueblo !== "ALL" && r.pueblo !== pueblo) return false;
+        if (search) {
+          const haystack = [r.date, r.start_time, r.walk_grade, r.walk_number,
+            r.leader_name, r.owner, r.pueblo, r.comments].join(" ").toLowerCase();
+          if (!haystack.includes(search)) return false;
+        }
+        return true;
+      });
+
+      keys.sort((a, b) => {
+        const va = getAdminSortValue(globalBookings[a], adminSortColumn);
+        const vb = getAdminSortValue(globalBookings[b], adminSortColumn);
+        let result =
+          typeof va === "number" && typeof vb === "number"
+            ? va - vb
+            : String(va).localeCompare(String(vb), undefined, { numeric: true, sensitivity: "base" });
+        if (result === 0) result = a.localeCompare(b); // stable tie-break
+        return adminSortDirection === "asc" ? result : -result;
+      });
+      return keys;
+    }
+
+    function updateAdminSortIndicators() {
+      document.querySelectorAll(".admin-sortable-header").forEach((header) => {
+        const indicator = header.querySelector(".sort-indicator");
+        const active = header.dataset.adminSort === adminSortColumn;
+        indicator.textContent = active ? (adminSortDirection === "asc" ? "↑" : "↓") : "↕";
+        indicator.classList.toggle("active", active);
+        header.setAttribute("aria-sort", active ? (adminSortDirection === "asc" ? "ascending" : "descending") : "none");
+      });
+    }
+
+    // Header clicks (mouse + keyboard)
+    document.querySelectorAll(".admin-sortable-header").forEach((header) => {
+      const toggleSort = () => {
+        const column = header.dataset.adminSort;
+        if (adminSortColumn === column) {
+          adminSortDirection = adminSortDirection === "asc" ? "desc" : "asc";
+        } else {
+          adminSortColumn = column;
+          adminSortDirection = "asc";
+        }
+        renderAdminTable();
+      };
+      header.addEventListener("click", toggleSort);
+      header.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          toggleSort();
+        }
+      });
+    });
+
+    // Filter controls
+    ["admin-filter-search", "admin-filter-grade", "admin-filter-leader",
+      "admin-filter-owner", "admin-filter-pueblo"].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener(id === "admin-filter-search" ? "input" : "change", () => renderAdminTable());
+    });
+    document.getElementById("admin-filter-clear").addEventListener("click", () => {
+      document.getElementById("admin-filter-search").value = "";
+      ["admin-filter-grade", "admin-filter-leader", "admin-filter-owner", "admin-filter-pueblo"]
+        .forEach((id) => { document.getElementById(id).value = "ALL"; });
+      renderAdminTable();
+    });
+
+    // Single source of truth for admin state: read it from the toggle itself
+    function isAdminView() {
+      const toggle = document.getElementById("viewToggle");
+      return !!(toggle && toggle.checked);
+    }
+
+    // If no argument is passed (data sync, save, clear, etc.), fall back to the toggle state
+    function renderAdminTable(admin = isAdminView()) {
   // 1. Guard clause: Stop early if the table body element doesn't exist
   if (!adminTableBody) return;
 
@@ -1546,8 +1779,15 @@
   // 3. Determine the mode cleanly using a ternary operator
   const currentMode = admin === true ? "adminView" : "view";
   
+  // Show/hide the Edit and Cancel column headers to match the row cells
+  document.querySelectorAll(".action-edit-head, .action-cancel-head").forEach((th) => {
+    th.hidden = (currentMode === "view");
+  });
+
   // 4. Sort the booking keys alphabetically/chronologically
-  const sortedKeys = Object.keys(globalBookings).sort();
+  populateAdminFilters();
+  const sortedKeys = getAdminVisibleKeys();
+  updateAdminSortIndicators();
 
   console.log(`Rendering table in [${currentMode}] mode for admin status:`, admin);
 
@@ -1588,6 +1828,16 @@
 
     adminTableBody.appendChild(tr);
   });
+
+  // Empty state + "Showing X of Y"
+  if (!sortedKeys.length) {
+    const empty = document.createElement("tr");
+    empty.innerHTML = `<td colspan="10" style="text-align:center; color: var(--text-muted)">No walks match the current filters.</td>`;
+    adminTableBody.appendChild(empty);
+  }
+  const total = Object.values(globalBookings).filter(Boolean).length;
+  const countEl = document.getElementById("admin-filter-count");
+  if (countEl) countEl.textContent = `Showing ${sortedKeys.length} of ${total}`;
 }
 
     // Wait for the window to load, then attach the listener
