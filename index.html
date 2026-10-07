@@ -575,19 +575,67 @@
       pointer-events: auto;
     }
 
+    /* Dialog: header and buttons stay in view, only the fields scroll (if they ever need to) */
     .modal-content {
       background: white;
-      padding: 32px;
       border-radius: 16px;
-      width: 100%;
-      max-width: 480px;
-      max-height: 90vh;
-      overflow-y: auto;
+      width: calc(100% - 24px);
+      max-width: 640px;
+      max-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
 
     .modal-content h3 {
-      margin-top: 0;
-      margin-bottom: 24px;
+      margin: 0;
+      padding: 18px 24px 14px;
+      font-size: 1.15rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-content form {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      flex: 1 1 auto;
+    }
+
+    .modal-body {
+      overflow-y: auto;
+      padding: 18px 24px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 14px 16px;
+    }
+
+    .form-grid .form-group {
+      grid-column: span 2;
+      margin-bottom: 0;
+      min-width: 0;
+    }
+
+    .form-grid .form-group.span-3 {
+      grid-column: span 3;
+    }
+
+    .form-grid .form-group.span-4 {
+      grid-column: span 4;
+    }
+
+    .form-grid .form-group label {
+      margin-bottom: 5px;
+      font-size: 0.85rem;
+    }
+
+    .form-grid .form-group input,
+    .form-grid .form-group select,
+    .form-grid .form-group textarea {
+      padding: 9px 12px;
+      font-size: 0.92rem;
     }
 
     .form-group {
@@ -619,14 +667,34 @@
 
     .form-group textarea {
       resize: vertical;
-      min-height: 70px;
+      min-height: 76px;
     }
 
     .modal-actions {
       display: flex;
       justify-content: flex-end;
       gap: 12px;
-      margin-top: 25px;
+      padding: 14px 24px;
+      border-top: 1px solid var(--border);
+      background: #fff;
+    }
+
+    /* Phones: single column (time and grade share a row), tighter padding */
+    @media (max-width: 560px) {
+      .form-grid .form-group {
+        grid-column: 1 / -1;
+      }
+
+      .form-grid .form-group.half-mobile {
+        grid-column: span 3;
+      }
+
+      .modal-content h3,
+      .modal-body,
+      .modal-actions {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
     }
 
 
@@ -695,6 +763,122 @@
 
     .sort-indicator.active {
       color: var(--primary);
+    }
+
+    /* Walk Offers table: sortable headers + filter bar */
+    .admin-sortable-header {
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .admin-sortable-header:hover {
+      background: #eef2f7;
+    }
+
+    .admin-sortable-header:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: -2px;
+    }
+
+    /* Walk Offers table: fit inside the page instead of running off the side.
+       Columns: 1 Date, 2 Time, 3 Grade, 4 Walk No, 5 Name, 6 Leader, 7 Pueblo,
+                8 Comments, 9 Notes, 10 Edit, 11 Cancel */
+    .offers-table {
+      font-size: 0.85rem;
+    }
+
+    .offers-table th,
+    .offers-table td {
+      padding: 10px 8px;
+      vertical-align: top;
+    }
+
+    .offers-table th {
+      white-space: normal; /* let headers wrap rather than force the table wider */
+    }
+
+    /* Short values stay on one line */
+    .offers-table td:nth-child(-n + 4) {
+      white-space: nowrap;
+    }
+
+    /* Free-text values wrap, even long unbroken words */
+    .offers-table td:nth-child(n + 5):nth-child(-n + 9) {
+      overflow-wrap: anywhere;
+    }
+
+    .offers-table td:nth-child(8),
+    .offers-table td:nth-child(9) {
+      min-width: 130px; /* Comments, Notes */
+    }
+
+    /* Action columns: as narrow as their buttons, buttons kept on one line */
+    .offers-table .action-edit-head,
+    .offers-table .action-cancel-head,
+    .offers-table td.action-edit,
+    .offers-table td.action-cancel {
+      width: 1%;
+      white-space: nowrap;
+    }
+
+    .offers-table td.action-edit .btn,
+    .offers-table td.action-cancel .btn {
+      padding: 6px 10px;
+      font-size: 0.8rem;
+      white-space: nowrap;
+    }
+
+    .required-mark {
+      color: #dc2626;
+      margin-left: 2px;
+    }
+
+    .table-filters {
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+      padding: 14px;
+      background: var(--bg-muted);
+      border-radius: 10px;
+    }
+
+    .table-filters .filter-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 130px;
+    }
+
+    .table-filters .filter-field.grow {
+      flex: 1 1 200px;
+    }
+
+    .table-filters label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .table-filters select,
+    .table-filters input[type="search"] {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+
+    .table-filters .filter-count {
+      margin-left: auto;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      white-space: nowrap;
     }
 
     /* =========================================================
@@ -856,20 +1040,49 @@
    
       </div>
     </div>
+    <!-- ======================================================= WALK OFFERS FILTERS ======================================================= -->
+    <div class="table-filters">
+      <div class="filter-field grow">
+        <label for="admin-filter-search">Search</label>
+        <input type="search" id="admin-filter-search" placeholder="Search all columns" />
+      </div>
+      <div class="filter-field">
+        <label for="admin-filter-grade">Grade</label>
+        <select id="admin-filter-grade">
+          <option value="ALL">All grades</option>
+          <option value="E">E</option>
+          <option value="M">M</option>
+          <option value="MS">MS</option>
+          <option value="S">S</option>
+          <option value="VS">VS</option>
+        </select>
+      </div>
+      <div class="filter-field">
+        <label for="admin-filter-leader">Leader</label>
+        <select id="admin-filter-leader"><option value="ALL">All leaders</option></select>
+      </div>
+      <div class="filter-field">
+        <label for="admin-filter-pueblo">Pueblo</label>
+        <select id="admin-filter-pueblo"><option value="ALL">All pueblos</option></select>
+      </div>
+      <button type="button" class="nav-btn" id="admin-filter-clear">Clear filters</button>
+      <span class="filter-count" id="admin-filter-count"></span>
+    </div>
     <div class="table-wrapper">
-      <table>
+      <table class="offers-table">
         <thead>
           <tr>
-            <th>Date</th>
-            <th>Start Time</th>
-            <th>Grade</th>
-            <th>Walk Number</th>
-            <th>Leader</th>
-            <th>Owner</th>
-            <th>Pueblo</th>
-            <th>Comments</th>
-            <th>Edit</th>
-            <th>Cancel</th>
+            <th class="admin-sortable-header" data-admin-sort="date" tabindex="0">Date <span class="sort-indicator">↕</span></th>
+            <th class="admin-sortable-header" data-admin-sort="start_time" tabindex="0">Start Time <span class="sort-indicator">↕</span></th>
+            <th class="admin-sortable-header" data-admin-sort="walk_grade" tabindex="0">Grade <span class="sort-indicator">↕</span></th>
+            <th class="admin-sortable-header" data-admin-sort="walk_number" tabindex="0">Walk Number <span class="sort-indicator">↕</span></th>
+            <th class="admin-sortable-header" data-admin-sort="walk_name" tabindex="0">Name of Walk <span class="sort-indicator">↕</span></th>
+            <th class="admin-sortable-header" data-admin-sort="leader_name" tabindex="0">Leader <span class="sort-indicator">↕</span></th>
+            <th class="admin-sortable-header" data-admin-sort="pueblo" tabindex="0">Pueblo <span class="sort-indicator">↕</span></th>
+            <th class="admin-sortable-header" data-admin-sort="comments" tabindex="0">Comments <span class="sort-indicator">↕</span></th>
+            <th class="admin-sortable-header" data-admin-sort="notes" tabindex="0">Notes <span class="sort-indicator">↕</span></th>
+            <th class="action-edit-head">Edit</th>
+            <th class="action-cancel-head">Cancel</th>
           </tr>
         </thead>
         <tbody id="admin-table-body"></tbody>
@@ -1009,11 +1222,6 @@
                     <span class="sort-indicator"> ↕ </span>
                   </th>
 
-                  <th class="sortable-header" data-sort="owner">
-                    Owner
-                    <span class="sort-indicator"> ↕ </span>
-                  </th>
-
                   <th class="sortable-header" data-sort="leader_name">
                     Leader
                     <span class="sort-indicator"> ↕ </span>
@@ -1124,53 +1332,55 @@
     <div class="modal-content">
       <h3 id="modal-heading">Book Walk Slot</h3>
       <form id="kv-booking-form">
-  <!-- 1. The Hidden Value Input -->
-    <input type="hidden" id="modalHiddenValue" name="uniqueId" value="">
-        <div class="form-group">
-          <label> Selected Date </label>
-          <input type="text" id="input-date" readonly />
-        </div>
-        <div class="form-group">
-          <label> Start Time </label>
-          <input type="time" id="input-start-time" value="10:00" />
-        </div>
-        <div class="form-group">
-          <label> Walk Grade </label>
-          <select id="input-grade">
-            <option value="E">E</option>
-            <option value="M">M</option>
-            <option value="MS">MS</option>
-            <option value="S">S</option>
-            <option value="VS">VS</option>
-          </select>
-
-        </div>
-        <div class="form-group">
-          <label> Walk Number </label>
-          <input type="text" id="input-walk-no" required placeholder="e.g. WK-104" />
-        </div>
-        <div class="form-group">
-          <label> Name of Leader </label>
-          <input type="text" id="input-leader" required placeholder="e.g. John Doe" />
-        </div>
-        <div class="form-group">
-          <label> Owner </label>
-          <input type="text" id="input-owner" placeholder="put the owner of the walk if different from Leader" />
-        </div>
-        <div class="form-group">
-          <label> Pueblo </label>
-          <input type="text" id="input-pueblo" placeholder="e.g. Pego" />
-        </div>
-        <div class="form-group">
-          <label>Programme Comments </label>
-          <textarea id="input-comments"
-            placeholder="Add comments to be included in the programme e.g. option lunch, walking pace that are not included in the walk description">
-            </textarea>
-        </div>
-        <div class="form-group">
-          <label>Notes for the Programme Team</label>
-          <textarea id="input-notes" placeholder="Add comments that may be helpful to the team creating the programme">
-            </textarea>
+        <!-- 1. The Hidden Value Input -->
+        <input type="hidden" id="modalHiddenValue" name="uniqueId" value="">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="input-date"> Selected Date </label>
+              <input type="text" id="input-date" readonly />
+            </div>
+            <div class="form-group half-mobile">
+              <label for="input-start-time"> Start Time </label>
+              <input type="time" id="input-start-time" value="10:00" />
+            </div>
+            <div class="form-group half-mobile">
+              <label for="input-grade"> Walk Grade </label>
+              <select id="input-grade">
+                <option value="E">E</option>
+                <option value="M">M</option>
+                <option value="MS">MS</option>
+                <option value="S">S</option>
+                <option value="VS">VS</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="input-walk-no"> Walk Number </label>
+              <input type="text" id="input-walk-no" required placeholder="e.g. WK-104" />
+            </div>
+            <div class="form-group span-4">
+              <label for="input-walk-name"> Name of Walk <span class="required-mark" aria-hidden="true">*</span></label>
+              <input type="text" id="input-walk-name" required maxlength="100" placeholder="e.g. Pego Marshes Circular" />
+            </div>
+            <div class="form-group span-3">
+              <label for="input-leader"> Name of Leader </label>
+              <input type="text" id="input-leader" required placeholder="e.g. John Doe" />
+            </div>
+            <div class="form-group span-3">
+              <label for="input-pueblo"> Pueblo </label>
+              <input type="text" id="input-pueblo" placeholder="e.g. Pego" />
+            </div>
+            <div class="form-group span-3">
+              <label for="input-comments"> Programme Comments </label>
+              <textarea id="input-comments" rows="3"
+                placeholder="For the programme, e.g. optional lunch, walking pace (not in the walk description)"></textarea>
+            </div>
+            <div class="form-group span-3">
+              <label for="input-notes"> Notes for the Programme Team </label>
+              <textarea id="input-notes" rows="3"
+                placeholder="Anything helpful for the team creating the programme"></textarea>
+            </div>
+          </div>
         </div>
         <div class="modal-actions">
           <button type="button" class="btn btn-secondary" id="close-modal">
@@ -1536,7 +1746,151 @@
         }
       }
       /* ========================================================= ADMIN TABLE ========================================================= */ 
-    function renderAdminTable(admin) {
+    /* ===== Walk Offers table: sort + filter state and helpers ===== */
+    const adminGradeOrder = { E: 1, M: 2, MS: 3, S: 4, VS: 5 };
+    let adminSortColumn = "date";
+    let adminSortDirection = "asc";
+
+    function getAdminSortValue(record, column) {
+      switch (column) {
+        case "date": {
+          const d = convertDate(record.date);
+          return d ? d.getTime() : 0;
+        }
+        case "start_time":
+          return record.start_time || "";
+        case "walk_grade":
+          return adminGradeOrder[record.walk_grade] || 99;
+        case "walk_number":
+          return Number(record.walk_number) || 0;
+        case "walk_name":
+          return (record.walk_name || "").toLowerCase();
+        case "leader_name":
+          return (record.leader_name || "").toLowerCase();
+        case "notes":
+          return (record.notes || "").toLowerCase();
+        case "pueblo":
+          return (record.pueblo || "").toLowerCase();
+        case "comments":
+          return (record.comments || "").toLowerCase();
+        default:
+          return "";
+      }
+    }
+
+    // Rebuild the Leader / Pueblo dropdowns from the data, keeping the current selection
+    function populateAdminFilters() {
+      const records = Object.values(globalBookings).filter(Boolean);
+      [
+        ["admin-filter-leader", "leader_name", "All leaders"],
+        ["admin-filter-pueblo", "pueblo", "All pueblos"],
+      ].forEach(([id, field, allLabel]) => {
+        const select = document.getElementById(id);
+        if (!select) return;
+        const current = select.value;
+        const values = [...new Set(records.map((r) => r[field]).filter(Boolean))]
+          .sort((a, b) => a.localeCompare(b));
+        select.innerHTML = "";
+        select.appendChild(new Option(allLabel, "ALL"));
+        values.forEach((v) => select.appendChild(new Option(v, v)));
+        select.value = values.includes(current) ? current : "ALL";
+      });
+    }
+
+    // Apply the filters, then sort; returns the booking keys to display
+    function getAdminVisibleKeys() {
+      const val = (id) => (document.getElementById(id) ? document.getElementById(id).value : "ALL");
+      const search = (document.getElementById("admin-filter-search")?.value || "").trim().toLowerCase();
+      const grade = val("admin-filter-grade");
+      const leader = val("admin-filter-leader");
+      const pueblo = val("admin-filter-pueblo");
+
+      const keys = Object.keys(globalBookings).filter((key) => {
+        const r = globalBookings[key];
+        if (!r) return false;
+        if (grade !== "ALL" && r.walk_grade !== grade) return false;
+        if (leader !== "ALL" && r.leader_name !== leader) return false;
+        if (pueblo !== "ALL" && r.pueblo !== pueblo) return false;
+        if (search) {
+          const haystack = [r.date, r.start_time, r.walk_grade, r.walk_number, r.walk_name,
+            r.leader_name, r.notes, r.pueblo, r.comments].join(" ").toLowerCase();
+          if (!haystack.includes(search)) return false;
+        }
+        return true;
+      });
+
+      keys.sort((a, b) => {
+        const va = getAdminSortValue(globalBookings[a], adminSortColumn);
+        const vb = getAdminSortValue(globalBookings[b], adminSortColumn);
+        let result =
+          typeof va === "number" && typeof vb === "number"
+            ? va - vb
+            : String(va).localeCompare(String(vb), undefined, { numeric: true, sensitivity: "base" });
+        if (result === 0) result = a.localeCompare(b); // stable tie-break
+        return adminSortDirection === "asc" ? result : -result;
+      });
+      return keys;
+    }
+
+    function updateAdminSortIndicators() {
+      document.querySelectorAll(".admin-sortable-header").forEach((header) => {
+        const indicator = header.querySelector(".sort-indicator");
+        const active = header.dataset.adminSort === adminSortColumn;
+        indicator.textContent = active ? (adminSortDirection === "asc" ? "↑" : "↓") : "↕";
+        indicator.classList.toggle("active", active);
+        header.setAttribute("aria-sort", active ? (adminSortDirection === "asc" ? "ascending" : "descending") : "none");
+      });
+    }
+
+    // Header clicks (mouse + keyboard)
+    document.querySelectorAll(".admin-sortable-header").forEach((header) => {
+      const toggleSort = () => {
+        const column = header.dataset.adminSort;
+        if (adminSortColumn === column) {
+          adminSortDirection = adminSortDirection === "asc" ? "desc" : "asc";
+        } else {
+          adminSortColumn = column;
+          adminSortDirection = "asc";
+        }
+        renderAdminTable();
+      };
+      header.addEventListener("click", toggleSort);
+      header.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          toggleSort();
+        }
+      });
+    });
+
+    // Filter controls
+    ["admin-filter-search", "admin-filter-grade", "admin-filter-leader",
+      "admin-filter-pueblo"].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener(id === "admin-filter-search" ? "input" : "change", () => renderAdminTable());
+    });
+    document.getElementById("admin-filter-clear").addEventListener("click", () => {
+      document.getElementById("admin-filter-search").value = "";
+      ["admin-filter-grade", "admin-filter-leader", "admin-filter-pueblo"]
+        .forEach((id) => { document.getElementById(id).value = "ALL"; });
+      renderAdminTable();
+    });
+
+    // Escape free text before it is placed into innerHTML
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (c) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+      }[c]));
+    }
+
+    // Single source of truth for admin state: read it from the toggle itself
+    function isAdminView() {
+      const toggle = document.getElementById("viewToggle");
+      return !!(toggle && toggle.checked);
+    }
+
+    // If no argument is passed (data sync, save, clear, etc.), fall back to the toggle state
+    function renderAdminTable(admin = isAdminView()) {
   // 1. Guard clause: Stop early if the table body element doesn't exist
   if (!adminTableBody) return;
 
@@ -1546,8 +1900,15 @@
   // 3. Determine the mode cleanly using a ternary operator
   const currentMode = admin === true ? "adminView" : "view";
   
+  // Show/hide the Edit and Cancel column headers to match the row cells
+  document.querySelectorAll(".action-edit-head, .action-cancel-head").forEach((th) => {
+    th.hidden = (currentMode === "view");
+  });
+
   // 4. Sort the booking keys alphabetically/chronologically
-  const sortedKeys = Object.keys(globalBookings).sort();
+  populateAdminFilters();
+  const sortedKeys = getAdminVisibleKeys();
+  updateAdminSortIndicators();
 
   console.log(`Rendering table in [${currentMode}] mode for admin status:`, admin);
 
@@ -1564,10 +1925,11 @@
       <td> ${record.start_time || "-"} </td> 
       <td> <span class="badge grade-${record.walk_grade}"> ${record.walk_grade} </span> </td> 
       <td> ${record.walk_number || "-"} </td> 
+      <td> ${escapeHtml(record.walk_name) || "-"} </td> 
       <td> ${record.leader_name || "-"} </td> 
-      <td> ${record.owner || "-"} </td> 
       <td> ${record.pueblo || "-"} </td> 
       <td> ${record.comments || "-"} </td> 
+      <td> ${escapeHtml(record.notes) || "-"} </td> 
       <td class="action-edit"> <button class="btn btn-success"> Edit </button> </td> 
       <td class="action-cancel"> <button class="btn btn-danger"> Cancel </button> </td> 
     `;
@@ -1588,6 +1950,16 @@
 
     adminTableBody.appendChild(tr);
   });
+
+  // Empty state + "Showing X of Y"
+  if (!sortedKeys.length) {
+    const empty = document.createElement("tr");
+    empty.innerHTML = `<td colspan="11" style="text-align:center; color: var(--text-muted)">No walks match the current filters.</td>`;
+    adminTableBody.appendChild(empty);
+  }
+  const total = Object.values(globalBookings).filter(Boolean).length;
+  const countEl = document.getElementById("admin-filter-count");
+  if (countEl) countEl.textContent = `Showing ${sortedKeys.length} of ${total}`;
 }
 
     // Wait for the window to load, then attach the listener
@@ -1624,6 +1996,7 @@ window.addEventListener('DOMContentLoaded', () => {
       } else {
         document.getElementById('modalHiddenValue').value = existingData.unique_id || ""; // Inject the value safely
       }
+      document.getElementById("input-walk-name").setCustomValidity("");
       const isPaused = document.getElementById("modeCheckBox") ? document.getElementById("modeCheckBox").checked : false;
       const adminView = document.getElementById("viewToggle") ? document.getElementById("viewToggle").checked : false;
 
@@ -1649,8 +2022,8 @@ window.addEventListener('DOMContentLoaded', () => {
       if (existingData) {
         modalHeading.innerText = "Edit Walk Parameters";
         document.getElementById("input-walk-no").value = existingData.walk_number || "";
+        document.getElementById("input-walk-name").value = existingData.walk_name || "";
         document.getElementById("input-leader").value = existingData.leader_name || "";
-        document.getElementById("input-owner").value = existingData.owner || "";
         document.getElementById("input-pueblo").value = existingData.pueblo || "";
         document.getElementById("input-start-time").value = existingData.start_time || "";
 
@@ -1678,6 +2051,7 @@ window.addEventListener('DOMContentLoaded', () => {
       modal.classList.remove("active");
     
     }
+      document.getElementById("input-walk-name").addEventListener("input", (e) => e.target.setCustomValidity(""));
       /* ========================================================= BOOKING FORM ========================================================= */ bookingForm.addEventListener(
       "submit",
       (e) => {
@@ -1685,6 +2059,16 @@ window.addEventListener('DOMContentLoaded', () => {
         const dateStr = document.getElementById("input-date").value;
         const gradeStr = document.getElementById("input-grade").value;
         const walkNum = document.getElementById("input-walk-no").value;
+        const walkNameInput = document.getElementById("input-walk-name");
+        const walkName = walkNameInput.value.trim();
+        if (!walkName) {
+          // "required" lets whitespace-only through, so check the trimmed value too
+          walkNameInput.value = "";
+          walkNameInput.setCustomValidity("Please enter the name of the walk.");
+          walkNameInput.reportValidity();
+          walkNameInput.focus();
+          return;
+        }
         const uniqueID = document.getElementById("modalHiddenValue").value;
         console.log("key: ", uniqueID);
         const compositeKey = `${dateStr}_${gradeStr}_${uniqueID}`;
@@ -1693,8 +2077,8 @@ window.addEventListener('DOMContentLoaded', () => {
           date: dateStr,
           walk_grade: gradeStr,
           walk_number: walkNum,
+          walk_name: walkName,
           leader_name: document.getElementById("input-leader").value.trim(),
-          owner: document.getElementById("input-owner").value.trim(),
           pueblo: document.getElementById("input-pueblo").value.trim(),
           comments: document.getElementById("input-comments").value.trim(),
           notes: document.getElementById("input-notes").value.trim(),
@@ -1703,6 +2087,10 @@ window.addEventListener('DOMContentLoaded', () => {
             .getElementById("input-start-time")
             .value.trim(),
         };
+        const existingRecord = globalBookings[compositeKey];
+        if (existingRecord && existingRecord.owner) {
+          payload.owner = existingRecord.owner;
+        }
         saveBookingRecord(compositeKey, payload);
         closeModal();
       },
@@ -1896,10 +2284,6 @@ window.addEventListener('DOMContentLoaded', () => {
             </td>
 
             <td>
-                ${item.owner || "-"}
-            </td>
-
-            <td>
                 ${item.leader_name || "-"}
             </td>
 
@@ -1937,17 +2321,18 @@ window.addEventListener('DOMContentLoaded', () => {
           return;
         }
         let csv =
-          "Date,Start Time,Grade,Walk Number,Leader,Owner,Pueblo,Comments\n";
+          "Date,Start Time,Grade,Walk Number,Name of Walk,Leader,Pueblo,Comments,Notes\n";
         records.forEach((r) => {
           const row = [
             r.date,
             r.start_time || "",
             r.walk_grade,
             r.walk_number || "",
+            r.walk_name || "",
             r.leader_name || "",
-            r.owner || "",
             r.pueblo || "",
             r.comments || "",
+            r.notes || "",
           ]
             .map((value) => `"${String(value).replace(/"/g, '""')}"`)
             .join(",");
@@ -2033,9 +2418,6 @@ WALK DATA TABLE SORTING
 
         case "walk_grade":
           return gradeSortOrder[item.walk_grade] || 99;
-
-        case "owner":
-          return (item.owner || "").toLowerCase();
 
         case "leader_name":
           return (item.leader_name || "").toLowerCase();
@@ -2186,7 +2568,7 @@ WALK DATA TABLE SORTING
     
 
   </script>
-  <script src="https://github.io"></script>
+
 
 </body>
 
