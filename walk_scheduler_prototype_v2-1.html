@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Walk Programme Scheduler - Prototype</title>
+<style>
+:root{--bg:#f4f6f8;--card:#fff;--text:#24303b;--muted:#697783;--border:#d9e0e6;--accent:#2563eb;--danger:#b91c1c;--good:#15803d}
+*{box-sizing:border-box} body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
+header{background:#1f2937;color:#fff;padding:22px 24px} header h1{margin:0 0 5px;font-size:24px} header p{margin:0;color:#d1d5db}
+.container{max-width:1450px;margin:auto;padding:20px}
+.toolbar,.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:18px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+label{font-size:12px;font-weight:bold;color:var(--muted);display:block;margin-bottom:5px}
+input,select,button{font:inherit;padding:9px 11px;border:1px solid #cbd5df;border-radius:6px}
+button{background:var(--accent);color:#fff;border:0;font-weight:bold;cursor:pointer}
+button.secondary{background:#475569} button.danger{background:#b91c1c} button:hover{opacity:.9}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.stat{padding:15px;border:1px solid var(--border);border-radius:8px;background:#fafafa}.stat strong{font-size:24px;display:block}.stat span{color:var(--muted);font-size:13px}
+table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:8px;border-bottom:1px solid var(--border);text-align:left} th{background:#f1f5f9;position:sticky;top:0;cursor:pointer}
+.scroll{overflow:auto;max-height:500px}.pill{display:inline-block;padding:4px 8px;border-radius:20px;font-weight:bold;font-size:11px}
+.grade-E{background:#dcfce7;color:#166534}.grade-M{background:#dbeafe;color:#1d4ed8}.grade-MS{background:#fee2e2;color:#991b1b}.grade-S{background:#ede9fe;color:#5b21b6}.grade-VS{background:#111827;color:#fff}
+.success{color:var(--good);font-weight:bold}.fail{color:var(--danger);font-weight:bold}
+.note{font-size:13px;color:var(--muted);line-height:1.5}.section-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.section-title h2{font-size:18px;margin:0}
+details{margin-top:10px} summary{cursor:pointer;font-weight:bold}
+@media(max-width:700px){header h1{font-size:20px}.container{padding:10px}table{font-size:12px}}
+ .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:end}.checkbox-group{display:flex;gap:8px;flex-wrap:wrap;padding:8px 0}.checkbox-group label{font-weight:normal;color:var(--text);display:flex;gap:4px;align-items:center;margin:0}.small-btn{padding:5px 8px;font-size:12px}.editing{background:#eff6ff!important}.empty{padding:18px;text-align:center;color:var(--muted)} </style>
+</head>
+<body>
+<header>
+  <h1>Walk Programme Scheduler — Prototype</h1>
+  <p>Constraint-based scheduling test: October to May • Wednesday & Saturday • E / M / MS / S / VS</p>
+</header>
+
+<div class="container">
+  <div class="toolbar">
+    <div><label>Season start year</label><input id="startYear" type="number" value="2026" min="2020" max="2100"></div>
+    <div><label>Season end year</label><input id="endYear" type="number" value="2027" min="2020" max="2100"></div>
+    <button onclick="runScheduler()">Generate Programme</button>
+    <button class="secondary" onclick="resetDemo()">Reset Demo Data</button>
+  </div>
+
+  <div class="card">
+    <div class="section-title"><h2>What this prototype does</h2></div>
+    <p class="note">
+      It creates every Wednesday and Saturday in the selected October–May season, with one slot for each grade.
+      It then chooses eligible leaders using availability, while enforcing one walk per grade per day and one walk per leader per day.
+      The scoring favours under-filled grades/months and leaders with fewer assignments.
+    </p>
+  </div>
+
+  <div class="card">
+    <div class="section-title"><h2>Leader Directory</h2><span class="note">Add, edit or remove leaders</span></div>
+    <div class="form-grid">
+      <div><label>Leader ID</label><input id="leaderId" placeholder="e.g. L13"></div>
+      <div><label>Leader name</label><input id="leaderName" placeholder="e.g. Fred Jones"></div>
+      <div><button onclick="saveLeader()">Add Leader</button></div>
+      <div><button class="secondary" onclick="clearLeaderForm()">Clear</button></div>
+    </div>
+    <div class="scroll" style="margin-top:15px"><table id="leadersEditTable"></table></div>
+  </div>
+  <div class="card">
+    <div class="section-title"><h2>Leader Availability</h2><span class="note">A leader can have any number of availability records</span></div>
+    <div class="form-grid">
+      <div><label>Leader</label><select id="avLeader"></select></div>
+      <div><label>From</label><input id="avFrom" type="date"></div>
+      <div><label>To</label><input id="avTo" type="date"></div>
+    </div>
+    <div style="margin-top:12px"><label>Days available</label><div class="checkbox-group">
+      <label><input type="checkbox" id="dayWed"> Wednesday</label>
+      <label><input type="checkbox" id="daySat"> Saturday</label>
+    </div></div>
+    <div><label>Grades available</label><div class="checkbox-group">
+      <label><input type="checkbox" class="gradeCheck" value="E"> E</label>
+      <label><input type="checkbox" class="gradeCheck" value="M"> M</label>
+      <label><input type="checkbox" class="gradeCheck" value="MS"> MS</label>
+      <label><input type="checkbox" class="gradeCheck" value="S"> S</label>
+      <label><input type="checkbox" class="gradeCheck" value="VS"> VS</label>
+    </div></div>
+    <div style="display:flex;gap:8px;margin-top:8px"><button onclick="saveAvailability()">Add Availability</button><button class="secondary" onclick="clearAvailabilityForm()">Clear</button></div>
+    <div class="scroll" style="margin-top:15px"><table id="availabilityEditTable"></table></div>
+  </div>
+
+  <div id="stats" class="grid"></div>
+
+  <div class="card">
+    <div class="section-title"><h2>Grade balance</h2></div>
+    <div class="scroll"><table id="gradeTable"></table></div>
+  </div>
+
+  <div class="card">
+    <div class="section-title"><h2>Monthly balance</h2></div>
+    <div class="scroll"><table id="monthTable"></table></div>
+  </div>
+
+  <div class="card">
+    <div class="section-title"><h2>Leader workload</h2></div>
+    <div class="scroll"><table id="leaderTable"></table></div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">
+      <h2>Generated programme</h2>
+      <span id="programmeCount" class="note"></span>
+    </div>
+    <div class="scroll"><table id="programmeTable"></table></div>
+  </div>
+
+  <div class="card">
+    <div class="section-title"><h2>Unfilled slots</h2><span id="unfilledCount"></span></div>
+    <div class="scroll"><table id="unfilledTable"></table></div>
+  </div>
+
+  <div class="card">
+    <details>
+      <summary>Demo leader availability used by the prototype</summary>
+      <div class="scroll"><table id="availabilityTable"></table></div>
+    </details>
+  </div>
+</div>
+
+<script>
+const GRADES = ["E","M","MS","S","VS"];
+const DAYS = [3,6]; // Wednesday, Saturday
+const dayNames = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+
+let leaders = [
+ {id:"L01",name:"John Smith"},
+ {id:"L02",name:"Mary Jones"},
+ {id:"L03",name:"Peter Brown"},
+ {id:"L04",name:"Gill Wilson"},
+ {id:"L05",name:"Alan Green"},
+ {id:"L06",name:"Sue Taylor"},
+ {id:"L07",name:"David White"},
+ {id:"L08",name:"Jane Black"},
+ {id:"L09",name:"Tom Evans"},
+ {id:"L10",name:"Ann Roberts"},
+ {id:"L11",name:"Mike Clark"},
+ {id:"L12",name:"Linda Hall"}
+];
+
+// Multiple availability records per leader are intentional.
+let availability = [
+ {leader:"L01",from:"2026-10-01",to:"2027-01-31",days:[3],grades:["E","M"]},
+ {leader:"L01",from:"2027-02-01",to:"2027-05-31",days:[6],grades:["MS","S"]},
+
+ {leader:"L02",from:"2026-10-01",to:"2027-05-31",days:[3,6],grades:["E","MS"]},
+ {leader:"L03",from:"2026-10-01",to:"2026-12-31",days:[6],grades:["M","S","VS"]},
+ {leader:"L03",from:"2027-01-01",to:"2027-05-31",days:[3],grades:["M","VS"]},
+ {leader:"L04",from:"2026-11-01",to:"2027-03-31",days:[3,6],grades:["E","M","MS"]},
+ {leader:"L04",from:"2027-04-01",to:"2027-05-31",days:[6],grades:["S","VS"]},
+ {leader:"L05",from:"2026-10-01",to:"2027-05-31",days:[3],grades:["S","VS"]},
+ {leader:"L06",from:"2026-10-01",to:"2027-05-31",days:[6],grades:["E","M","VS"]},
+ {leader:"L07",from:"2026-10-15",to:"2027-02-28",days:[3,6],grades:["MS","S"]},
+ {leader:"L08",from:"2027-01-01",to:"2027-05-31",days:[3,6],grades:["E","M","MS","VS"]},
+ {leader:"L09",from:"2026-10-01",to:"2027-05-31",days:[3,6],grades:["M","S"]},
+ {leader:"L10",from:"2026-10-01",to:"2027-05-31",days:[3],grades:["E","MS","VS"]},
+ {leader:"L11",from:"2026-10-01",to:"2027-05-31",days:[6],grades:["M","S","VS"]},
+ {leader:"L12",from:"2026-12-01",to:"2027-05-31",days:[3,6],grades:["E","M","MS","S","VS"]}
+];
+
+let result = null;
+
+function datesForSeason(startYear,endYear){
+  const out=[];
+  const start=new Date(startYear,9,1); // Oct
+  const end=new Date(endYear,4,31);    // May
+  for(let d=new Date(start); d<=end; d.setDate(d.getDate()+1)){
+    if(DAYS.includes(d.getDay())){
+      out.push(new Date(d));
+    }
+  }
+  return out;
+}
+function iso(d){return d.toISOString().slice(0,10)}
+function monthName(d){return d.toLocaleString("en-GB",{month:"long"})}
+function eligible(date,grade){
+  const ds=iso(date), dow=date.getDay();
+  return leaders.filter(l => availability.some(a =>
+    a.leader===l.id && ds>=a.from && ds<=a.to &&
+    a.days.includes(dow) && a.grades.includes(grade)
+  ));
+}
+function availabilitySpecificity(leader,date,grade){
+  // Number of separate availability records that could cover this assignment.
+  // Fewer options means more urgency, so candidates with fewer options score higher.
+  let n=0;
+  availability.forEach(a=>{
+    if(a.leader===leader.id && iso(date)>=a.from && iso(date)<=a.to &&
+       a.days.includes(date.getDay()) && a.grades.includes(grade)) n++;
+  });
+  return n;
+}
+
+function runScheduler(){
+  const sy=+document.getElementById("startYear").value;
+  const ey=+document.getElementById("endYear").value;
+  if(ey<=sy){alert("End year must be after start year.");return;}
+
+  const dates=datesForSeason(sy,ey);
+  const assignments=[];
+  const unfilled=[];
+  const leaderCount=Object.fromEntries(leaders.map(l=>[l.id,0]));
+  const gradeCount=Object.fromEntries(GRADES.map(g=>[g,0]));
+  const monthGradeCount={};
+
+  // Target is naturally equal because every date has one slot of each grade.
+  // The algorithm chooses the least represented grade/month opportunity first
+  // by considering each day's slots together.
+  dates.forEach(date=>{
+    const usedLeaders=new Set();
+    const dayAssignments=[];
+
+    const candidatesByGrade={};
+    GRADES.forEach(g=>candidatesByGrade[g]=eligible(date,g));
+
+    // Schedule the most constrained grade first: fewest eligible leaders.
+    const grades=[...GRADES].sort((a,b)=>{
+      const ca=candidatesByGrade[a].filter(l=>!usedLeaders.has(l.id)).length;
+      const cb=candidatesByGrade[b].filter(l=>!usedLeaders.has(l.id)).length;
+      return ca-cb;
+    });
+
+    grades.forEach(grade=>{
+      let candidates=candidatesByGrade[grade].filter(l=>!usedLeaders.has(l.id));
+
+      if(!candidates.length){
+        unfilled.push({date:new Date(date),grade,reason:candidatesByGrade[grade].length ?
+          "All eligible leaders are already assigned another walk on this date." :
+          "No leader is available for this grade on this date."});
+        return;
+      }
+
+      const m=monthName(date);
+      const scored=candidates.map(l=>{
+        const monthKey=m+"-"+grade;
+        const monthCount=monthGradeCount[monthKey]||0;
+        const totalGrade=gradeCount[grade];
+        const totalLeader=leaderCount[l.id];
+        const flexibility=availabilitySpecificity(l,date,grade);
+
+        // Lower score is better.
+        // Strongly favour under-represented grade/month and lower leader workload.
+        const score =
+          totalGrade*100 +
+          monthCount*150 +
+          totalLeader*8 +
+          flexibility*3 +
+          Math.random()*2;
+
+        return {l,score};
+      }).sort((a,b)=>a.score-b.score);
+
+      const chosen=scored[0].l;
+      usedLeaders.add(chosen.id);
+      leaderCount[chosen.id]++;
+      gradeCount[grade]++;
+      const monthKey=m+"-"+grade;
+      monthGradeCount[monthKey]=(monthGradeCount[monthKey]||0)+1;
+      dayAssignments.push({date:new Date(date),grade,leader:chosen});
+    });
+
+    assignments.push(...dayAssignments);
+  });
+
+  result={dates,assignments,unfilled,leaderCount,gradeCount,monthGradeCount};
+  render();
+}
+
+function render(){
+  const r=result;
+  const totalSlots=r.dates.length*GRADES.length;
+  const filled=r.assignments.length;
+  const pct=totalSlots?Math.round(filled/totalSlots*100):0;
+
+  document.getElementById("stats").innerHTML=[
+    ["Scheduling days",r.dates.length],
+    ["Total slots",totalSlots],
+    ["Scheduled",filled],
+    ["Unfilled",r.unfilled.length],
+    ["Fill rate",pct+"%"],
+    ["Leaders used",new Set(r.assignments.map(x=>x.leader.id)).size]
+  ].map(x=>`<div class="stat"><strong>${x[1]}</strong><span>${x[0]}</span></div>`).join("");
+
+  let gt="<thead><tr><th>Grade</th><th>Scheduled</th><th>Target</th><th>Difference</th></tr></thead><tbody>";
+  const target=r.dates.length;
+  GRADES.forEach(g=>{
+    const n=r.gradeCount[g], diff=n-target;
+    gt+=`<tr><td><span class="pill grade-${g}">${g}</span></td><td>${n}</td><td>${target}</td><td class="${diff===0?'success':''}">${diff>0?"+":""}${diff}</td></tr>`;
+  });
+  document.getElementById("gradeTable").innerHTML=gt+"</tbody>";
+
+  const months=[];
+  const seen=new Set();
+  r.dates.forEach(d=>{const key=monthName(d)+" "+d.getFullYear();if(!seen.has(key)){seen.add(key);months.push(key)}});
+  let mt="<thead><tr><th>Month</th>"+GRADES.map(g=>`<th>${g}</th>`).join("")+"</tr></thead><tbody>";
+  months.forEach(m=>{
+    mt+=`<tr><td>${m}</td>`;
+    GRADES.forEach(g=>mt+=`<td>${r.monthGradeCount[m.split(" ")[0]+"-"+g]||0}</td>`);
+    mt+="</tr>";
+  });
+  document.getElementById("monthTable").innerHTML=mt+"</tbody>";
+
+  const leaderRows=leaders.map(l=>({l,n:r.leaderCount[l.id]||0})).sort((a,b)=>b.n-a.n);
+  let lt="<thead><tr><th>Leader</th><th>Walks</th></tr></thead><tbody>";
+  leaderRows.forEach(x=>lt+=`<tr><td>${x.l.name}</td><td>${x.n}</td></tr>`);
+  document.getElementById("leaderTable").innerHTML=lt+"</tbody>";
+
+  let pt="<thead><tr><th>Date</th><th>Day</th><th>Grade</th><th>Leader</th></tr></thead><tbody>";
+  r.assignments.slice().sort((a,b)=>a.date-b.date||GRADES.indexOf(a.grade)-GRADES.indexOf(b.grade)).forEach(x=>{
+    pt+=`<tr><td>${x.date.toLocaleDateString("en-GB")}</td><td>${dayNames[x.date.getDay()]}</td><td><span class="pill grade-${x.grade}">${x.grade}</span></td><td>${x.leader.name}</td></tr>`;
+  });
+  document.getElementById("programmeTable").innerHTML=pt+"</tbody>";
+  document.getElementById("programmeCount").textContent=filled+" scheduled walks";
+
+  let ut="<thead><tr><th>Date</th><th>Day</th><th>Grade</th><th>Reason</th></tr></thead><tbody>";
+  r.unfilled.forEach(x=>ut+=`<tr><td>${x.date.toLocaleDateString("en-GB")}</td><td>${dayNames[x.date.getDay()]}</td><td><span class="pill grade-${x.grade}">${x.grade}</span></td><td class="fail">${x.reason}</td></tr>`);
+  document.getElementById("unfilledTable").innerHTML=ut+"</tbody>";
+  document.getElementById("unfilledCount").textContent=r.unfilled.length+" unfilled";
+
+  let at="<thead><tr><th>Leader</th><th>From</th><th>To</th><th>Days</th><th>Grades</th></tr></thead><tbody>";
+  availability.forEach(a=>{
+    at+=`<tr><td>${leaders.find(l=>l.id===a.leader).name}</td><td>${a.from}</td><td>${a.to}</td><td>${a.days.map(d=>dayNames[d]).join(", ")}</td><td>${a.grades.join(", ")}</td></tr>`;
+  });
+  document.getElementById("availabilityTable").innerHTML=at+"</tbody>";
+}
+
+let editingLeaderId=null,editingAvailabilityIndex=null;
+function renderManagement(){
+ const lt=document.getElementById("leadersEditTable");
+ let s="<thead><tr><th>ID</th><th>Name</th><th>Actions</th></tr></thead><tbody>";
+ leaders.forEach(l=>s+=`<tr class="${editingLeaderId===l.id?'editing':''}"><td>${l.id}</td><td>${l.name}</td><td><button class="small-btn" onclick="editLeader('${l.id}')">Edit</button> <button class="small-btn danger" onclick="deleteLeader('${l.id}')">Delete</button></td></tr>`);
+ lt.innerHTML=s+"</tbody>";
+ const sel=document.getElementById("avLeader"),old=sel.value;
+ sel.innerHTML=leaders.map(l=>`<option value="${l.id}">${l.name} (${l.id})</option>`).join("");
+ if(leaders.some(l=>l.id===old))sel.value=old;
+ const at=document.getElementById("availabilityEditTable");
+ let a="<thead><tr><th>Leader</th><th>From</th><th>To</th><th>Days</th><th>Grades</th><th>Actions</th></tr></thead><tbody>";
+ availability.forEach((x,i)=>{const l=leaders.find(z=>z.id===x.leader);a+=`<tr class="${editingAvailabilityIndex===i?'editing':''}"><td>${l?l.name:x.leader}</td><td>${x.from}</td><td>${x.to}</td><td>${x.days.map(d=>dayNames[d]).join(", ")}</td><td>${x.grades.join(", ")}</td><td><button class="small-btn" onclick="editAvailability(${i})">Edit</button> <button class="small-btn danger" onclick="deleteAvailability(${i})">Delete</button></td></tr>`});
+ at.innerHTML=a+"</tbody>";
+}
+function saveLeader(){
+ const id=document.getElementById("leaderId").value.trim(),name=document.getElementById("leaderName").value.trim();
+ if(!id||!name){alert("Please enter both a Leader ID and name.");return}
+ if(editingLeaderId){if(id!==editingLeaderId&&leaders.some(x=>x.id===id)){alert("That Leader ID already exists.");return}const l=leaders.find(x=>x.id===editingLeaderId);l.id=id;l.name=name;availability.forEach(a=>{if(a.leader===editingLeaderId)a.leader=id})}
+ else{if(leaders.some(x=>x.id===id)){alert("That Leader ID already exists.");return}leaders.push({id,name})}
+ clearLeaderForm();renderManagement();runScheduler()
+}
+function editLeader(id){const l=leaders.find(x=>x.id===id);if(!l)return;editingLeaderId=id;document.getElementById("leaderId").value=l.id;document.getElementById("leaderName").value=l.name;renderManagement()}
+function deleteLeader(id){const l=leaders.find(x=>x.id===id);if(!l)return;if(!confirm(`Delete ${l.name} and all availability records?`))return;leaders=leaders.filter(x=>x.id!==id);availability=availability.filter(a=>a.leader!==id);clearLeaderForm();renderManagement();runScheduler()}
+function clearLeaderForm(){editingLeaderId=null;document.getElementById("leaderId").value="";document.getElementById("leaderName").value="";if(document.getElementById("leadersEditTable"))renderManagement()}
+function getSelectedDays(){return [document.getElementById("dayWed").checked?3:null,document.getElementById("daySat").checked?6:null].filter(x=>x!==null)}
+function getSelectedGrades(){return [...document.querySelectorAll(".gradeCheck:checked")].map(x=>x.value)}
+function saveAvailability(){
+ const x={leader:document.getElementById("avLeader").value,from:document.getElementById("avFrom").value,to:document.getElementById("avTo").value,days:getSelectedDays(),grades:getSelectedGrades()};
+ if(!x.leader||!x.from||!x.to){alert("Please select a leader and enter both dates.");return}
+ if(x.to<x.from){alert("The To date cannot be before the From date.");return}
+ if(!x.days.length){alert("Select at least one day.");return}if(!x.grades.length){alert("Select at least one grade.");return}
+ if(editingAvailabilityIndex!==null)availability[editingAvailabilityIndex]=x;else availability.push(x);
+ clearAvailabilityForm();renderManagement();runScheduler()
+}
+function editAvailability(i){const x=availability[i];editingAvailabilityIndex=i;document.getElementById("avLeader").value=x.leader;document.getElementById("avFrom").value=x.from;document.getElementById("avTo").value=x.to;document.getElementById("dayWed").checked=x.days.includes(3);document.getElementById("daySat").checked=x.days.includes(6);document.querySelectorAll(".gradeCheck").forEach(c=>c.checked=x.grades.includes(c.value));renderManagement()}
+function deleteAvailability(i){if(!confirm("Delete this availability record?"))return;availability.splice(i,1);editingAvailabilityIndex=null;renderManagement();runScheduler()}
+function clearAvailabilityForm(){editingAvailabilityIndex=null;document.getElementById("avFrom").value="";document.getElementById("avTo").value="";document.getElementById("dayWed").checked=false;document.getElementById("daySat").checked=false;document.querySelectorAll(".gradeCheck").forEach(c=>c.checked=false);if(leaders.length)document.getElementById("avLeader").value=leaders[0].id;if(document.getElementById("availabilityEditTable"))renderManagement()}
+
+const demoLeaders=JSON.parse(JSON.stringify(leaders));
+const demoAvailability=JSON.parse(JSON.stringify(availability));
+function resetDemo(){
+ if(!confirm("Reset leaders and availability to the original demo data?"))return;
+ leaders=JSON.parse(JSON.stringify(demoLeaders));availability=JSON.parse(JSON.stringify(demoAvailability));
+ editingLeaderId=null;editingAvailabilityIndex=null;document.getElementById("startYear").value=2026;document.getElementById("endYear").value=2027;
+ renderManagement();runScheduler();
+}
+renderManagement();runScheduler();
+</script>
+</body>
+</html>
