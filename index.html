@@ -1273,10 +1273,18 @@
       color: var(--text-muted);
     }
     .hover-card-hint {
-      margin-top: 10px;
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      font-style: italic;
+      margin-top: 12px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: var(--primary);
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-align: center;
+      letter-spacing: 0.01em;
+    }
+    .hover-card-hint::after {
+      content: " →";
     }
 
     /* ========================================================= WALKER DETAIL CARD ========================================================= */
