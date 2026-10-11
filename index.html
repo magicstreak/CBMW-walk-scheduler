@@ -1432,7 +1432,7 @@
     .status-toggle.status-draft { background: #fef3c7; color: #92400e; }
     .status-toggle:hover { filter: brightness(0.95); }
     /* Walker card: layout matches the event card design */
-    .detail-card.walk-card-wrap { padding: 0; overflow: hidden; }
+    .detail-card.walk-card-wrap { overflow-y: auto; overflow-x: hidden; }
     .walk-card-header {
       background: #2d5b3e;
       color: #fff;
@@ -1441,6 +1441,7 @@
       justify-content: space-between;
       align-items: flex-start;
       gap: 12px;
+      position: sticky; top: 0; z-index: 1;
     }
     .walk-card-header h3 { margin: 0; font-size: 1.35rem; line-height: 1.25; color: #fff; }
     .walk-card-date { margin-top: 8px; font-size: 0.95rem; opacity: 0.95; }
