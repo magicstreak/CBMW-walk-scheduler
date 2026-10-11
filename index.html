@@ -1783,6 +1783,8 @@
       .walk-stat { padding: 6px 10px; }
     }
 
+    .leader-details { margin-top: 8px; }
+
     /* A rule under the weekday labels */
     .weekdays {
       padding-bottom: 8px;
@@ -2311,7 +2313,8 @@
             </div>
             <div class="form-group span-3">
               <label for="input-leader"> Name of Leader <span class="required-mark" aria-hidden="true">*</span></label>
-              <input type="text" id="input-leader" required placeholder="e.g. John Doe" />
+              <select id="input-leader" required></select>
+              <div id="leader-details" class="leader-details"></div>
             </div>
             <div class="form-group span-3">
               <label for="input-pueblo"> Pueblo </label>
@@ -2695,6 +2698,68 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       walkInput.setAttribute("aria-invalid", mismatch ? "true" : "false");
       if (showMessage && mismatch) walkInput.reportValidity();
       return { mismatch, masterGrade, bookingGrade };
+    }
+
+    /* ========================================================= LEADER LOOKUP =========================================================
+       Temporary lookup list. It will come from the leaders database later, so keep these field names.
+       Replace the example rows with real leaders. linked_leader holds another leader's leader_id (e.g. a co-leader). */
+    const LEADER_LOOKUP = [
+      { leader_id: "L001", first_name: "Example", surname: "Leader One", phone_1: "", phone_2: "", email_add: "", whats_app: "n", linked_leader: "" },
+      { leader_id: "L002", first_name: "Example", surname: "Leader Two", phone_1: "", phone_2: "", email_add: "", whats_app: "n", linked_leader: "L001" },
+    ];
+
+    function leaderFullName(leader) {
+      return leader ? `${leader.first_name || ""} ${leader.surname || ""}`.trim() : "";
+    }
+
+    function findLeader(leaderId) {
+      return LEADER_LOOKUP.find((l) => l.leader_id === leaderId) || null;
+    }
+
+    // Bookings saved before the lookup existed only have a name; match it to a leader where possible
+    function selectedLeaderId(record) {
+      if (!record) return "";
+      if (record.leader_id) return record.leader_id;
+      const name = String(record.leader_name || "").trim();
+      const match = LEADER_LOOKUP.find((l) => leaderFullName(l) === name);
+      return match ? match.leader_id : "";
+    }
+
+    function leaderOptionsHtml(selectedId) {
+      const placeholder = `<option value="" disabled ${selectedId ? "" : "selected"}>Choose a leader</option>`;
+      const options = LEADER_LOOKUP.map((l) =>
+        `<option value="${escapeHtml(l.leader_id)}" ${l.leader_id === selectedId ? "selected" : ""}>${escapeHtml(leaderFullName(l))}</option>`
+      ).join("");
+      return placeholder + options;
+    }
+
+    function populateLeaderSelect(record) {
+      const select = document.getElementById("input-leader");
+      if (!select) return;
+      select.innerHTML = leaderOptionsHtml(selectedLeaderId(record));
+      refreshLeaderDetails();
+    }
+
+    // Shows the chosen leader's contact details under the Name of Leader field (booking modal)
+    function refreshLeaderDetails() {
+      const box = document.getElementById("leader-details");
+      const select = document.getElementById("input-leader");
+      if (!box || !select) return;
+      const leader = findLeader(select.value);
+      if (!leader) {
+        box.innerHTML = "";
+        return;
+      }
+      const linked = findLeader(leader.linked_leader);
+      box.innerHTML = `
+        <div class="offer-card-grid">
+          ${readOnlyFieldHtml("Leader ID", leader.leader_id)}
+          ${readOnlyFieldHtml("Phone 1", leader.phone_1)}
+          ${readOnlyFieldHtml("Phone 2", leader.phone_2)}
+          ${readOnlyFieldHtml("Email", leader.email_add)}
+          ${readOnlyFieldHtml("WhatsApp", leader.whats_app === "y" ? "Yes" : "No")}
+          ${readOnlyFieldHtml("Linked leader", linked ? `${leaderFullName(linked)} (${linked.leader_id})` : leader.linked_leader)}
+        </div>`;
     }
 
     function getMasterRouteName(walk) {
@@ -3193,7 +3258,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
             <label>Walk number / ID <span class="required-mark" aria-hidden="true">*</span>
               <input type="text" name="walk_number" required list="inline-walk-options" autocomplete="off" value="${escapeHtml(record.walk_number || "")}" /></label>
             <label>Name of leader <span class="required-mark" aria-hidden="true">*</span>
-              <input type="text" name="leader_name" required value="${escapeHtml(record.leader_name || "")}" /></label>
+              <select name="leader_id" required>${leaderOptionsHtml(selectedLeaderId(record))}</select></label>
             <label class="wide">Programme comments
               <textarea name="comments" rows="2">${escapeHtml(record.comments || "")}</textarea></label>
             <label class="wide">Notes for programme team
@@ -3232,8 +3297,9 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       }
       const startTime = form.elements.start_time.value;
       if (!startTime) return fail("Please enter a start time.");
-      const leader = form.elements.leader_name.value.trim();
-      if (!leader) return fail("Please enter the name of the leader.");
+      const leaderRecord = findLeader(form.elements.leader_id.value);
+      if (!leaderRecord) return fail("Please choose a leader.");
+      const leader = leaderFullName(leaderRecord);
 
       const walkChanged = walkNo !== String(record.walk_number || "").trim();
       saveBookingRecord(key, {
@@ -3242,6 +3308,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         walk_id: walkNo,
         walk_name: walkChanged ? (getMasterRouteName(walk) || record.walk_name || "") : record.walk_name,
         start_time: startTime,
+        leader_id: leaderRecord.leader_id,
         leader_name: leader,
         comments: form.elements.comments.value.trim(),
         notes: form.elements.notes.value.trim(),
@@ -4073,7 +4140,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         modalHeading.innerText = "Edit Walk Offer";
         document.getElementById("input-walk-no").value = existingData.walk_number || walkNum || "";
         document.getElementById("input-walk-name").value = existingData.walk_name || "";
-        document.getElementById("input-leader").value = existingData.leader_name || "";
+        populateLeaderSelect(existingData);
         document.getElementById("input-pueblo").value = existingData.pueblo || "";
         document.getElementById("input-start-time").value = existingData.start_time || "";
         commentsInput.value = (existingData.comments || "").trim();
@@ -4082,7 +4149,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         modalHeading.innerText = "Book Walk Slot";
         document.getElementById("input-walk-no").value = walkNum || "";
         document.getElementById("input-walk-name").value = "";
-        document.getElementById("input-leader").value = "";
+        populateLeaderSelect(null);
         document.getElementById("input-pueblo").value = "";
         document.getElementById("input-start-time").value = "10:00";
         commentsInput.value = "";
@@ -4155,6 +4222,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         refreshWalkPicker();
         refreshWalkDetailsPanel();
       });
+      document.getElementById("input-leader").addEventListener("change", refreshLeaderDetails);
       // Refresh the walk list on focus so it always matches the grade currently chosen
       document.getElementById("input-walk-no").addEventListener("focus", refreshWalkPicker);
       /* ========================================================= BOOKING FORM ========================================================= */ bookingForm.addEventListener(
@@ -4207,7 +4275,8 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           walk_number: walkNum.trim(),
           walk_id: walkNum.trim(),
           walk_name: walkName,
-          leader_name: document.getElementById("input-leader").value.trim(),
+          leader_id: document.getElementById("input-leader").value,
+          leader_name: leaderFullName(findLeader(document.getElementById("input-leader").value)),
           pueblo: document.getElementById("input-pueblo").value.trim(),
           comments: document.getElementById("input-comments").value.trim(),
           notes: document.getElementById("input-notes").value.trim(),
