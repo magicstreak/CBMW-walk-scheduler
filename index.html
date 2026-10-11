@@ -797,9 +797,23 @@
     .offers-table .expand-toggle:hover { background: #eff6ff; }
     .offers-table .expand-toggle[aria-expanded="true"] { background: #dbeafe; }
     .offer-details-row > td {
-      padding: 14px;
-      background: #f8fafc;
+      padding: 14px 16px 18px 20px;
+      background: #f3f8f4;
+      border-top: none;
       border-bottom: 2px solid var(--border);
+      box-shadow: inset 4px 0 0 #2d5b3e;
+    }
+    /* Expanded row and its details read as one block */
+    .offers-table tbody tr.expanded-parent > td {
+      background: #eef6f0;
+      border-bottom-color: transparent;
+    }
+    .offers-table tbody tr.expanded-parent > td:first-child {
+      box-shadow: inset 4px 0 0 #2d5b3e;
+    }
+    .offers-table tbody tr.expanded-parent > td .expand-toggle {
+      background: #2d5b3e;
+      color: #fff;
     }
     .offer-detail-cards {
       display: grid;
@@ -2123,7 +2137,7 @@
             <div class="override-actions"><button type="button" class="btn btn-secondary" id="override-reset">Reset to master</button></div>
           </section>
           <section class="walk-master-panel" aria-live="polite">
-            <h4>Linked master route</h4>
+  
             <div id="walk-master-details"><p class="walk-details-empty">Enter or select a Walk Number to load the master route details.</p></div>
           </section>
         </div>
@@ -2132,7 +2146,7 @@
             Cancel
           </button>
           <button type="submit" class="btn btn-primary" id="submit-booking">
-            Submit Booking
+            Submit
           </button>
         </div>
       </form>
@@ -2385,7 +2399,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         ["WIS_URL", getMasterWisUrl(walk)]
       ];
       panel.innerHTML = `
-        <div class="walk-details-title">Master walk details <span class="walk-id-pill">Walk ID: ${escapeHtml(walkId)}</span></div>
+        <div class="walk-details-title">Walk details from the master database <span class="walk-id-pill">Walk ID: ${escapeHtml(walkId)}</span></div>
         ${gradeCheck.mismatch ? `<p role="alert" style="color:#b91c1c;font-weight:700;margin:8px 0;">Grade mismatch: this master walk is grade ${escapeHtml(gradeCheck.masterGrade)}, but the booking is grade ${escapeHtml(gradeCheck.bookingGrade)}. Choose a walk with a matching grade.</p>` : ""}
         <div class="walk-details-grid">
           ${fields.map(([label, value]) => {
@@ -2920,6 +2934,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         const displayPueblo = masterValues.pueblo;
         const tr = document.createElement("tr");
         tr.classList.toggle("cancelled-row", isCancelled(record));
+        tr.classList.toggle("expanded-parent", expanded);
         tr.innerHTML = `
           <td class="expand-column">
             <button type="button" class="expand-toggle" aria-expanded="${expanded}" aria-label="${expanded ? "Hide" : "Show"} details for walk ${escapeHtml(record.walk_number || "")}" title="${expanded ? "Hide details" : "Show all details"}">${expanded ? "−" : "+"}</button>
@@ -3023,13 +3038,13 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
             <td colspan="13">
               <div class="offer-detail-cards">
                 <section class="offer-detail-card">
-                  <h4><span class="card-icon" aria-hidden="true">🗓️</span> Booking details</h4>
+                  <h4><span class="card-icon" aria-hidden="true">🗓️</span> Booked Walking Slot Details </h4>
                   <div class="offer-card-grid">
                     ${bookingFields.map(([label, value, wide]) => cardField(label, value, wide)).join("")}
                   </div>
                 </section>
                 <section class="offer-detail-card">
-                  <h4><span class="card-icon" aria-hidden="true">🥾</span> Linked master route
+                  <h4><span class="card-icon" aria-hidden="true">🥾</span> Walk details from Master Database
                     <span class="offer-route-id">Walk ID: ${escapeHtml(walkId || "Not set")}</span>
                   </h4>
                   ${route ? `<div class="offer-card-grid route-compact-grid">
@@ -3537,7 +3552,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       populateOverrideFields(existingData, walkNum, adminView && !admin);
 
       if (existingData) {
-        modalHeading.innerText = "Edit Walk Booking";
+        modalHeading.innerText = "Edit Walk Offer";
         document.getElementById("input-walk-no").value = existingData.walk_number || walkNum || "";
         document.getElementById("input-walk-name").value = existingData.walk_name || "";
         document.getElementById("input-leader").value = existingData.leader_name || "";
