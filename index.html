@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CBMW Walk Scheduler</title>
+  <title>Walk Schedule</title>
   <!-- Google Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -168,14 +168,51 @@
     }
 
     /* ========================================================= LEGEND ========================================================= */
-    .legend-container {
+    /* Compact legend: a small link that shows the key on hover, focus or tap */
+    .legend-wrap {
+      position: relative;
       display: flex;
-      gap: 12px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-      padding: 12px;
-      background: var(--bg-muted);
+      justify-content: flex-end;
+      margin-bottom: 14px;
+    }
+    .legend-link {
+      background: #fff;
+      border: 1px solid var(--border);
       border-radius: 8px;
+      padding: 6px 12px;
+      font: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .legend-swatches { display: inline-flex; gap: 4px; vertical-align: middle; }
+    .legend-swatches span { width: 10px; height: 10px; border-radius: 50%; display: block; }
+    .legend-link:hover,
+    .legend-link:focus-visible {
+      color: var(--text);
+      background: var(--bg-muted);
+      outline: none;
+      border-color: #cbd5e1;
+    }
+    .legend-container {
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      z-index: 50;
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 200px;
+      padding: 12px 14px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: 0 16px 32px -8px rgba(15, 23, 42, 0.25);
+    }
+    .legend-wrap:hover .legend-container,
+    .legend-wrap:focus-within .legend-container {
+      display: flex;
     }
 
     .legend-item {
@@ -1432,7 +1469,7 @@
     .status-toggle.status-draft { background: #fef3c7; color: #92400e; }
     .status-toggle:hover { filter: brightness(0.95); }
     /* Walker card: layout matches the event card design */
-    .detail-card.walk-card-wrap { padding: 0; overflow: hidden; }
+    .detail-card.walk-card-wrap { padding: 0; overflow-y: auto; overflow-x: hidden; }
     .walk-card-header {
       background: #2d5b3e;
       color: #fff;
@@ -1441,6 +1478,7 @@
       justify-content: space-between;
       align-items: flex-start;
       gap: 12px;
+      position: sticky; top: 0; z-index: 1;
     }
     .walk-card-header h3 { margin: 0; font-size: 1.35rem; line-height: 1.25; color: #fff; }
     .walk-card-date { margin-top: 8px; font-size: 0.95rem; opacity: 0.95; }
@@ -1570,7 +1608,7 @@
     }
     .calendar-container.calendar-collapsed .weekdays,
     .calendar-container.calendar-collapsed .days-grid,
-    .calendar-container.calendar-collapsed .legend-container { display: none; }
+    .calendar-container.calendar-collapsed .legend-wrap { display: none; }
     /* Booking overrides */
     .override-panel {
       border: 1px dashed #cbd5e1;
@@ -1672,14 +1710,16 @@
     .walker-date-value { display: flex; align-items: center; gap: 8px; min-height: 36px; font-weight: 600; }
     .walker-date-value .date-filtered { color: var(--primary); }
     .walker-date-filter[hidden] { display: none; }
+    /* Instruction line: shown in Leader and Admin views only, driven by the view attribute on <body> */
+    body[data-view="walker"] #page-instruction { display: none; }
   </style>
 </head>
 
 <body>
   <!-- ======================================================= HEADER ======================================================= -->
   <header class="page-header">
-    <h1>CBMW Walk Scheduler</h1>
-    <p>Click on a slot to schedule or edit a walk.</p>
+    <h1>Walk Schedule</h1>
+    <p id="page-instruction">Click on a slot to schedule or edit a walk.</p>
   </header>
   <!-- ======================================================= VIEW TOGGLE ======================================================= -->
   <div class="view-toggle-container">
@@ -1704,26 +1744,37 @@
       <input type="month" id="walker-goto-month" />
       <button type="button" class="nav-btn" id="calendar-collapse" aria-expanded="true">Hide calendar</button>
     </div>
-    <div class="legend-container">
-      <div class="legend-item">
-        <div class="legend-dot" style="background: var(--color-E)"></div>
-        E (Easy)
-      </div>
-      <div class="legend-item">
-        <div class="legend-dot" style="background: var(--color-M)"></div>
-        M (Moderate)
-      </div>
-      <div class="legend-item">
-        <div class="legend-dot" style="background: var(--color-MS)"></div>
-        MS (Moderate S)
-      </div>
-      <div class="legend-item">
-        <div class="legend-dot" style="background: var(--color-S)"></div>
-        S (Strenuous)
-      </div>
-      <div class="legend-item">
-        <div class="legend-dot" style="background: var(--color-VS)"></div>
-        VS (Very Strenuous)
+    <div class="legend-wrap">
+      <button type="button" class="legend-link" aria-label="Grade legend" aria-describedby="grade-legend">
+        <span class="legend-swatches" aria-hidden="true">
+          <span style="background: var(--color-E)"></span>
+          <span style="background: var(--color-M)"></span>
+          <span style="background: var(--color-MS)"></span>
+          <span style="background: var(--color-S)"></span>
+          <span style="background: var(--color-VS)"></span>
+        </span>
+      </button>
+      <div class="legend-container" id="grade-legend" role="tooltip">
+        <div class="legend-item">
+          <div class="legend-dot" style="background: var(--color-E)"></div>
+          E (Easy)
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background: var(--color-M)"></div>
+          M (Moderate)
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background: var(--color-MS)"></div>
+          MS (Moderate S)
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background: var(--color-S)"></div>
+          S (Strenuous)
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background: var(--color-VS)"></div>
+          VS (Very Strenuous)
+        </div>
       </div>
     </div>
     <div class="weekdays">
