@@ -1729,6 +1729,41 @@
       .slot.social { padding: 4px 2px; }
     }
 
+    /* Master database details: clearly read-only in Leader View */
+    .read-only-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #e7e5e4;
+      color: #44403c;
+      border-radius: 999px;
+      padding: 3px 9px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+    .read-only-note {
+      margin: 0 0 10px;
+      padding: 8px 10px;
+      background: #f5f5f4;
+      border: 1px dashed #a8a29e;
+      border-radius: 8px;
+      color: #57534e;
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+    .read-only-card {
+      background: #f5f5f4;
+      border: 1px dashed #a8a29e;
+    }
+    .read-only-card .offer-card-field {
+      background: #fafaf9;
+      cursor: not-allowed;
+    }
+    .read-only-card .offer-card-field .field-value { color: #57534e; }
+
     /* A rule under the weekday labels */
     .weekdays {
       padding-bottom: 8px;
@@ -2611,6 +2646,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       ];
       panel.innerHTML = `
         <div class="walk-details-title">Walk details from the master database <span class="walk-id-pill">Walk ID: ${escapeHtml(walkId)}</span></div>
+        ${readOnlyNoteHtml()}
         ${gradeCheck.mismatch ? `<p role="alert" style="color:#b91c1c;font-weight:700;margin:8px 0;">Grade mismatch: this master walk is grade ${escapeHtml(gradeCheck.masterGrade)}, but the booking is grade ${escapeHtml(gradeCheck.bookingGrade)}. Choose a walk with a matching grade.</p>` : ""}
         <div class="walk-details-grid">
           ${fields.map(([label, value]) => {
@@ -3091,8 +3127,22 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
        start time, walk number, leader, programme comments and notes. Date, grade and name stay as they are. */
     let editingOfferKey = null;
 
+    /* Master database details cannot be changed from a booking; Leader View says so plainly */
+    function readOnlyPillHtml() {
+      return currentView === "walker" ? "" : '<span class="read-only-pill">🔒 Read only</span>';
+    }
+    function readOnlyNoteHtml() {
+      if (currentView === "leader") {
+        return '<p class="read-only-note">🔒 These walk details come from the master walks database. They can\'t be changed from a booking.</p>';
+      }
+      if (currentView === "admin") {
+        return '<p class="read-only-note">🔒 These walk details come from the master walks database.</p>';
+      }
+      return "";
+    }
+
     function canEditBookingInline() {
-      return currentView === "leader";
+      return currentView === "leader" || currentView === "admin";
     }
 
     function readOnlyFieldHtml(label, value) {
@@ -3402,10 +3452,12 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
                     ${bookingFields.map(([label, value, wide]) => cardField(label, value, wide)).join("")}
                   </div>`}
                 </section>
-                <section class="offer-detail-card">
+                <section class="offer-detail-card${currentView === "walker" ? "" : " read-only-card"}">
                   <h4><span class="card-icon" aria-hidden="true">🥾</span> Walk details from Master Database
                     <span class="offer-route-id">Walk ID: ${escapeHtml(walkId || "Not set")}</span>
+                    ${readOnlyPillHtml()}
                   </h4>
+                  ${readOnlyNoteHtml()}
                   ${route ? `<div class="offer-card-grid route-compact-grid">
                     ${routeFields.map(([label, value, wide]) => cardField(label, value, wide)).join("")}
                   </div>` : `<p class="offer-route-missing">${walkId
@@ -4038,10 +4090,12 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         const lockedForLeader = !adminView && !editableInLeadersView.has(id);
         field.classList.toggle("field-locked", lockedForLeader);
         if (id === "input-date") {
-          if (lockedForLeader) field.setAttribute("readonly", "true");
+          // Date is chosen only when adding a walk; otherwise it comes from the slot or booking
+          if (lockedForLeader || !admin) field.setAttribute("readonly", "true");
           else field.removeAttribute("readonly");
         } else if (id === "input-grade") {
-          field.disabled = lockedForLeader;
+          // Grade is chosen only when adding a walk; otherwise it comes from the slot or booking
+          field.disabled = lockedForLeader || !admin;
         } else if (id === "input-walk-name" || id === "input-pueblo") {
           // Greyed out when editing an existing booking; enabled when adding a walk
           field.disabled = !!existingData;
