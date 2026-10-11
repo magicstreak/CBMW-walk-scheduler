@@ -25,6 +25,10 @@
       --color-MS: #dc2626;
       --color-S: #7c3aed;
       --color-VS: #111827;
+      --radius-panel: 14px;
+      --radius-card: 10px;
+      --shadow-panel: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+      --shadow-float: 0 16px 32px -8px rgba(15, 23, 42, 0.25);
     }
 
     * {
@@ -37,7 +41,7 @@
         system-ui,
         -apple-system,
         sans-serif;
-      background-color: #f1f5f9;
+      background-color: #f6f5f0;
       color: var(--text);
       margin: 0;
       padding: 20px;
@@ -54,7 +58,7 @@
     }
 
     .page-header h1 {
-      font-size: 2.2rem;
+      font-size: 2rem;
       font-weight: 700;
       margin: 0 0 8px 0;
       letter-spacing: -0.03em;
@@ -74,10 +78,8 @@
       max-width: none;
       background: #fff;
       padding: 28px;
-      border-radius: 16px;
-      box-shadow:
-        0 10px 25px -5px rgba(0, 0, 0, 0.05),
-        0 8px 10px -6px rgba(0, 0, 0, 0.05);
+      border-radius: var(--radius-panel);
+      box-shadow: var(--shadow-panel);
       margin-bottom: 30px;
     }
 
@@ -91,53 +93,6 @@
   margin-bottom: 30px;
 }
 
-    .switch-label {
-      font-weight: 600;
-      color: #333;
-    }
-
-    .switch {
-      position: relative;
-      display: inline-block;
-      width: 60px;
-      height: 34px;
-    }
-
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      inset: 0;
-      background-color: #0284c7;
-      transition: 0.4s;
-      border-radius: 34px;
-    }
-
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 26px;
-      width: 26px;
-      left: 4px;
-      bottom: 4px;
-      background-color: white;
-      transition: 0.4s;
-      border-radius: 50%;
-    }
-
-    input:checked+.slider {
-      background-color: #b91c1c;
-    }
-
-    input:checked+.slider:before {
-      transform: translateX(26px);
-    }
-
     /* ========================================================= CALENDAR ========================================================= */
     .calendar-header {
       display: flex;
@@ -148,7 +103,7 @@
 
     .calendar-header h2 {
       margin: 0;
-      font-size: 1.75rem;
+      font-size: 1.5rem;
       font-weight: 700;
     }
 
@@ -208,7 +163,7 @@
       background: #fff;
       border: 1px solid var(--border);
       border-radius: 10px;
-      box-shadow: 0 16px 32px -8px rgba(15, 23, 42, 0.25);
+      box-shadow: var(--shadow-float);
     }
     .legend-wrap:hover .legend-container,
     .legend-wrap:focus-within .legend-container {
@@ -376,7 +331,7 @@
     }
 
     .btn-success {
-      background: #10b981;
+      background: #2d5b3e;
       color: white;
     }
 
@@ -406,7 +361,7 @@
     .admin-header h3,
     .stats-header h3 {
       margin: 0;
-      font-size: 1.35rem;
+      font-size: 1.25rem;
     }
 
     /* ========================================================= TABLES ========================================================= */
@@ -507,7 +462,7 @@
 
     .stat-card {
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: var(--radius-card);
       padding: 16px;
       background: white;
     }
@@ -600,7 +555,7 @@
     /* Dialog: header and buttons stay in view, only the fields scroll (if they ever need to) */
     .modal-content {
       background: white;
-      border-radius: 16px;
+      border-radius: var(--radius-panel);
       width: calc(100% - 24px);
       max-width: 640px;
       max-height: 92vh;
@@ -1252,7 +1207,7 @@
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 14px 16px;
-      box-shadow: 0 16px 32px -8px rgba(15, 23, 42, 0.25);
+      box-shadow: var(--shadow-float);
       font-size: 0.85rem;
     }
     .hover-card[hidden] { display: none; }
@@ -1342,7 +1297,7 @@
       max-height: calc(100vh - 40px);
       overflow-y: auto;
       background: #fff;
-      border-radius: 18px;
+      border-radius: var(--radius-panel);
       padding: 26px 28px;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
     }
@@ -1363,7 +1318,7 @@
     }
     .detail-head h3 {
       margin: 0;
-      font-size: 1.4rem;
+      font-size: 1.25rem;
       letter-spacing: -0.02em;
       line-height: 1.25;
     }
@@ -1480,7 +1435,7 @@
       gap: 12px;
       position: sticky; top: 0; z-index: 1;
     }
-    .walk-card-header h3 { margin: 0; font-size: 1.35rem; line-height: 1.25; color: #fff; }
+    .walk-card-header h3 { margin: 0; font-size: 1.25rem; line-height: 1.25; color: #fff; }
     .walk-card-date { margin-top: 8px; font-size: 0.95rem; opacity: 0.95; }
     .walk-card-close {
       background: none;
@@ -1715,6 +1670,25 @@
     .offers-table td.action-cancel { white-space: normal; }
     .offers-table td.action-cancel .btn { display: block; width: 100%; margin: 2px 0; }
     .offers-table td.action-cancel .btn + .btn { margin-top: 4px; }
+    /* Cancel / reinstate: clearly visible in the Actions column */
+    .cancel-walk-btn {
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      border-radius: 8px;
+      border: 2px solid transparent;
+    }
+    .cancel-walk-btn.cancel {
+      background: #fff;
+      color: #dc2626;
+      border-color: #dc2626;
+    }
+    .cancel-walk-btn.cancel:hover { background: #dc2626; color: #fff; }
+    .cancel-walk-btn.reinstate {
+      background: #fff;
+      color: #2d5b3e;
+      border-color: #2d5b3e;
+    }
+    .cancel-walk-btn.reinstate:hover { background: #e8f1eb; }
     .walker-date-value { display: flex; align-items: center; gap: 8px; min-height: 36px; font-weight: 600; }
     .walker-date-value .date-filtered { color: var(--primary); }
     .walker-date-filter[hidden] { display: none; }
@@ -1733,7 +1707,7 @@
       color: #a8a29e !important;
     }
     .social-card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 12px; }
-    .social-card-head h3 { margin: 0; font-size: 1.4rem; letter-spacing: -0.02em; line-height: 1.25; }
+    .social-card-head h3 { margin: 0; font-size: 1.25rem; letter-spacing: -0.02em; line-height: 1.25; }
     .social-kicker { font-size: 0.75rem; font-weight: 700; color: #a21caf; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
     .social-card-meta { display: flex; gap: 14px; flex-wrap: wrap; color: var(--text-muted); font-weight: 600; font-size: 0.95rem; margin-bottom: 14px; }
     .social-card-line { margin: 0 0 12px; font-size: 0.95rem; }
@@ -3102,7 +3076,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           <td class="notes-col" data-label="Notes">${escapeHtml(record.notes || "-")}</td>
           <td class="action-cancel">
             <button class="btn btn-success edit-walk-btn" type="button">Edit</button>
-            <button class="btn btn-secondary cancel-walk-btn" type="button">${isCancelled(record) ? "Reinstate walk" : "Cancel walk"}</button>
+            <button class="btn cancel-walk-btn ${isCancelled(record) ? "reinstate" : "cancel"}" type="button">${isCancelled(record) ? "Reinstate walk" : "Cancel walk"}</button>
             <button class="btn btn-danger" type="button">Delete</button>
           </td>
         `;
