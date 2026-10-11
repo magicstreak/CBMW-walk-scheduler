@@ -1764,6 +1764,25 @@
     }
     .read-only-card .offer-card-field .field-value { color: #57534e; }
 
+    /* Walk stat tiles: compact, one row on desktop, stacked on phones */
+    .walk-stats {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .walk-stat { padding: 7px 9px; border-radius: 8px; min-width: 0; }
+    .walk-stat-label { font-size: 0.6rem; letter-spacing: 0.06em; }
+    .walk-stat-value {
+      font-size: 0.85rem;
+      margin-top: 2px;
+      font-weight: 600;
+      overflow-wrap: anywhere;
+    }
+    @media (max-width: 650px) {
+      .walk-stats { grid-template-columns: 1fr; }
+      .walk-stat { padding: 6px 10px; }
+    }
+
     /* A rule under the weekday labels */
     .weekdays {
       padding-bottom: 8px;
