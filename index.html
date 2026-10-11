@@ -3858,6 +3858,18 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         }
         const gradeStr = document.getElementById("input-grade").value;
         const walkNum = document.getElementById("input-walk-no").value;
+        // Only a Walk Number that exists in the master database can be saved
+        const walkNumKey = walkNum.trim();
+        if (!walkNumKey || !masterWalks || !Object.prototype.hasOwnProperty.call(masterWalks, walkNumKey)) {
+          const walkNumEl = document.getElementById("input-walk-no");
+          alert(
+            walkNumKey
+              ? `Walk Number "${walkNumKey}" is not in the master walks list. Choose one from the list.`
+              : "Please choose a Walk Number from the list."
+          );
+          walkNumEl.focus();
+          return;
+        }
         const gradeValidation = validateBookingWalkGrade(true);
         if (gradeValidation.mismatch) {
           document.getElementById("input-walk-no").focus();
@@ -4494,4 +4506,3 @@ WALK DATA TABLE SORTING
 </body>
 
 </html>
-
