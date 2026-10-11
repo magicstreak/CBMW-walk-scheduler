@@ -2418,10 +2418,14 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       const list = document.getElementById("master-walk-options");
       if (!input || !list) return;
       list.innerHTML = "";
+      // Only walks of the grade chosen in the form are offered; each option shows its grade
+      const selectedGrade = document.getElementById("input-grade")?.value || "";
       Object.entries(masterWalks || {}).sort(([a], [b]) => a.localeCompare(b, undefined, {numeric:true})).forEach(([id, walk]) => {
+        const walkGrade = getMasterRouteGrade(walk);
+        if (selectedGrade && walkGrade !== selectedGrade) return;
         const option = document.createElement("option");
         option.value = id;
-        option.label = walk?.Route_Name || `Walk ${id}`;
+        option.label = `${walkGrade || "?"} · ${walk?.Route_Name || `Walk ${id}`}`;
         list.appendChild(option);
       });
     }
@@ -3836,8 +3840,11 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       });
       document.getElementById("input-grade").addEventListener("change", () => {
         validateBookingWalkGrade(false);
+        refreshWalkPicker();
         refreshWalkDetailsPanel();
       });
+      // Refresh the walk list on focus so it always matches the grade currently chosen
+      document.getElementById("input-walk-no").addEventListener("focus", refreshWalkPicker);
       /* ========================================================= BOOKING FORM ========================================================= */ bookingForm.addEventListener(
       "submit",
       (e) => {
