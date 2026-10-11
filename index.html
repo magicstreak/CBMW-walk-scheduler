@@ -1692,6 +1692,69 @@
     .walker-date-value { display: flex; align-items: center; gap: 8px; min-height: 36px; font-weight: 600; }
     .walker-date-value .date-filtered { color: var(--primary); }
     .walker-date-filter[hidden] { display: none; }
+
+    /* A rule under the weekday labels */
+    .weekdays {
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 10px;
+    }
+
+    /* Previous and Next sit either side of the calendar grid */
+    .calendar-header { justify-content: center; }
+    .calendar-sandwich {
+      display: flex;
+      align-items: stretch;
+      gap: 10px;
+    }
+    .calendar-grid-wrap { flex: 1 1 auto; min-width: 0; }
+    .nav-side {
+      flex: 0 0 auto;
+      width: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      background: #2d5b3e;
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 1.6rem;
+      font-weight: 700;
+      line-height: 1;
+      box-shadow: 0 2px 6px rgba(45, 91, 62, 0.25);
+    }
+    .nav-side:hover { background: #234a31; }
+    @media (max-width: 650px) {
+      .nav-side { width: 36px; font-size: 1.3rem; }
+    }
+
+    /* Wednesday and Saturday headers: bolder and green, matching their emphasis in the grid */
+    .weekdays > div:nth-child(4),
+    .weekdays > div:nth-child(7) {
+      color: #1f4a2e;
+      font-weight: 900;
+      font-size: 0.9rem;
+      background: #e3f0e7;
+      border-radius: 6px;
+      padding: 4px 0;
+    }
+    /* Days with a booked walk or social event have a light green background */
+    .day-cell:has(.slot.booked, .slot.social) {
+      background: #f1f8f3;
+      border-color: #bcd6c4;
+    }
+    /* Days with a booked walk or social event get a small green dot beside the day number */
+    .day-cell:has(.slot.booked, .slot.social) .day-number::after {
+      content: "";
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #2d5b3e;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
     /* Instruction line: shown in Leader and Admin views only, driven by the view attribute on <body> */
     body[data-view="walker"] #page-instruction { display: none; }
     /* ========================================================= SOCIAL EVENTS ========================================================= */
@@ -1735,9 +1798,7 @@
   <!-- ======================================================= CALENDAR ======================================================= -->
   <div class="calendar-container">
     <div class="calendar-header">
-      <button class="nav-btn" id="prev-month">&larr; Previous</button>
       <h2 id="calendar-title">Month Year</h2>
-      <button class="nav-btn" id="next-month">Next &rarr;</button>
     </div>
     <div class="walker-calendar-tools">
       <label for="walker-goto-month" class="walker-only">Go to month</label>
@@ -1777,16 +1838,22 @@
         </div>
       </div>
     </div>
-    <div class="weekdays">
-      <div>Sun</div>
-      <div>Mon</div>
-      <div>Tue</div>
-      <div>Wed</div>
-      <div>Thu</div>
-      <div>Fri</div>
-      <div>Sat</div>
+    <div class="calendar-sandwich">
+      <button type="button" class="nav-btn nav-side" id="prev-month" aria-label="Previous month">&larr;</button>
+      <div class="calendar-grid-wrap">
+      <div class="weekdays">
+        <div>Sun</div>
+        <div>Mon</div>
+        <div>Tue</div>
+        <div>Wed</div>
+        <div>Thu</div>
+        <div>Fri</div>
+        <div>Sat</div>
+      </div>
+      <div class="days-grid" id="days-grid"></div>
+      </div>
+      <button type="button" class="nav-btn nav-side" id="next-month" aria-label="Next month">&rarr;</button>
     </div>
-    <div class="days-grid" id="days-grid"></div>
   </div>
   <!-- ======================================================= ADMIN ======================================================= -->
   <div class="admin-container" id="admin-container">
