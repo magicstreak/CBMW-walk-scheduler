@@ -2990,7 +2990,17 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
     }
 
     // Single source of truth for admin state: read it from the toggle itself
-    let currentView = "walker"; // "walker" | "leader" | "admin"
+    // The hosting page can fix the view, e.g. ?view=leader in the iframe address or window.SCHEDULER_VIEW = "admin".
+    // When it does, the view switch is hidden. This only changes what is shown; protecting the data is a separate job (Firebase rules, logins).
+    const VIEW_FROM_HOST = (() => {
+      let requested = "";
+      try {
+        requested = new URLSearchParams(window.location.search).get("view") || window.SCHEDULER_VIEW || "";
+      } catch (e) {}
+      requested = String(requested).trim().toLowerCase();
+      return ["walker", "leader", "admin"].includes(requested) ? requested : null;
+    })();
+    let currentView = VIEW_FROM_HOST || "walker"; // "walker" | "leader" | "admin"
     function isAdminView() {
       return currentView === "admin";
     }
@@ -4318,7 +4328,12 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       title.style.cursor = "pointer";
     })();
 
-    /* ========================================================= START ========================================================= */ authReady.then(initDataSync);
+    /* ========================================================= START ========================================================= */ if (VIEW_FROM_HOST) {
+      document.querySelector(`input[name="viewMode"][value="${VIEW_FROM_HOST}"]`).checked = true;
+      document.querySelector(".view-toggle-container").classList.add("hidden");
+      setView(VIEW_FROM_HOST);
+    }
+    authReady.then(initDataSync);
     /* =========================================================
 WALK DATA TABLE SORTING
 ========================================================= */
