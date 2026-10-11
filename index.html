@@ -3160,6 +3160,11 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       return "";
     }
 
+    // Leaders can only change draft bookings; admins can change any booking
+    function canEditRecordInline(record) {
+      return canEditBookingInline() && (currentView !== "leader" || isDraft(record));
+    }
+
     function canEditBookingInline() {
       return currentView === "leader" || currentView === "admin";
     }
@@ -3212,6 +3217,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         errorEl.hidden = false;
       };
       if (!record) return fail("This booking no longer exists.");
+      if (currentView === "leader" && !isDraft(record)) return fail("Live walks can only be changed by an admin.");
 
       const walkNo = form.elements.walk_number.value.trim();
       const walk = walkNo && masterWalks ? masterWalks[walkNo] : null;
@@ -3383,7 +3389,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           </td>
         `;
 
-        tr.querySelector(".edit-walk-btn").hidden = (currentMode === "view");
+        tr.querySelector(".edit-walk-btn").hidden = (currentMode === "view") || (currentView === "leader" && !isDraft(record));
         tr.querySelectorAll(".notes-col, .status-col, .walkid-col, .hide-in-walker").forEach((el) => {
           el.hidden = walkerMode;
         });
@@ -3463,9 +3469,9 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
               <div class="offer-detail-cards">
                 <section class="offer-detail-card">
                   <h4><span class="card-icon" aria-hidden="true">🗓️</span> Booked Walking Slot Details
-                    ${canEditBookingInline() && editingOfferKey !== key ? `<button type="button" class="btn btn-secondary inline-edit-btn" data-action="edit-offer" data-key="${escapeHtml(key)}">Edit</button>` : ""}
+                    ${canEditRecordInline(record) && editingOfferKey !== key ? `<button type="button" class="btn btn-secondary inline-edit-btn" data-action="edit-offer" data-key="${escapeHtml(key)}">Edit</button>` : ""}
                   </h4>
-                  ${canEditBookingInline() && editingOfferKey === key
+                  ${canEditRecordInline(record) && editingOfferKey === key
                     ? inlineEditFormHtml(key, record, masterValues.pueblo, masterValues.name)
                     : `<div class="offer-card-grid">
                     ${bookingFields.map(([label, value, wide]) => cardField(label, value, wide)).join("")}
@@ -3995,7 +4001,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       // Walker View opens the read-only card; Leader and Admin View open the booking modal
       const open = () => {
         hideHoverCard();
-        if (currentView === "walker") openDetailCard(key);
+        if (currentView === "walker" || (currentView === "leader" && !isDraft(globalBookings[key]))) openDetailCard(key);
         else openModal();
       };
       el.addEventListener("mouseenter", (e) => showHoverCard(key, e, open));
