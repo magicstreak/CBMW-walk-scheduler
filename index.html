@@ -1712,6 +1712,24 @@
     .walker-date-filter[hidden] { display: none; }
     /* Instruction line: shown in Leader and Admin views only, driven by the view attribute on <body> */
     body[data-view="walker"] #page-instruction { display: none; }
+    /* ========================================================= SOCIAL EVENTS ========================================================= */
+    .slot.social {
+      background: linear-gradient(135deg, #fef3c7, #fbcfe8);
+      color: #701a75;
+      border: 2px dashed #c026d3;
+      font-weight: 700;
+    }
+    .slot.social.past {
+      background: #f5f5f4 !important;
+      border-color: #d6d3d1 !important;
+      color: #a8a29e !important;
+    }
+    .social-card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 12px; }
+    .social-card-head h3 { margin: 0; font-size: 1.4rem; letter-spacing: -0.02em; line-height: 1.25; }
+    .social-kicker { font-size: 0.75rem; font-weight: 700; color: #a21caf; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+    .social-card-meta { display: flex; gap: 14px; flex-wrap: wrap; color: var(--text-muted); font-weight: 600; font-size: 0.95rem; margin-bottom: 14px; }
+    .social-card-line { margin: 0 0 12px; font-size: 0.95rem; }
+    .social-card-desc { white-space: pre-wrap; line-height: 1.55; background: #fdf4ff; border: 1px solid #f5d0fe; border-radius: 10px; padding: 12px 14px; font-size: 0.95rem; }
   </style>
 </head>
 
@@ -1795,6 +1813,7 @@
       <div style="display: flex; gap: 8px; flex-wrap: wrap">
 
         <button class="btn btn-success" id="add-walk-to-schedule" hidden>Add Walk</button>
+        <button class="btn btn-success" id="add-social-event" hidden>Add Social Event</button>
         <button class="btn btn-success" id="export-csv" hidden>Export to CSV</button>
         <button class="btn btn-danger" id="clear-all" hidden>
           Clear All Bookings
@@ -2203,6 +2222,43 @@
       </form>
     </div>
   </div>
+  <!-- ======================================================= SOCIAL EVENT MODAL (Admin View only) ======================================================= -->
+  <div class="modal-overlay" id="social-modal">
+    <div class="modal-content">
+      <h3 id="social-heading">Add Social Event</h3>
+      <form id="social-form">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group span-3">
+              <label for="social-date"> Date <span class="required-mark" aria-hidden="true">*</span></label>
+              <input type="date" id="social-date" required />
+            </div>
+            <div class="form-group span-3">
+              <label for="social-start-time"> Start Time <span class="required-mark" aria-hidden="true">*</span></label>
+              <input type="time" id="social-start-time" required />
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1">
+              <label for="social-title"> Event Title <span class="required-mark" aria-hidden="true">*</span></label>
+              <input type="text" id="social-title" required maxlength="100" placeholder="e.g. Autumn Potluck Supper" />
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1">
+              <label for="social-location"> Location </label>
+              <input type="text" id="social-location" maxlength="150" placeholder="e.g. Pego Community Hall" />
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1">
+              <label for="social-description"> Description </label>
+              <textarea id="social-description" rows="4" placeholder="What is happening, what to bring, cost, how to reply"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-danger" id="social-delete" hidden>Delete</button>
+          <button type="button" class="btn btn-secondary" id="social-cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
   <!-- ======================================================= FIREBASE ======================================================= -->
   <script type="module">
     import {initializeApp} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -2276,6 +2332,8 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       ["E", "M", "MS", "S", "VS"];
     let currentDate = new Date();
     let globalBookings = {};
+    let globalSocial = {};
+    let editingSocialKey = null;
     let masterWalks = {};
     let monthlyChart = null;
     const monthNames = [
@@ -2309,6 +2367,19 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
     };
       /* ========================================================= DATA SYNC ========================================================= */
     function initDataSync() {
+      // Social events: own database path, shown in every view, changed from Admin View only.
+      if (isFirebaseActive) {
+        onValue(ref(db, "social_events"), (snapshot) => {
+          globalSocial = snapshot.val() || {};
+          renderCalendar();
+          refreshOpenDetailCard();
+        }, (error) => {
+          console.error("Unable to load social events:", error);
+        });
+      } else {
+        globalSocial = JSON.parse(localStorage.getItem("global_social_events") || "{}");
+      }
+
       // Booking database remains the source of scheduled dates and booking fields.
       if (isFirebaseActive) {
         onValue(ref(db, "walk_bookings"), (snapshot) => {
@@ -2587,6 +2658,24 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
 
           const slotsContainer = document.createElement("div");
           slotsContainer.classList.add("slots-container");
+
+          // Social events: listed first on the day, in every view
+          socialKeysForDate(dateISO).forEach((key) => {
+            const record = globalSocial[key];
+            const socialEl = document.createElement("div");
+            socialEl.classList.add("slot", "social");
+            socialEl.innerText = `★ ${record.title || "Social event"}`;
+            socialEl.title = `${record.title || "Social event"} • ${formatStartTime(record.start_time)}`;
+            if (isPast) socialEl.classList.add("past");
+            socialEl.addEventListener("click", () => {
+              if (isAdminView()) {
+                openSocialModal(dateISO, key);
+              } else {
+                openSocialCard(key);
+              }
+            });
+            slotsContainer.appendChild(socialEl);
+          });
 
           // ============================================================
           // STANDARD WEDNESDAY / SATURDAY
@@ -3529,6 +3618,88 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       if (openCardKey) renderDetailCard();
     }
 
+    /* ========================================================= SOCIAL EVENTS =========================================================
+       Kept apart from walk bookings (own database path), so they never enter walk stats or the Walk Offers table.
+       Shown on the calendar in every view. Only Admin View can add, edit or delete them. */
+    function socialKeysForDate(dateISO) {
+      const prefix = `${dateISO}_SOC_`;
+      return Object.keys(globalSocial || {}).filter((key) => key.startsWith(prefix));
+    }
+
+    function saveSocialRecord(key, data) {
+      if (data === null) {
+        delete globalSocial[key];
+      } else {
+        globalSocial[key] = data;
+      }
+      if (isFirebaseActive) {
+        set(ref(db, "social_events/" + key), data);
+      } else {
+        localStorage.setItem("global_social_events", JSON.stringify(globalSocial));
+        renderCalendar();
+      }
+    }
+
+    function isoFromDisplayDate(dateISO) {
+      const [dd, mm, yyyy] = dateISO.split("-");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function displayDateFromIso(value) {
+      const [yyyy, mm, dd] = value.split("-");
+      return `${dd}-${mm}-${yyyy}`;
+    }
+
+    function socialCardHtml(record) {
+      return `
+        <div class="social-card-head">
+          <div>
+            <div class="social-kicker">Social event</div>
+            <h3 id="detail-title">${escapeHtml(record.title || "Social event")}</h3>
+          </div>
+          <button class="detail-close" type="button" data-action="close" aria-label="Close">×</button>
+        </div>
+        <div class="social-card-meta">
+          <span>📅 ${escapeHtml(formatWalkDate(record.date))}</span>
+          <span>🕒 ${escapeHtml(formatStartTime(record.start_time))}</span>
+        </div>
+        ${record.location ? `<p class="social-card-line"><strong>Where:</strong> ${escapeHtml(record.location)}</p>` : ""}
+        ${record.description ? `<div class="social-card-desc">${escapeHtml(record.description)}</div>` : ""}
+        <div class="detail-actions">
+          <button class="btn btn-secondary" type="button" data-action="close">Close</button>
+        </div>`;
+    }
+
+    function openSocialCard(key) {
+      const record = globalSocial[key];
+      if (!record) return;
+      hideHoverCard();
+      openCardKey = null;
+      detailCard.classList.remove("walk-card-wrap");
+      detailCard.innerHTML = socialCardHtml(record);
+      detailOverlay.classList.add("active");
+    }
+
+    function openSocialModal(dateISO, key = null) {
+      if (!isAdminView()) return;
+      hideHoverCard();
+      editingSocialKey = key;
+      const record = key ? globalSocial[key] : null;
+      document.getElementById("social-heading").textContent = key ? "Edit Social Event" : "Add Social Event";
+      document.getElementById("social-date").value = dateISO ? isoFromDisplayDate(dateISO) : "";
+      document.getElementById("social-start-time").value = record ? record.start_time || "" : "18:00";
+      document.getElementById("social-title").value = record ? record.title || "" : "";
+      document.getElementById("social-location").value = record ? record.location || "" : "";
+      document.getElementById("social-description").value = record ? record.description || "" : "";
+      document.getElementById("social-delete").hidden = !key;
+      document.getElementById("social-modal").classList.add("active");
+    }
+
+    function closeSocialModal() {
+      editingSocialKey = null;
+      document.getElementById("social-modal").classList.remove("active");
+    }
+
     // Booked slot: walker view shows hover + card; other views keep the original modal
     function attachBookedSlot(el, key, openModal) {
       // Walker View opens the read-only card; Leader and Admin View open the booking modal
@@ -4011,6 +4182,44 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       .addEventListener("click", () => {
         openBookingModal("", "", "", "", "", true);
       });
+
+      /* ========================================================= SOCIAL EVENT BUTTONS ========================================================= */
+      document.getElementById("add-social-event").addEventListener("click", () => {
+        openSocialModal("");
+      });
+      document.getElementById("social-cancel").addEventListener("click", closeSocialModal);
+      document.getElementById("social-delete").addEventListener("click", () => {
+        if (!editingSocialKey || !isAdminView()) return;
+        if (!confirm("Delete this social event?")) return;
+        saveSocialRecord(editingSocialKey, null);
+        closeSocialModal();
+      });
+      document.getElementById("social-form").addEventListener("submit", (e) => {
+        e.preventDefault();
+        if (!isAdminView()) return;
+        const dateInput = document.getElementById("social-date");
+        if (!dateInput.value) {
+          alert("Please choose a date for this social event.");
+          dateInput.focus();
+          return;
+        }
+        const dateStr = displayDateFromIso(dateInput.value);
+        // Keep the existing key when the date is unchanged; otherwise move the event to its new date
+        const key = editingSocialKey && editingSocialKey.startsWith(`${dateStr}_SOC_`)
+          ? editingSocialKey
+          : `${dateStr}_SOC_${Date.now()}`;
+        if (editingSocialKey && editingSocialKey !== key) saveSocialRecord(editingSocialKey, null);
+        saveSocialRecord(key, {
+          type: "social",
+          title: document.getElementById("social-title").value.trim(),
+          date: dateStr,
+          start_time: document.getElementById("social-start-time").value,
+          location: document.getElementById("social-location").value.trim(),
+          description: document.getElementById("social-description").value.trim(),
+          updated_at: new Date().toISOString(),
+        });
+        closeSocialModal();
+      });
       /* ========================================================= CALENDAR NAVIGATION ========================================================= */ document
       .getElementById("prev-month")
       .addEventListener("click", () => {
@@ -4044,7 +4253,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         document.getElementById("admin-container").hidden = false;
         document.getElementById("statistics-dashboard").hidden = view === "walker";
 
-        ["add-walk-to-schedule", "export-csv", "clear-all"].forEach((id) => {
+        ["add-walk-to-schedule", "add-social-event", "export-csv", "clear-all"].forEach((id) => {
           document.getElementById(id).hidden = !admin;
         });
 
