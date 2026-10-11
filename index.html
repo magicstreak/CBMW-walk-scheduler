@@ -1693,6 +1693,28 @@
     .walker-date-value .date-filtered { color: var(--primary); }
     .walker-date-filter[hidden] { display: none; }
 
+    /* Leader inline edit */
+    .inline-edit-btn { margin-left: auto; padding: 4px 12px; font-size: 0.8rem; }
+    .offer-detail-card h4 { flex-wrap: wrap; }
+    .inline-edit-form { display: flex; flex-direction: column; gap: 12px; }
+    .inline-edit-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 12px; }
+    .inline-edit-grid label { display: flex; flex-direction: column; gap: 4px; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); }
+    .inline-edit-grid .wide { grid-column: 1 / -1; }
+    .inline-edit-grid input,
+    .inline-edit-grid textarea {
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font: inherit;
+      font-size: 0.9rem;
+      color: var(--text);
+      background: #fff;
+    }
+    .inline-edit-grid textarea { resize: vertical; }
+    .inline-edit-error { margin: 0; color: #b91c1c; font-weight: 600; font-size: 0.85rem; }
+    .inline-edit-actions { display: flex; justify-content: flex-end; gap: 8px; }
+    @media (max-width: 560px) { .inline-edit-grid { grid-template-columns: 1fr; } }
+
     /* A rule under the weekday labels */
     .weekdays {
       padding-bottom: 8px;
@@ -3050,6 +3072,96 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
     });
 
     // Escape free text before it is placed into innerHTML
+    /* ========================================================= LEADER INLINE EDIT =========================================================
+       In Leader View an expanded walk offer can change the same fields the leader may change in the modal:
+       start time, walk number, leader, programme comments and notes. Date, grade and name stay as they are. */
+    let editingOfferKey = null;
+
+    function canEditBookingInline() {
+      return currentView === "leader";
+    }
+
+    function readOnlyFieldHtml(label, value) {
+      return `<div class="offer-card-field"><span class="field-label">${escapeHtml(label)}</span><span class="field-value">${escapeHtml(value || "-")}</span></div>`;
+    }
+
+    function inlineEditFormHtml(key, record, pueblo, walkName) {
+      const sameGradeWalks = Object.entries(masterWalks || {})
+        .filter(([, w]) => getMasterRouteGrade(w) === record.walk_grade)
+        .sort(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }))
+        .map(([id, w]) => `<option value="${escapeHtml(id)}" label="${escapeHtml(`${record.walk_grade} · ${w?.Route_Name || `Walk ${id}`}`)}"></option>`)
+        .join("");
+      return `
+        <form class="inline-edit-form" data-key="${escapeHtml(key)}">
+          <div class="offer-card-grid">
+            ${readOnlyFieldHtml("Date", record.date)}
+            ${readOnlyFieldHtml("Booking grade", record.walk_grade)}
+            ${readOnlyFieldHtml("Walk name", walkName)}
+            ${readOnlyFieldHtml("Pueblo", pueblo)}
+          </div>
+          <div class="inline-edit-grid">
+            <label>Start time <span class="required-mark" aria-hidden="true">*</span>
+              <input type="time" name="start_time" required value="${escapeHtml(record.start_time || "")}" /></label>
+            <label>Walk number / ID <span class="required-mark" aria-hidden="true">*</span>
+              <input type="text" name="walk_number" required list="inline-walk-options" autocomplete="off" value="${escapeHtml(record.walk_number || "")}" /></label>
+            <label>Name of leader <span class="required-mark" aria-hidden="true">*</span>
+              <input type="text" name="leader_name" required value="${escapeHtml(record.leader_name || "")}" /></label>
+            <label class="wide">Programme comments
+              <textarea name="comments" rows="2">${escapeHtml(record.comments || "")}</textarea></label>
+            <label class="wide">Notes for programme team
+              <textarea name="notes" rows="2">${escapeHtml(record.notes || "")}</textarea></label>
+          </div>
+          <datalist id="inline-walk-options">${sameGradeWalks}</datalist>
+          <p class="inline-edit-error" hidden></p>
+          <div class="inline-edit-actions">
+            <button type="button" class="btn btn-secondary" data-inline="cancel">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save changes</button>
+          </div>
+        </form>`;
+    }
+
+    function saveInlineOffer(form) {
+      const key = form.dataset.key;
+      const record = globalBookings[key];
+      const errorEl = form.querySelector(".inline-edit-error");
+      const fail = (message) => {
+        errorEl.textContent = message;
+        errorEl.hidden = false;
+      };
+      if (!record) return fail("This booking no longer exists.");
+
+      const walkNo = form.elements.walk_number.value.trim();
+      const walk = walkNo && masterWalks ? masterWalks[walkNo] : null;
+      if (!walk) {
+        return fail(walkNo
+          ? `Walk Number "${walkNo}" is not in the master walks list. Choose one from the list.`
+          : "Please choose a Walk Number.");
+      }
+      const walkGrade = getMasterRouteGrade(walk);
+      if (walkGrade !== record.walk_grade) {
+        return fail(`Walk ${walkNo} is grade ${walkGrade || "?"}, but this booking is grade ${record.walk_grade}.`);
+      }
+      const startTime = form.elements.start_time.value;
+      if (!startTime) return fail("Please enter a start time.");
+      const leader = form.elements.leader_name.value.trim();
+      if (!leader) return fail("Please enter the name of the leader.");
+
+      const walkChanged = walkNo !== String(record.walk_number || "").trim();
+      saveBookingRecord(key, {
+        ...record,
+        walk_number: walkNo,
+        walk_id: walkNo,
+        walk_name: walkChanged ? (getMasterRouteName(walk) || record.walk_name || "") : record.walk_name,
+        start_time: startTime,
+        leader_name: leader,
+        comments: form.elements.comments.value.trim(),
+        notes: form.elements.notes.value.trim(),
+        updated_at: new Date().toISOString(),
+      });
+      editingOfferKey = null;
+      renderAdminTable();
+    }
+
     function escapeHtml(value) {
       return String(value ?? "").replace(/[&<>"']/g, (c) => ({
         "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
@@ -3071,6 +3183,25 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
     function isAdminView() {
       return currentView === "admin";
     }
+
+    adminTableBody.addEventListener("click", (e) => {
+      const editBtn = e.target.closest('[data-action="edit-offer"]');
+      if (editBtn && canEditBookingInline()) {
+        editingOfferKey = editBtn.dataset.key;
+        expandedOfferRows.add(editingOfferKey);
+        renderAdminTable();
+        return;
+      }
+      if (e.target.closest('[data-inline="cancel"]')) {
+        editingOfferKey = null;
+        renderAdminTable();
+      }
+    });
+    adminTableBody.addEventListener("submit", (e) => {
+      if (!e.target.classList || !e.target.classList.contains("inline-edit-form")) return;
+      e.preventDefault();
+      if (canEditBookingInline()) saveInlineOffer(e.target);
+    });
 
     // Keep track of which booking cards are expanded as the table re-renders.
     const expandedOfferRows = new Set();
@@ -3241,10 +3372,14 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
             <td colspan="13">
               <div class="offer-detail-cards">
                 <section class="offer-detail-card">
-                  <h4><span class="card-icon" aria-hidden="true">🗓️</span> Booked Walking Slot Details </h4>
-                  <div class="offer-card-grid">
+                  <h4><span class="card-icon" aria-hidden="true">🗓️</span> Booked Walking Slot Details
+                    ${canEditBookingInline() && editingOfferKey !== key ? `<button type="button" class="btn btn-secondary inline-edit-btn" data-action="edit-offer" data-key="${escapeHtml(key)}">Edit</button>` : ""}
+                  </h4>
+                  ${canEditBookingInline() && editingOfferKey === key
+                    ? inlineEditFormHtml(key, record, masterValues.pueblo, masterValues.name)
+                    : `<div class="offer-card-grid">
                     ${bookingFields.map(([label, value, wide]) => cardField(label, value, wide)).join("")}
-                  </div>
+                  </div>`}
                 </section>
                 <section class="offer-detail-card">
                   <h4><span class="card-icon" aria-hidden="true">🥾</span> Walk details from Master Database
@@ -4317,6 +4452,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       /* ========================================================= VIEW SWITCHER ========================================================= */
       function setView(view) {
         currentView = view;
+        editingOfferKey = null;
         selectedWalkerDate = null;
         updateWalkOffersTitle();
         document.querySelectorAll(".walker-only").forEach((el) => {
