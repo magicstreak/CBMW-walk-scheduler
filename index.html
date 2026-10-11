@@ -1477,6 +1477,15 @@
       margin: 18px 0 10px;
     }
     .walk-section-title:first-child { margin-top: 0; }
+    .whatsapp-pref {
+      display: inline-block;
+      padding: 1px 8px;
+      border-radius: 999px;
+      background: #dcfce7;
+      color: #166534;
+      font-weight: 600;
+      font-size: 0.85em;
+    }
     .walk-info-row {
       display: grid;
       grid-template-columns: 110px 1fr;
@@ -1955,6 +1964,7 @@
 
         <button class="btn btn-success" id="add-walk-to-schedule" hidden>Add Walk</button>
         <button class="btn btn-success" id="add-social-event" hidden>Add Social Event</button>
+        <button class="btn" id="seed-leaders" hidden>Load Test Leaders</button>
         <button class="btn btn-success" id="export-csv" hidden>Export to CSV</button>
         <button class="btn btn-danger" id="clear-all" hidden>
           Clear All Bookings
@@ -2509,6 +2519,24 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
     };
       /* ========================================================= DATA SYNC ========================================================= */
     function initDataSync() {
+      // Leaders: read from the "leaders" path and kept as a list sorted by leader_id.
+      if (isFirebaseActive) {
+        onValue(ref(db, "leaders"), (snapshot) => {
+          const data = snapshot.val() || {};
+          LEADER_LOOKUP = Object.values(data).sort((a, b) => Number(a.leader_id) - Number(b.leader_id));
+          // Refresh the open booking modal's dropdown, keeping the current choice
+          const select = document.getElementById("input-leader");
+          if (select) {
+            select.innerHTML = leaderOptionsHtml(select.value);
+            refreshLeaderDetails();
+          }
+          // Do not re-render the table while someone is editing a row inline
+          if (!editingOfferKey) renderAdminTable();
+        }, (error) => {
+          console.error("Unable to load leaders:", error);
+        });
+      }
+
       // Social events: own database path, shown in every view, changed from Admin View only.
       if (isFirebaseActive) {
         onValue(ref(db, "social_events"), (snapshot) => {
@@ -2701,12 +2729,9 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
     }
 
     /* ========================================================= LEADER LOOKUP =========================================================
-       Temporary lookup list. It will come from the leaders database later, so keep these field names.
-       Replace the example rows with real leaders. linked_leader holds another leader's leader_id (e.g. a co-leader). */
-    const LEADER_LOOKUP = [
-      { leader_id: "L001", first_name: "Example", surname: "Leader One", phone_1: "", phone_2: "", email_add: "", whats_app: "n", linked_leader: "" },
-      { leader_id: "L002", first_name: "Example", surname: "Leader Two", phone_1: "", phone_2: "", email_add: "", whats_app: "n", linked_leader: "L001" },
-    ];
+       Loaded live from the "leaders" database path (see initDataSync). Keyed by leader_id.
+       linked_leader holds another leader's leader_id (e.g. a co-leader). */
+    let LEADER_LOOKUP = [];
 
     function leaderFullName(leader) {
       return leader ? `${leader.first_name || ""} ${leader.surname || ""}`.trim() : "";
@@ -3871,8 +3896,24 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           <div class="walk-stat-value">${value}</div>
         </div>`;
 
+      // Leader contact details come from the leaders lookup (database)
+      const leader = findLeader(selectedLeaderId(d.record));
+      const phoneLink = (p) => {
+        const digits = String(p).replace(/[^\d+]/g, "");
+        return `<a href="tel:${escapeHtml(digits)}">${escapeHtml(p)}</a>`;
+      };
+      const leaderRows = leader
+        ? [
+            walkInfoRow("Leader:", escapeHtml(leaderFullName(leader))),
+            walkInfoRow("Phone:", [
+              [leader.phone_1, leader.phone_2].filter((p) => String(p || "").trim()).map(phoneLink).join(" · ") || "–",
+              leader.whats_app === "y" ? `<span class="whatsapp-pref">WhatsApp</span>` : "",
+            ].filter(Boolean).join(" ")),
+          ].join("")
+        : walkInfoRow("Leader:", escapeHtml(d.record.leader_name || "–"));
+
       const organiser = [
-        walkInfoRow("Leader:", escapeHtml(d.record.leader_name || "–")),
+        leaderRows,
         d.pueblo ? walkInfoRow("Pueblo:", escapeHtml(d.pueblo)) : "",
         meeting && meeting.url
           ? walkInfoRow("Meeting point:", `<a href="${escapeHtml(meeting.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(meeting.latitude)}, ${escapeHtml(meeting.longitude)} ↗</a>`)
@@ -4570,6 +4611,21 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         openSocialModal("");
       });
       document.getElementById("social-cancel").addEventListener("click", closeSocialModal);
+
+      /* ========================================================= ONE-OFF: LOAD TEST LEADERS INTO /leaders =========================================================
+         Writes only leaders/{leader_id}. Does not touch walk_bookings or social_events.
+         Remove this block once the leaders path is in use. */
+      document.getElementById("seed-leaders").addEventListener("click", async () => {
+        if (!isAdminView() || !db) return;
+        if (!confirm(`Write ${LEADER_LOOKUP.length} test leaders to the leaders path? Existing leaders with the same IDs will be overwritten.`)) return;
+        try {
+          await Promise.all(LEADER_LOOKUP.map((l) => set(ref(db, "leaders/" + l.leader_id), l)));
+          alert(`Wrote ${LEADER_LOOKUP.length} test leaders to leaders/.`);
+        } catch (err) {
+          console.error("Seeding leaders failed.", err);
+          alert("Writing test leaders failed. Check the console and the database rules.");
+        }
+      });
       document.getElementById("social-delete").addEventListener("click", () => {
         if (!editingSocialKey || !isAdminView()) return;
         if (!confirm("Delete this social event?")) return;
@@ -4636,7 +4692,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         document.getElementById("admin-container").hidden = false;
         document.getElementById("statistics-dashboard").hidden = view === "walker";
 
-        ["add-walk-to-schedule", "add-social-event", "export-csv", "clear-all"].forEach((id) => {
+        ["add-walk-to-schedule", "add-social-event", "seed-leaders", "export-csv", "clear-all"].forEach((id) => {
           document.getElementById(id).hidden = !admin;
         });
 
