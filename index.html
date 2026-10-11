@@ -1715,6 +1715,20 @@
     .inline-edit-actions { display: flex; justify-content: flex-end; gap: 8px; }
     @media (max-width: 560px) { .inline-edit-grid { grid-template-columns: 1fr; } }
 
+    /* Phones: compact booked slots (grade and start time) */
+    .slot-short { display: none; }
+    @media (max-width: 650px) {
+      .slot-long { display: none; }
+      .slot-short {
+        display: block;
+        font-size: 0.62rem;
+        line-height: 1.25;
+        text-align: center;
+      }
+      .slot.booked,
+      .slot.social { padding: 4px 2px; }
+    }
+
     /* A rule under the weekday labels */
     .weekdays {
       padding-bottom: 8px;
@@ -2739,7 +2753,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
             const record = globalSocial[key];
             const socialEl = document.createElement("div");
             socialEl.classList.add("slot", "social");
-            socialEl.innerText = `★ ${record.title || "Social event"}`;
+            setSlotLabel(socialEl, `★ ${record.title || "Social event"}`, "★", record.start_time);
             socialEl.title = `${record.title || "Social event"} • ${formatStartTime(record.start_time)}`;
             if (isPast) socialEl.classList.add("past");
             socialEl.addEventListener("click", () => {
@@ -2801,7 +2815,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
                   */
                   const walkID = bookedData.walk_number;
 
-                  slotEl.innerText = bookedSlotLabel(bookedData, walkID);
+                  setSlotLabel(slotEl, bookedSlotLabel(bookedData, walkID), grade, bookedData.start_time);
 
                   
 
@@ -2887,7 +2901,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
                   if (isDraft(bookedData)) slotEl.classList.add("draft");
                   if (isCancelled(bookedData)) slotEl.classList.add("cancelled");
 
-                slotEl.innerText = bookedSlotLabel(bookedData, walkID);
+                setSlotLabel(slotEl, bookedSlotLabel(bookedData, walkID), grade, bookedData.start_time);
 
                 
 
@@ -3160,6 +3174,13 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       });
       editingOfferKey = null;
       renderAdminTable();
+    }
+
+    /* Booked slots keep the full name for desktop; phones show the grade and start time (see CSS) */
+    function setSlotLabel(el, longText, grade, startTime) {
+      const time = String(startTime || "");
+      el.innerHTML = `<span class="slot-long">${escapeHtml(longText)}</span><span class="slot-short">${escapeHtml(grade || "")}<br>${escapeHtml(time)}</span>`;
+      el.title = longText;
     }
 
     function escapeHtml(value) {
