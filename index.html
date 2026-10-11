@@ -4331,9 +4331,18 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
     /* ========================================================= START ========================================================= */ if (VIEW_FROM_HOST) {
       document.querySelector(`input[name="viewMode"][value="${VIEW_FROM_HOST}"]`).checked = true;
       document.querySelector(".view-toggle-container").classList.add("hidden");
-      setView(VIEW_FROM_HOST);
     }
-    authReady.then(initDataSync);
+    // Data listeners start first, so an error while applying the host view cannot stop the data loading
+    authReady.then(() => {
+      initDataSync();
+      if (VIEW_FROM_HOST) {
+        try {
+          setView(VIEW_FROM_HOST);
+        } catch (err) {
+          console.error("Could not apply the view set by the host page:", err);
+        }
+      }
+    });
     /* =========================================================
 WALK DATA TABLE SORTING
 ========================================================= */
