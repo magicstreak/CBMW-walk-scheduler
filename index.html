@@ -1675,6 +1675,11 @@
       padding: 8px 12px;
       border-top: 1px solid var(--border);
     }
+    /* Summer programme walks in the walker list: yellow edge, like the calendar */
+    tr.summer-row td:first-child { box-shadow: inset 5px 0 0 #eab308; }
+    .summer-badge { background: #fde68a; color: #713f12; }
+    .summer-details { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 2px; }
+    .summer-time { font-weight: 600; color: var(--text-muted); font-size: 0.85rem; }
     .walker-date-count { margin-left: 10px; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); }
     .calendar-container.calendar-collapsed .weekdays,
     .calendar-container.calendar-collapsed .days-grid,
@@ -1971,6 +1976,18 @@
       border: 2px dashed #c026d3;
       font-weight: 700;
     }
+    /* Summer programme walks: yellow edge, so they stand out from social events */
+    .slot.social.summer {
+      background: #fffbeb;
+      color: #713f12;
+      border: 1px solid #fde68a;
+      border-left: 5px solid #eab308;
+    }
+    .slot.social.summer.past { border-left-color: #d6d3d1; }
+    .social-kicker.summer-kicker { color: #a16207; }
+    .social-card-desc.summer-desc { background: #fffbeb; border-color: #fde68a; }
+    #social-modal .summer-only[hidden], #social-modal .social-only[hidden] { display: none; }
+    .social-walk-preview-card { font-size: 0.9rem; line-height: 1.5; padding: 10px 12px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; }
     .slot.social.past {
       background: #f5f5f4 !important;
       border-color: #d6d3d1 !important;
@@ -2092,7 +2109,7 @@
       <div style="display: flex; gap: 8px; flex-wrap: wrap">
 
         <button class="btn btn-success" id="add-walk-to-schedule" hidden>Add Walk</button>
-        <button class="btn btn-success" id="add-social-event" hidden>Add Social Event</button>
+        <button class="btn btn-success" id="add-social-event" hidden>Add Event</button>
         <button class="btn btn-success" id="export-pdf">Download</button>
         <button class="btn btn-success" id="export-csv" hidden>Export to CSV</button>
         <button class="btn btn-danger" id="clear-all" hidden>
@@ -2537,10 +2554,17 @@
 
   <div class="modal-overlay" id="social-modal">
     <div class="modal-content">
-      <h3 id="social-heading">Add Social Event</h3>
+      <h3 id="social-heading">Add Event</h3>
       <form id="social-form">
         <div class="modal-body">
           <div class="form-grid">
+            <div class="form-group" style="grid-column: 1 / -1">
+              <label for="social-type"> Type </label>
+              <select id="social-type">
+                <option value="social">Social event</option>
+                <option value="summer">Summer programme walk</option>
+              </select>
+            </div>
             <div class="form-group span-3">
               <label for="social-date"> Date <span class="required-mark" aria-hidden="true">*</span></label>
               <input type="date" id="social-date" required />
@@ -2551,11 +2575,35 @@
             </div>
             <div class="form-group" style="grid-column: 1 / -1">
               <label for="social-title"> Event Title <span class="required-mark" aria-hidden="true">*</span></label>
-              <input type="text" id="social-title" required maxlength="100" placeholder="e.g. Autumn Potluck Supper" />
+              <input type="text" id="social-title" required maxlength="100" placeholder="e.g. Autumn Potluck Supper / Breakfast Walk - Cap Prim" />
             </div>
-            <div class="form-group" style="grid-column: 1 / -1">
+            <div class="form-group social-only" style="grid-column: 1 / -1">
               <label for="social-location"> Location </label>
               <input type="text" id="social-location" maxlength="150" placeholder="e.g. Pego Community Hall" />
+            </div>
+            <div class="form-group summer-only span-3" hidden>
+              <label for="social-leader"> Leader(s) </label>
+              <input type="text" id="social-leader" maxlength="100" placeholder="e.g. Martin Dunkley" />
+            </div>
+            <div class="form-group summer-only span-3" hidden>
+              <label for="social-duration"> Duration </label>
+              <input type="text" id="social-duration" maxlength="30" placeholder="e.g. 2.5 hrs" />
+            </div>
+            <div class="form-group summer-only span-3" hidden>
+              <label for="social-distance"> Distance </label>
+              <input type="text" id="social-distance" maxlength="30" placeholder="e.g. 8km" />
+            </div>
+            <div class="form-group summer-only span-3" hidden>
+              <label for="social-ascent"> Ascent </label>
+              <input type="text" id="social-ascent" maxlength="30" placeholder="e.g. 200m or None" />
+            </div>
+            <div class="form-group summer-only" style="grid-column: 1 / -1" hidden>
+              <label for="social-meeting"> Meeting point </label>
+              <input type="text" id="social-meeting" maxlength="200" placeholder="e.g. 38.7634, 0.2046 - park near the xiringuito" />
+            </div>
+            <div class="form-group summer-only" style="grid-column: 1 / -1" hidden>
+              <label for="social-contact"> Booking / contact </label>
+              <input type="text" id="social-contact" maxlength="200" placeholder="e.g. Book with Joan on +34 678 937 258 or WhatsApp" />
             </div>
             <div class="form-group" style="grid-column: 1 / -1">
               <label for="social-description"> Description </label>
@@ -2702,6 +2750,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         onValue(ref(db, "social_events"), (snapshot) => {
           globalSocial = snapshot.val() || {};
           renderCalendar();
+          renderAdminTable();
           refreshOpenDetailCard();
         }, (error) => {
           console.error("Unable to load social events:", error);
@@ -3058,9 +3107,12 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           socialKeysForDate(dateISO).forEach((key) => {
             const record = globalSocial[key];
             const socialEl = document.createElement("div");
+            const isSummer = record.type === "summer";
             socialEl.classList.add("slot", "social");
-            setSlotLabel(socialEl, `★ ${record.title || "Social event"}`, "★", record.start_time);
-            socialEl.title = `${record.title || "Social event"} • ${formatStartTime(record.start_time)}`;
+            if (isSummer) socialEl.classList.add("summer");
+            const eventLabel = isSummer ? `Walk · ${record.title || "Summer walk"}` : `★ ${record.title || "Social event"}`;
+            setSlotLabel(socialEl, eventLabel, isSummer ? "Walk" : "★", record.start_time);
+            socialEl.title = `${record.title || (isSummer ? "Summer walk" : "Social event")} • ${formatStartTime(record.start_time)}`;
             if (isPast) socialEl.classList.add("past");
             socialEl.addEventListener("click", () => {
               if (isAdminView()) {
@@ -3584,6 +3636,35 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
     const expandedOfferRows = new Set();
 
     // If no argument is passed (data sync, save, clear, etc.), fall back to the toggle state
+    // Walker View: a summer programme walk as a row in the Upcoming Walks list
+    function summerWalkerRow(skey) {
+      const rec = globalSocial[skey];
+      const tr = document.createElement("tr");
+      tr.className = "summer-row walk-row-clickable";
+      const headCells = [...document.querySelectorAll(".offers-table thead th")];
+      const details = [
+        rec.leader ? `Leader: ${rec.leader}` : "",
+        rec.duration,
+        rec.distance,
+        rec.ascent ? `Ascent: ${rec.ascent}` : "",
+        rec.meeting_point ? `Meeting point: ${rec.meeting_point}` : "",
+        rec.contact ? `Booking: ${rec.contact}` : "",
+      ].map((v) => String(v ?? "").trim()).filter(Boolean);
+      // Column order follows the table header: expand, date, grade, walk number, name, description, then the hidden walker columns
+      const values = [
+        "",
+        `${escapeHtml(tableDate(rec.date))}<br><span class="summer-time">${escapeHtml(formatStartTime(rec.start_time))}</span>`,
+        '<span class="badge summer-badge">Summer</span>',
+        "",
+        `<strong>${escapeHtml(rec.title || "Summer walk")}</strong>`,
+        `${details.length ? `<div class="summer-details">${escapeHtml(details.join(" · "))}</div>` : ""}${rec.description ? `<div>${escapeHtml(rec.description)}</div>` : ""}`,
+        "", "", "", "", "",
+      ];
+      tr.innerHTML = headCells.map((th, i) => `<td${th.hidden ? " hidden" : ""} data-label="${escapeHtml(th.textContent.trim())}">${values[i] ?? ""}</td>`).join("");
+      tr.addEventListener("click", () => openSocialCard(skey));
+      return tr;
+    }
+
     function renderAdminTable(admin = isAdminView()) {
       updateWalkOffersTitle();
       if (!adminTableBody) return;
@@ -3613,7 +3694,30 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       if (statusFilter) statusFilter.closest(".filter-field").hidden = walkerMode;
 
       populateAdminFilters();
-      const sortedKeys = getAdminVisibleKeys();
+      let sortedKeys = getAdminVisibleKeys();
+      // Walker View: summer programme walks join the list. Date sort places them by date; other sorts add them at the end.
+      if (walkerMode) {
+        const gradeNow = document.getElementById("admin-filter-grade")?.value || "ALL";
+        const fromNow = document.getElementById("admin-filter-from")?.value || "";
+        const toNow = document.getElementById("admin-filter-to")?.value || "";
+        const isoOfDmy = (d) => { const p = String(d || "").split("-"); return p.length === 3 ? `${p[2]}-${p[1]}-${p[0]}` : ""; };
+        const summerKeys = gradeNow !== "ALL" ? [] : Object.keys(globalSocial || {})
+          .filter((k) => globalSocial[k]?.type === "summer")
+          .filter((k) => {
+            const iso = isoOfDmy(globalSocial[k].date);
+            return iso && (!fromNow || iso >= fromNow) && (!toNow || iso <= toNow);
+          })
+          .map((k) => `SUMMER:${k}`);
+        if (summerKeys.length && adminSortColumn === "date") {
+          const isoOfKey = (k) => isoOfDmy(k.startsWith("SUMMER:") ? globalSocial[k.slice(7)]?.date : globalBookings[k]?.date);
+          sortedKeys = [...sortedKeys, ...summerKeys].sort((a, b) => {
+            const c = isoOfKey(a).localeCompare(isoOfKey(b));
+            return adminSortDirection === "desc" ? -c : c;
+          });
+        } else if (summerKeys.length) {
+          sortedKeys = [...sortedKeys, ...summerKeys];
+        }
+      }
       updateAdminSortIndicators();
 
       // Build a consistent card field, escaping every value before inserting HTML.
@@ -3637,19 +3741,27 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       };
 
       let lastGroupDate = null;
+      const dateOfKey = (k) => (k.startsWith("SUMMER:") ? globalSocial[k.slice(7)]?.date : globalBookings[k]?.date) || "";
+      const addGroupHeader = (dateStr) => {
+        if (!walkerMode || adminSortColumn !== "date" || dateStr === lastGroupDate) return;
+        lastGroupDate = dateStr;
+        const groupRow = document.createElement("tr");
+        groupRow.className = "walker-date-group";
+        const groupCount = sortedKeys.filter((k) => dateOfKey(k) === dateStr).length;
+        groupRow.innerHTML = `<th colspan="${document.querySelectorAll(".offers-table thead th:not([hidden])").length}" scope="rowgroup">${escapeHtml(tableDate(dateStr))}<span class="walker-date-count">${groupCount} ${groupCount === 1 ? "walk" : "walks"}</span></th>`;
+        adminTableBody.appendChild(groupRow);
+      };
       sortedKeys.forEach((key) => {
+        if (key.startsWith("SUMMER:")) {
+          const skey = key.slice(7);
+          if (!globalSocial[skey]) return;
+          addGroupHeader(globalSocial[skey].date);
+          adminTableBody.appendChild(summerWalkerRow(skey));
+          return;
+        }
         const record = globalBookings[key];
         if (!record) return;
-
-        // Walker View: a header row for each date, so the list reads day by day
-        if (walkerMode && adminSortColumn === "date" && record.date !== lastGroupDate) {
-          lastGroupDate = record.date;
-          const groupRow = document.createElement("tr");
-          groupRow.className = "walker-date-group";
-          const groupCount = sortedKeys.filter((k) => globalBookings[k]?.date === record.date).length;
-          groupRow.innerHTML = `<th colspan="${document.querySelectorAll(".offers-table thead th:not([hidden])").length}" scope="rowgroup">${escapeHtml(tableDate(record.date))}<span class="walker-date-count">${groupCount} ${groupCount === 1 ? "walk" : "walks"}</span></th>`;
-          adminTableBody.appendChild(groupRow);
-        }
+        addGroupHeader(record.date);
 
         const expanded = expandedOfferRows.has(key);
         const masterValues = getBookingMasterValues(record);
@@ -4312,20 +4424,29 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
     }
 
     function socialCardHtml(record) {
+      const isSummer = record.type === "summer";
+      const line = (label, value) => (String(value ?? "").trim() ? `<p class="social-card-line"><strong>${label}:</strong> ${escapeHtml(value)}</p>` : "");
       return `
         <div class="social-card-head">
           <div>
-            <div class="social-kicker">Social event</div>
-            <h3 id="detail-title">${escapeHtml(record.title || "Social event")}</h3>
+            <div class="social-kicker${isSummer ? " summer-kicker" : ""}">${isSummer ? "Summer programme walk" : "Social event"}</div>
+            <h3 id="detail-title">${escapeHtml(record.title || (isSummer ? "Summer walk" : "Social event"))}</h3>
           </div>
           <button class="detail-close" type="button" data-action="close" aria-label="Close">×</button>
         </div>
         <div class="social-card-meta">
           <span>📅 ${escapeHtml(formatWalkDate(record.date))}</span>
           <span>🕒 ${escapeHtml(formatStartTime(record.start_time))}</span>
+          ${isSummer && String(record.duration ?? "").trim() ? `<span>⏱ ${escapeHtml(record.duration)}</span>` : ""}
         </div>
-        ${record.location ? `<p class="social-card-line"><strong>Where:</strong> ${escapeHtml(record.location)}</p>` : ""}
-        ${record.description ? `<div class="social-card-desc">${escapeHtml(record.description)}</div>` : ""}
+        ${isSummer ? `
+          ${line("Leader(s)", record.leader)}
+          ${line("Distance", record.distance)}
+          ${line("Ascent", record.ascent)}
+          ${line("Meeting point", record.meeting_point)}
+          ${line("Booking / contact", record.contact)}
+        ` : (record.location ? `<p class="social-card-line"><strong>Where:</strong> ${escapeHtml(record.location)}</p>` : "")}
+        ${record.description ? `<div class="social-card-desc${isSummer ? " summer-desc" : ""}">${escapeHtml(record.description)}</div>` : ""}
         <div class="detail-actions">
           <button class="btn btn-secondary" type="button" data-action="close">Close</button>
         </div>`;
@@ -4346,14 +4467,29 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       hideHoverCard();
       editingSocialKey = key;
       const record = key ? globalSocial[key] : null;
-      document.getElementById("social-heading").textContent = key ? "Edit Social Event" : "Add Social Event";
+      document.getElementById("social-heading").textContent = key ? "Edit Event" : "Add Event";
+      document.getElementById("social-type").value = record && record.type === "summer" ? "summer" : "social";
       document.getElementById("social-date").value = dateISO ? isoFromDisplayDate(dateISO) : "";
       document.getElementById("social-start-time").value = record ? record.start_time || "" : "18:00";
       document.getElementById("social-title").value = record ? record.title || "" : "";
       document.getElementById("social-location").value = record ? record.location || "" : "";
+      document.getElementById("social-leader").value = record ? record.leader || "" : "";
+      document.getElementById("social-duration").value = record ? record.duration || "" : "";
+      document.getElementById("social-distance").value = record ? record.distance || "" : "";
+      document.getElementById("social-ascent").value = record ? record.ascent || "" : "";
+      document.getElementById("social-meeting").value = record ? record.meeting_point || "" : "";
+      document.getElementById("social-contact").value = record ? record.contact || "" : "";
       document.getElementById("social-description").value = record ? record.description || "" : "";
+      applySocialTypeFields();
       document.getElementById("social-delete").hidden = !key;
       document.getElementById("social-modal").classList.add("active");
+    }
+
+    // Summer programme walks show the walk fields; social events show the location
+    function applySocialTypeFields() {
+      const summer = document.getElementById("social-type").value === "summer";
+      document.querySelectorAll("#social-modal .summer-only").forEach((el) => { el.hidden = !summer; });
+      document.querySelectorAll("#social-modal .social-only").forEach((el) => { el.hidden = summer; });
     }
 
     function closeSocialModal() {
@@ -5134,10 +5270,11 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         openSocialModal("");
       });
       document.getElementById("social-cancel").addEventListener("click", closeSocialModal);
+      document.getElementById("social-type").addEventListener("change", applySocialTypeFields);
 
       document.getElementById("social-delete").addEventListener("click", () => {
         if (!editingSocialKey || !isAdminView()) return;
-        if (!confirm("Delete this social event?")) return;
+        if (!confirm("Delete this event?")) return;
         saveSocialRecord(editingSocialKey, null);
         closeSocialModal();
       });
@@ -5146,7 +5283,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         if (!isAdminView()) return;
         const dateInput = document.getElementById("social-date");
         if (!dateInput.value) {
-          alert("Please choose a date for this social event.");
+          alert("Please choose a date for this event.");
           dateInput.focus();
           return;
         }
@@ -5156,13 +5293,21 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           ? editingSocialKey
           : `${dateStr}_SOC_${Date.now()}`;
         if (editingSocialKey && editingSocialKey !== key) saveSocialRecord(editingSocialKey, null);
+        const type = document.getElementById("social-type").value === "summer" ? "summer" : "social";
+        const val = (id) => document.getElementById(id).value.trim();
         saveSocialRecord(key, {
-          type: "social",
-          title: document.getElementById("social-title").value.trim(),
+          type,
+          title: val("social-title"),
           date: dateStr,
           start_time: document.getElementById("social-start-time").value,
-          location: document.getElementById("social-location").value.trim(),
-          description: document.getElementById("social-description").value.trim(),
+          location: type === "social" ? val("social-location") : "",
+          leader: type === "summer" ? val("social-leader") : "",
+          duration: type === "summer" ? val("social-duration") : "",
+          distance: type === "summer" ? val("social-distance") : "",
+          ascent: type === "summer" ? val("social-ascent") : "",
+          meeting_point: type === "summer" ? val("social-meeting") : "",
+          contact: type === "summer" ? val("social-contact") : "",
+          description: val("social-description"),
           updated_at: new Date().toISOString(),
         });
         closeSocialModal();
