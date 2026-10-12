@@ -1666,6 +1666,16 @@
       color: var(--text);
       background: #fff;
     }
+    /* Walker View: date headers in the Upcoming Walks list */
+    .offers-table tr.walker-date-group th {
+      background: #f1f5f9;
+      color: var(--text);
+      font-weight: 700;
+      text-align: left;
+      padding: 8px 12px;
+      border-top: 1px solid var(--border);
+    }
+    .walker-date-count { margin-left: 10px; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); }
     .calendar-container.calendar-collapsed .weekdays,
     .calendar-container.calendar-collapsed .days-grid,
     .calendar-container.calendar-collapsed .legend-wrap { display: none; }
@@ -3575,6 +3585,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
 
     // If no argument is passed (data sync, save, clear, etc.), fall back to the toggle state
     function renderAdminTable(admin = isAdminView()) {
+      updateWalkOffersTitle();
       if (!adminTableBody) return;
       adminTableBody.innerHTML = "";
 
@@ -3625,9 +3636,20 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         </div>`;
       };
 
+      let lastGroupDate = null;
       sortedKeys.forEach((key) => {
         const record = globalBookings[key];
         if (!record) return;
+
+        // Walker View: a header row for each date, so the list reads day by day
+        if (walkerMode && adminSortColumn === "date" && record.date !== lastGroupDate) {
+          lastGroupDate = record.date;
+          const groupRow = document.createElement("tr");
+          groupRow.className = "walker-date-group";
+          const groupCount = sortedKeys.filter((k) => globalBookings[k]?.date === record.date).length;
+          groupRow.innerHTML = `<th colspan="${document.querySelectorAll(".offers-table thead th:not([hidden])").length}" scope="rowgroup">${escapeHtml(tableDate(record.date))}<span class="walker-date-count">${groupCount} ${groupCount === 1 ? "walk" : "walks"}</span></th>`;
+          adminTableBody.appendChild(groupRow);
+        }
 
         const expanded = expandedOfferRows.has(key);
         const masterValues = getBookingMasterValues(record);
@@ -5225,7 +5247,16 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
 
     /* Walker View shows "Upcoming Walks" as the table title */
     function updateWalkOffersTitle() {
-      document.getElementById("walk-offers-title").textContent = currentView === "walker" ? "Upcoming Walks" : "Walk Offers";
+      const title = document.getElementById("walk-offers-title");
+      if (currentView !== "walker") { title.textContent = "Walk Offers"; return; }
+      const fromVal = document.getElementById("admin-filter-from")?.value || "";
+      const toVal = document.getElementById("admin-filter-to")?.value || "";
+      if (fromVal && fromVal === toVal) {
+        const [y, m, d] = fromVal.split("-");
+        title.textContent = `Walks on ${tableDate(`${d}-${m}-${y}`)}`;
+      } else {
+        title.textContent = "Upcoming Walks";
+      }
     }
 
     /* Walk Offers: collapse / expand in every view (button or title) */
