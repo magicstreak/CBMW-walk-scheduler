@@ -169,8 +169,46 @@
       box-shadow: var(--shadow-float);
     }
     .legend-wrap:hover .legend-container,
-    .legend-wrap:focus-within .legend-container {
+    .legend-wrap:focus-within .legend-container,
+    .legend-wrap.open .legend-container {
       display: flex;
+    }
+
+    /* Walk levels: full definitions, opened from the legend or a walk card */
+    .walk-levels-link {
+      background: none;
+      border: none;
+      padding: 4px 0;
+      font: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #2d5b3e;
+      text-decoration: underline;
+      cursor: pointer;
+      align-self: flex-start;
+    }
+    #walk-levels-dialog {
+      width: min(680px, calc(100% - 32px));
+      max-height: 85vh;
+      border: none;
+      border-radius: 12px;
+      padding: 0;
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.25);
+    }
+    #walk-levels-dialog::backdrop { background: rgba(15, 23, 42, 0.45); }
+    .walk-levels-body { padding: 22px 26px; font-size: 0.92rem; line-height: 1.55; color: #1f2937; }
+    .walk-levels-body h2 { font-size: 1.15rem; margin: 0 0 12px; }
+    .walk-levels-body h3 { font-size: 0.95rem; margin: 16px 0 6px; text-decoration: underline; }
+    .walk-levels-body p { margin: 0 0 8px; }
+    .walk-levels-close {
+      float: right;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
     }
 
     .legend-item {
@@ -1964,6 +2002,28 @@
       <input type="month" id="walker-goto-month" class="walker-only" />
       <button type="button" class="nav-btn" id="calendar-collapse" aria-expanded="true">Hide calendar</button>
     </div>
+    <dialog id="walk-levels-dialog" aria-labelledby="walk-levels-title">
+      <div class="walk-levels-body">
+        <button type="button" class="walk-levels-close" data-close-levels>Close</button>
+        <h2 id="walk-levels-title">Walk Levels</h2>
+        <p><strong>E - Easy:</strong> A walk of up to 4½ hours on good surfaced tracks and less than 200 metres total ascent.</p>
+        <p><strong>M - Moderate:</strong> up to 12km, less than 400 metres total ascent and less than 50% rough going.</p>
+        <p><strong>MS - Moderately Strenuous:</strong> Up to 600 metres total ascent and/or no more than 15 km with some rough going taken at a reasonable pace.</p>
+        <p><strong>S - Strenuous:</strong> More than 600 metres total ascent and/or more than 15km with steep, loose or heavily vegetated sections.</p>
+        <p><strong>VS - Very Strenuous:</strong> More than 800 metres total ascent and/or more than 20km with steep, loose or heavily vegetated sections.</p>
+        <p><strong>X - Experienced walkers routes:</strong> Routes which require considerable stamina and/or significant scrambling skills on rough, steep or exposed sections.</p>
+        <p><strong>Scr - Scrambling:</strong> This implies the need for handholds to ascend steep rock pitches with a sense of exposure to vertigo and where a slip could lead to a serious accident.</p>
+        <p><strong>Scr0</strong> Very easy scrambling. Short sections requiring the use of handholds on not very steep or sustained sections. No exposure.</p>
+        <p><strong>Scr1</strong> Easy scrambling, requiring the use of handholds on not very steep or sustained sections. No exposure.</p>
+        <p><strong>Scr2</strong> Scrambling with some technical moves over steep and more continuous sections. With the probability of some exposure.</p>
+        <p><strong>Scr3</strong> Technically difficult scrambling. Sometimes over prolonged sections, possibly very exposed and with steep drops to one or both sides. Not easy to reverse down or escape from.</p>
+        <h3>Terrain</h3>
+        <p><strong>A</strong> - All good tracks</p>
+        <p><strong>B</strong> - Less than half the route on rough ground</p>
+        <p><strong>C</strong> - More than half the route on rough ground or routes with difficult steep awkward/rocky sections.</p>
+      </div>
+    </dialog>
+
     <div class="legend-wrap">
       <button type="button" class="legend-link" aria-label="Grade legend" aria-describedby="grade-legend">
         <span class="legend-swatches" aria-hidden="true">
@@ -1977,24 +2037,25 @@
       <div class="legend-container" id="grade-legend" role="tooltip">
         <div class="legend-item">
           <div class="legend-dot" style="background: var(--color-E)"></div>
-          E (Easy)
+          E · Easy
         </div>
         <div class="legend-item">
           <div class="legend-dot" style="background: var(--color-M)"></div>
-          M (Moderate)
+          M · Moderate
         </div>
         <div class="legend-item">
           <div class="legend-dot" style="background: var(--color-MS)"></div>
-          MS (Moderate S)
+          MS · Moderately Strenuous
         </div>
         <div class="legend-item">
           <div class="legend-dot" style="background: var(--color-S)"></div>
-          S (Strenuous)
+          S · Strenuous
         </div>
         <div class="legend-item">
           <div class="legend-dot" style="background: var(--color-VS)"></div>
-          VS (Very Strenuous)
+          VS · Very Strenuous
         </div>
+        <button type="button" class="walk-levels-link" data-open-levels>Full walk levels, scrambling and terrain</button>
       </div>
     </div>
     <div class="calendar-sandwich">
@@ -2776,6 +2837,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         ["Ascent", walk.Ascent],
         ["Terrain", walk.Terrain],
         ["SCR", walk.Scr],
+        ["X", xFlag(walk)],
         ["Total time", walk.Total_Time],
         ["Dogs", walk.Dogs],
         ["Route description", walk.Route_Description],
@@ -3675,6 +3737,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
             [adjLabel(record, ["Ascent"], "Ascent"), route.Ascent],
             [adjLabel(record, ["Terrain"], "Terrain"), route.Terrain],
             [adjLabel(record, ["Scr"], "SCR"), route.Scr],
+            [adjLabel(record, ["X"], "X"), xFlag(route)],
             [adjLabel(record, ["Total_Time"], "Total time"), route.Total_Time],
             [adjLabel(record, ["Dogs"], "Dogs"), route.Dogs],
             [adjLabel(record, ["Route_Description"], "Route description"), route.Route_Description, true],
@@ -3779,13 +3842,15 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
     }
 
     /* ---------- Hover card: quick summary ---------- */
+    // Experienced-walkers attribute: shown as a bare "X" after the grade, terrain and SCR when set
+    function xFlag(r) { return String(r?.X ?? "").trim() ? "X" : ""; }
     function hoverCardHtml(d) {
       const r = d.route || {};
       const grade = getMasterRouteGrade(d.route) || d.record.walk_grade || "";
       const or = (v) => (v === undefined || v === null || String(v).trim() === "" ? "Not recorded" : escapeHtml(v));
       const dash = (v) => (v === undefined || v === null || String(v).trim() === "" ? "–" : escapeHtml(v));
       const description = String(r.Route_Description ?? "").trim();
-      const stats = [r.Distance, r.Ascent, grade, r.Terrain, r.Scr].map(dash).join(" / ");
+      const stats = [r.Distance, r.Ascent, grade, r.Terrain, r.Scr, xFlag(r)].map(dash).join(" / ");
       return `
         <div class="hover-card-head">
           <span class="grade-chip grade-${escapeHtml(grade)}">${escapeHtml(grade || "-")}</span>
@@ -3795,7 +3860,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         <div class="hover-card-title">${escapeHtml(d.name || "Untitled walk")}</div>
         <div class="hover-card-stats">
           <div class="hover-card-stats-label">Walk stats</div>
-          <div class="hover-card-stats-labels">Distance / Ascent / Grade / Terrain / SCR</div>
+          <div class="hover-card-stats-labels">Distance / Ascent / Grade / Terrain / SCR / X</div>
           <div class="hover-card-stats-value">${stats}</div>
         </div>
         <div class="hover-card-row"><span>Start</span>${or(d.record.start_time)}</div>
@@ -3984,6 +4049,30 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       if (hoverAction) hoverAction();
     });
 
+    /* ---------- Walk levels dialog and legend toggle ---------- */
+    // Any [data-open-levels] button opens the full definitions dialog
+    document.addEventListener("click", (e) => {
+      if (e.target.closest("[data-open-levels]")) {
+        const dialog = document.getElementById("walk-levels-dialog");
+        if (dialog && !dialog.open) dialog.showModal();
+        document.querySelector(".legend-wrap")?.classList.remove("open");
+      }
+    });
+    document.getElementById("walk-levels-dialog").addEventListener("click", (e) => {
+      // Close button, or a click on the backdrop (outside the content)
+      if (e.target.closest("[data-close-levels]") || e.target.id === "walk-levels-dialog") {
+        e.currentTarget.close();
+      }
+    });
+    // Legend: tap to open on touch screens, tap outside to close
+    const legendWrap = document.querySelector(".legend-wrap");
+    if (legendWrap) {
+      legendWrap.querySelector(".legend-link").addEventListener("click", () => legendWrap.classList.toggle("open"));
+      document.addEventListener("click", (e) => {
+        if (!legendWrap.contains(e.target)) legendWrap.classList.remove("open");
+      });
+    }
+
     /* ---------- Click card: full booking + walk details (read-only) ---------- */
     // "14-10-2026" -> "Wed " (empty if the date cannot be read)
     function weekdayShort(dateString) {
@@ -4079,9 +4168,10 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
             ${stat("Distance", dash(r.Distance))}
             ${stat("Ascent", dash(r.Ascent))}
             ${stat("Duration", dash(r.Total_Time))}
-            ${stat("Grade / Terrain / SCR", [grade, r.Terrain, r.Scr].map(dash).join(" / "))}
+            ${stat("Grade / Terrain / SCR / X", [grade, r.Terrain, r.Scr, xFlag(r)].map(dash).join(" / "))}
           </div>
           ${quoteBlock}
+          <button type="button" class="walk-levels-link" data-open-levels>What do the walk levels mean?</button>
           <div class="walk-section-title">Leader and location</div>
           <div class="walk-info">${organiser}</div>
           ${directions ? `<div class="walk-section-title">Driving directions</div><div class="walk-directions">${escapeHtml(directions)}</div>` : ""}
@@ -4826,7 +4916,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         ].filter(Boolean).join("\n");
 
         const gradeCell = [
-          `Grade: ${[grade, route.Terrain, route.Scr].map(dash).join(" / ")}`,
+          `Grade: ${[grade, route.Terrain, route.Scr, xFlag(route)].map(dash).join(" / ")}`,
           `Dist: ${dash(route.Distance)}`,
           `Asc: ${dash(route.Ascent)}`,
           `Dogs: ${dash(route.Dogs)}`,
