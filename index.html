@@ -285,31 +285,34 @@
       color: #1e293b !important;
     }
 
+    /* Booked walks: monochrome, with the grade colour on the right-hand edge (same as the walks table badge) */
     .slot.booked {
       font-weight: 700;
-      color: #fff;
+      color: #1f2937;
+      background: #f3f4f6;
       border: 1px solid transparent;
+      border-right: 5px solid #9ca3af;
       box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
     }
 
     .slot.booked.grade-E {
-      background: var(--color-E);
+      border-right-color: var(--color-E);
     }
 
     .slot.booked.grade-M {
-      background: var(--color-M);
+      border-right-color: var(--color-M);
     }
 
     .slot.booked.grade-MS {
-      background: var(--color-MS);
+      border-right-color: var(--color-MS);
     }
 
     .slot.booked.grade-S {
-      background: var(--color-S);
+      border-right-color: var(--color-S);
     }
 
     .slot.booked.grade-VS {
-      background: var(--color-VS);
+      border-right-color: var(--color-VS);
     }
 
     /* ========================================================= BUTTONS ========================================================= */
@@ -427,6 +430,21 @@
     .grade-VS {
       background: var(--color-VS);
     }
+
+    /* Walker view: monochrome grade badge with a coloured right-hand edge */
+    .badge.badge-mono {
+      background: #f3f4f6;
+      color: #1f2937;
+      border-right: 5px solid #9ca3af;
+    }
+    .badge.badge-mono.grade-E  { border-right-color: var(--color-E); }
+    .badge.badge-mono.grade-M  { border-right-color: var(--color-M); }
+    .badge.badge-mono.grade-MS { border-right-color: var(--color-MS); }
+    .badge.badge-mono.grade-S  { border-right-color: var(--color-S); }
+    .badge.badge-mono.grade-VS { border-right-color: var(--color-VS); }
+    /* Distance and ascent: same style as the grade badges, in a neutral colour */
+    .stat-badges { margin-top: 4px; display: flex; flex-wrap: wrap; gap: 4px; }
+    .badge.stat-badge { background: #64748b; font-weight: 600; }
 
     /* ========================================================= STATISTICS ========================================================= */
     .stats-filter {
@@ -1057,7 +1075,10 @@
     }
 
     .table-filters select,
-    .table-filters input[type="search"] {
+    .table-filters input[type="search"],
+    .table-filters input[type="date"] {
+      min-height: 38px;
+      box-sizing: border-box;
       width: 100%;
       padding: 9px 12px;
       border: 1px solid var(--border);
@@ -2052,6 +2073,14 @@
           <span id="admin-filter-date">All dates</span>
           <button type="button" class="nav-btn" id="admin-filter-date-clear" hidden>Clear date</button>
         </div>
+      </div>
+      <div class="filter-field">
+        <label for="admin-filter-from">From</label>
+        <input type="date" id="admin-filter-from" />
+      </div>
+      <div class="filter-field">
+        <label for="admin-filter-to">To</label>
+        <input type="date" id="admin-filter-to" />
       </div>
       <button type="button" class="nav-btn" id="admin-filter-clear">Clear filters</button>
       <span class="filter-count" id="admin-filter-count"></span>
@@ -3132,13 +3161,20 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           // Add slots to day
           dayCell.appendChild(slotsContainer);
 
-          // Walker View: clicking a day filters the offers table to that day; click again to clear
+          // Walker View: clicking a day sets the From and To date filters to that day; click again to clear
+          const dayIso = `${dateISO.slice(6, 10)}-${dateISO.slice(3, 5)}-${dateISO.slice(0, 2)}`;
           if (currentView === "walker") {
             dayCell.classList.add("selectable-day");
-            if (selectedWalkerDate === dateISO) dayCell.classList.add("selected-day");
+            const fromEl = document.getElementById("admin-filter-from");
+            const toEl = document.getElementById("admin-filter-to");
+            if (fromEl && toEl && fromEl.value === dayIso && toEl.value === dayIso) dayCell.classList.add("selected-day");
             dayCell.addEventListener("click", (e) => {
               if (e.target.closest(".slot")) return; // slot clicks open their own card
-              selectedWalkerDate = selectedWalkerDate === dateISO ? null : dateISO;
+              const fromEl = document.getElementById("admin-filter-from");
+              const toEl = document.getElementById("admin-filter-to");
+              const alreadySet = fromEl.value === dayIso && toEl.value === dayIso;
+              fromEl.value = alreadySet ? "" : dayIso;
+              toEl.value = alreadySet ? "" : dayIso;
               renderCalendar();
               renderAdminTable();
             });
@@ -3210,16 +3246,25 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       const leader = currentView === "walker" ? "ALL" : val("admin-filter-leader");
       const pueblo = currentView === "walker" ? "ALL" : val("admin-filter-pueblo");
       const status = val("admin-filter-status");
+      // Date range (YYYY-MM-DD from the date inputs); booking dates are DD-MM-YYYY
+      const rangeFrom = document.getElementById("admin-filter-from")?.value || "";
+      const rangeTo = document.getElementById("admin-filter-to")?.value || "";
 
       const keys = Object.keys(globalBookings).filter((key) => {
         const r = globalBookings[key];
         if (!r) return false;
+        if (rangeFrom || rangeTo) {
+          const p = String(r.date || "").split("-");
+          const iso = p.length === 3 ? `${p[2]}-${p[1]}-${p[0]}` : "";
+          if (!iso) return false;
+          if (rangeFrom && iso < rangeFrom) return false;
+          if (rangeTo && iso > rangeTo) return false;
+        }
         if (grade !== "ALL" && r.walk_grade !== grade) return false;
         if (leader !== "ALL" && r.leader_name !== leader) return false;
         if (pueblo !== "ALL" && r.pueblo !== pueblo) return false;
         if (status !== "ALL" && bookingStatus(r) !== status) return false;
         if (!isVisibleInView(r)) return false;
-        if (currentView === "walker" && selectedWalkerDate && r.date !== selectedWalkerDate) return false;
         if (search) {
           const haystack = [r.date, r.start_time, r.walk_grade, r.walk_number, r.walk_name,
             r.leader_name, r.notes, r.pueblo, r.comments].join(" ").toLowerCase();
@@ -3274,17 +3319,19 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
 
     // Filter controls
     ["admin-filter-search", "admin-filter-grade", "admin-filter-leader",
-      "admin-filter-pueblo", "admin-filter-status"].forEach((id) => {
+      "admin-filter-pueblo", "admin-filter-status", "admin-filter-from", "admin-filter-to"].forEach((id) => {
       const el = document.getElementById(id);
       if (el) el.addEventListener(id === "admin-filter-search" ? "input" : "change", () => {
         renderAdminTable();
-        if (id === "admin-filter-grade" && currentView === "walker") renderCalendar();
+        if (["admin-filter-grade", "admin-filter-from", "admin-filter-to"].includes(id) && currentView === "walker") renderCalendar();
       });
     });
     document.getElementById("admin-filter-clear").addEventListener("click", () => {
       document.getElementById("admin-filter-search").value = "";
       ["admin-filter-grade", "admin-filter-leader", "admin-filter-pueblo", "admin-filter-status"]
         .forEach((id) => { document.getElementById(id).value = "ALL"; });
+      ["admin-filter-from", "admin-filter-to"]
+        .forEach((id) => { document.getElementById(id).value = ""; });
       renderAdminTable();
       if (currentView === "walker") renderCalendar();
     });
@@ -3484,7 +3531,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       const dateField = document.getElementById("admin-filter-date-field");
       const dateValue = document.getElementById("admin-filter-date");
       const dateClear = document.getElementById("admin-filter-date-clear");
-      dateField.hidden = !walkerMode;
+      dateField.hidden = true;   // day selection now lives in the From and To filters
       dateValue.textContent = walkerMode && selectedWalkerDate ? `Showing ${selectedWalkerDate}` : "All dates";
       dateValue.classList.toggle("date-filtered", walkerMode && !!selectedWalkerDate);
       dateClear.hidden = !(walkerMode && selectedWalkerDate);
@@ -3524,6 +3571,15 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         const masterValues = getBookingMasterValues(record);
         const displayWalkName = masterValues.name;
         const displayPueblo = masterValues.pueblo;
+        // Distance and ascent under the walk name, as unlabelled badges in every view
+        const walkerStats = (() => {
+          const rt = bookingRoute(record) || {};
+          const badges = [rt.Distance, rt.Ascent]
+            .map((v) => String(v ?? "").trim())
+            .filter(Boolean)
+            .map((v) => `<span class="badge stat-badge">${escapeHtml(v)}</span>`);
+          return badges.length ? `<div class="stat-badges">${badges.join(" ")}</div>` : "";
+        })();
         const tr = document.createElement("tr");
         tr.classList.toggle("cancelled-row", isCancelled(record));
         tr.classList.toggle("expanded-parent", expanded);
@@ -3532,13 +3588,13 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
             <button type="button" class="expand-toggle" aria-expanded="${expanded}" aria-label="${expanded ? "Hide" : "Show"} details for walk ${escapeHtml(record.walk_number || "")}" title="${expanded ? "Hide details" : "Show all details"}"><svg class="chev-down" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg><svg class="chev-up" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 15 12 9 18 15"/></svg></button>
           </td>
           <td data-label="Date" class="date-time-cell">
-            <div class="dt-line"><span class="dt-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span><strong>${escapeHtml(weekdayShort(record.date))}${escapeHtml(record.date || "-")}</strong></div>
-            <div class="dt-line"><span class="dt-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span><span>${escapeHtml(formatStartTime(record.start_time) || "-")}</span></div>
+            <div class="dt-line"><strong>${escapeHtml(tableDate(record.date))}</strong></div>
+            <div class="dt-line"><span>${escapeHtml(formatStartTime(record.start_time) || "-")}</span></div>
             ${isAdminView() ? `<div class="dt-line dt-status status-col"><button type="button" class="status-toggle status-${bookingStatus(record)}" data-status-key="${escapeHtml(key)}" title="Click to switch between Draft and Live">${bookingStatus(record) === "live" ? "Live" : "Draft"}</button></div>` : ""}
           </td>
-          <td data-label="Grade"><span class="badge grade-${escapeHtml(record.walk_grade || "")}">${escapeHtml(record.walk_grade || "-")}</span></td>
+          <td data-label="Grade"><span class="badge ${currentView === "walker" ? "badge-mono" : ""} grade-${escapeHtml(record.walk_grade || "")}">${escapeHtml(record.walk_grade || "-")}</span></td>
           <td class="walkid-col" data-label="Walk No">${escapeHtml(record.walk_number || record.walk_id || "-")}</td>
-          <td data-label="Walk name">${cancelledBadge(record)}${escapeHtml(displayWalkName || "-")}</td>
+          <td data-label="Walk name">${cancelledBadge(record)}${escapeHtml(displayWalkName || "-")}${walkerStats}</td>
           <td class="walker-only-col" data-label="Description">${walkerDescriptionCell(record)}</td>
           <td class="hide-in-walker" data-label="Leader">${escapeHtml(record.leader_name || "-")}</td>
           <td class="hide-in-walker" data-label="Pueblo">${escapeHtml(displayPueblo || "-")}</td>
@@ -3673,8 +3729,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       const total = Object.values(globalBookings).filter(Boolean).length;
       const countEl = document.getElementById("admin-filter-count");
       if (countEl) {
-        const dayNote = walkerMode && selectedWalkerDate ? ` · ${selectedWalkerDate}` : "";
-        countEl.textContent = `Showing ${sortedKeys.length} of ${total}${dayNote}`;
+        countEl.textContent = `Showing ${sortedKeys.length} of ${total}`;
       }
     }
 
@@ -3937,6 +3992,15 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       return d.toLocaleDateString("en-GB", { weekday: "short" }) + " ";
     }
 
+    // Walk offers and upcoming walks: "Wed 14 Oct 26"
+    function tableDate(dateString) {
+      const d = convertDate(dateString);
+      if (!d) return dateString || "-";
+      const wd = d.toLocaleDateString("en-GB", { weekday: "short" });
+      const rest = d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "2-digit" });
+      return `${wd} ${rest}`;
+    }
+
     // "14-10-2026" -> "Wednesday 14 Oct 2026"
     function formatWalkDate(dateString) {
       const d = convertDate(dateString);
@@ -3944,14 +4008,11 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       return d.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "short", year: "numeric" });
     }
 
-    // "10:00" -> "10 am", "10:30" -> "10:30 am"
+    // "9:05" -> "09:05", "14:30" -> "14:30"
     function formatStartTime(t) {
       const m = /^(\d{1,2}):(\d{2})/.exec(String(t || "").trim());
       if (!m) return String(t || "");
-      let h = Number(m[1]);
-      const suffix = h >= 12 ? "pm" : "am";
-      h = h % 12 || 12;
-      return m[2] === "00" ? `${h} ${suffix}` : `${h}:${m[2]} ${suffix}`;
+      return `${String(Number(m[1])).padStart(2, "0")}:${m[2]}`;
     }
 
     function walkInfoRow(label, valueHtml) {
@@ -4021,7 +4082,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
             ${stat("Grade / Terrain / SCR", [grade, r.Terrain, r.Scr].map(dash).join(" / "))}
           </div>
           ${quoteBlock}
-          <div class="walk-section-title">Organiser info</div>
+          <div class="walk-section-title">Leader and location</div>
           <div class="walk-info">${organiser}</div>
           ${directions ? `<div class="walk-section-title">Driving directions</div><div class="walk-directions">${escapeHtml(directions)}</div>` : ""}
           ${dogs ? `<div class="walk-dogs">🐾 ${escapeHtml(dogs)}</div>` : ""}`
