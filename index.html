@@ -12,6 +12,9 @@
     rel="stylesheet" />
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <!-- PDF export: jsPDF and the AutoTable plugin -->
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
   <style>
     :root {
       --primary: #2d5b3e;
@@ -1998,7 +2001,7 @@
 
         <button class="btn btn-success" id="add-walk-to-schedule" hidden>Add Walk</button>
         <button class="btn btn-success" id="add-social-event" hidden>Add Social Event</button>
-        <button class="btn" id="seed-leaders" hidden>Load Test Leaders</button>
+        <button class="btn btn-success" id="export-pdf">Download</button>
         <button class="btn btn-success" id="export-csv" hidden>Export to CSV</button>
         <button class="btn btn-danger" id="clear-all" hidden>
           Clear All Bookings
@@ -2409,6 +2412,29 @@
     </div>
   </div>
   <!-- ======================================================= SOCIAL EVENT MODAL (Admin View only) ======================================================= -->
+  <div class="modal-overlay" id="pdf-modal">
+    <div class="modal-content">
+      <h3>Export walks to PDF</h3>
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="form-group span-3">
+            <label for="pdf-from">From</label>
+            <input type="date" id="pdf-from" />
+          </div>
+          <div class="form-group span-3">
+            <label for="pdf-to">To</label>
+            <input type="date" id="pdf-to" />
+          </div>
+          <p id="pdf-count" style="grid-column: 1 / -1; margin: 0; color: #64748b; font-size: 0.9rem"></p>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" id="pdf-cancel">Cancel</button>
+        <button type="button" class="btn btn-primary" id="pdf-submit">Export PDF</button>
+      </div>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="social-modal">
     <div class="modal-content">
       <h3 id="social-heading">Add Social Event</h3>
@@ -2952,6 +2978,9 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           if (dayOfWeek === 3 || dayOfWeek === 6) {
 
             grades.forEach((grade) => {
+              // Walker view: a chosen grade filter shows only that grade on the calendar
+              const gradeFilter = currentView === "walker" ? (document.getElementById("admin-filter-grade")?.value || "ALL") : "ALL";
+              if (gradeFilter !== "ALL" && grade !== gradeFilter) return;
 
               /*
               * Find ALL booking keys matching:
@@ -3054,6 +3083,9 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           else {
 
             grades.forEach((grade) => {
+              // Walker view: a chosen grade filter applies to ad hoc days too
+              const gradeFilter = currentView === "walker" ? (document.getElementById("admin-filter-grade")?.value || "ALL") : "ALL";
+              if (gradeFilter !== "ALL" && grade !== gradeFilter) return;
 
               const keyPrefix = `${dateISO}_${grade}_`;
 
@@ -3244,13 +3276,17 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
     ["admin-filter-search", "admin-filter-grade", "admin-filter-leader",
       "admin-filter-pueblo", "admin-filter-status"].forEach((id) => {
       const el = document.getElementById(id);
-      if (el) el.addEventListener(id === "admin-filter-search" ? "input" : "change", () => renderAdminTable());
+      if (el) el.addEventListener(id === "admin-filter-search" ? "input" : "change", () => {
+        renderAdminTable();
+        if (id === "admin-filter-grade" && currentView === "walker") renderCalendar();
+      });
     });
     document.getElementById("admin-filter-clear").addEventListener("click", () => {
       document.getElementById("admin-filter-search").value = "";
       ["admin-filter-grade", "admin-filter-leader", "admin-filter-pueblo", "admin-filter-status"]
         .forEach((id) => { document.getElementById(id).value = "ALL"; });
       renderAdminTable();
+      if (currentView === "walker") renderCalendar();
     });
 
     // Status toggle in the Walk Offers table: Draft <-> Live in one click
@@ -3496,7 +3532,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
             <button type="button" class="expand-toggle" aria-expanded="${expanded}" aria-label="${expanded ? "Hide" : "Show"} details for walk ${escapeHtml(record.walk_number || "")}" title="${expanded ? "Hide details" : "Show all details"}"><svg class="chev-down" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg><svg class="chev-up" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 15 12 9 18 15"/></svg></button>
           </td>
           <td data-label="Date" class="date-time-cell">
-            <div class="dt-line"><span class="dt-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span><strong>${escapeHtml(record.date || "-")}</strong></div>
+            <div class="dt-line"><span class="dt-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span><strong>${escapeHtml(weekdayShort(record.date))}${escapeHtml(record.date || "-")}</strong></div>
             <div class="dt-line"><span class="dt-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span><span>${escapeHtml(formatStartTime(record.start_time) || "-")}</span></div>
             ${isAdminView() ? `<div class="dt-line dt-status status-col"><button type="button" class="status-toggle status-${bookingStatus(record)}" data-status-key="${escapeHtml(key)}" title="Click to switch between Draft and Live">${bookingStatus(record) === "live" ? "Live" : "Draft"}</button></div>` : ""}
           </td>
@@ -3894,6 +3930,13 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
     });
 
     /* ---------- Click card: full booking + walk details (read-only) ---------- */
+    // "14-10-2026" -> "Wed " (empty if the date cannot be read)
+    function weekdayShort(dateString) {
+      const d = convertDate(dateString);
+      if (!d) return "";
+      return d.toLocaleDateString("en-GB", { weekday: "short" }) + " ";
+    }
+
     // "14-10-2026" -> "Wednesday 14 Oct 2026"
     function formatWalkDate(dateString) {
       const d = convertDate(dateString);
@@ -3955,12 +3998,12 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
 
       const organiser = [
         leaderRows,
-        d.pueblo ? walkInfoRow("Pueblo:", escapeHtml(d.pueblo)) : "",
+        d.pueblo && currentView !== "walker" ? walkInfoRow("Pueblo:", escapeHtml(d.pueblo)) : "",
         meeting && meeting.url
           ? walkInfoRow("Meeting point:", `<a href="${escapeHtml(meeting.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(meeting.latitude)}, ${escapeHtml(meeting.longitude)} ↗</a>`)
           : "",
         wisUrl
-          ? walkInfoRow("Route map:", `<a href="${escapeHtml(wisUrl)}" target="_blank" rel="noopener noreferrer">View map link ↗</a>`)
+          ? walkInfoRow("Route map:", `<a href="${escapeHtml(wisUrl)}" target="_blank" rel="noopener noreferrer">${currentView === "walker" ? "Walks In Spain" : "View map link"} ↗</a>`)
           : "",
       ].join("");
 
@@ -4605,6 +4648,272 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       "change",
       updateStatistics,
     );
+      /* ========================================================= EXPORT PDF (admin) ========================================================= */
+      const pdfModal = document.getElementById("pdf-modal");
+      const pdfIso = (d) => {
+        const p = (n) => String(n).padStart(2, "0");
+        return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+      };
+      // Booking date (DD-MM-YYYY) as YYYY-MM-DD, so ranges compare as text
+      const bookingIsoDate = (dateString) => {
+        const d = convertDate(dateString);
+        return d ? pdfIso(d) : "";
+      };
+      const pdfRange = () => ({
+        from: document.getElementById("pdf-from").value,
+        to: document.getElementById("pdf-to").value,
+      });
+
+      function bookingsInRange(from, to) {
+        const walkerView = currentView === "walker";
+        return Object.entries(globalBookings)
+          .filter(([, r]) => r)
+          .map(([key, r]) => ({ key, r, iso: bookingIsoDate(r.date) }))
+          .filter((x) => x.iso && x.iso >= from && x.iso <= to)
+          // Walker view: live bookings only. Leader and admin views also get drafts and cancelled walks.
+          .filter((x) => !walkerView || (bookingStatus(x.r) === "live" && x.r.cancelled !== true))
+          .sort((a, b) => (a.iso + (a.r.start_time || "")).localeCompare(b.iso + (b.r.start_time || "")))
+          .map((x) => x.key);
+      }
+
+      function updatePdfCount() {
+        const { from, to } = pdfRange();
+        const countEl = document.getElementById("pdf-count");
+        const submit = document.getElementById("pdf-submit");
+        let n = 0;
+        let message = "";
+        if (!from || !to) {
+          message = "Choose a start and end date.";
+        } else if (from > to) {
+          message = "The start date must be on or before the end date.";
+        } else {
+          n = bookingsInRange(from, to).length;
+          message = `${n} walk booking(s) in this range.`;
+        }
+        countEl.textContent = message;
+        submit.disabled = false;
+      }
+
+      document.getElementById("export-pdf").addEventListener("click", () => {
+        const today = new Date();
+        const end = new Date(today);
+        end.setDate(end.getDate() + 30);
+        document.getElementById("pdf-from").value = pdfIso(today);
+        document.getElementById("pdf-to").value = pdfIso(end);
+        updatePdfCount();
+        pdfModal.classList.add("active");
+      });
+      document.getElementById("pdf-from").addEventListener("change", updatePdfCount);
+      document.getElementById("pdf-to").addEventListener("change", updatePdfCount);
+      document.getElementById("pdf-cancel").addEventListener("click", () => pdfModal.classList.remove("active"));
+
+      // Status badge colours: [background, text]
+      const PDF_BADGE = {
+        Live: [[220, 252, 231], [22, 101, 52]],
+        Draft: [[241, 245, 249], [71, 85, 105]],
+        Cancelled: [[254, 226, 226], [185, 28, 28]],
+      };
+      const pdfState = (r) => (r.cancelled === true ? "Cancelled" : bookingStatus(r) === "live" ? "Live" : "Draft");
+
+      // One table row per booked walk. Five columns:
+      // 1 date, time and duration (status badge below) | 2 walk name, description, comments
+      // 3 grade, distance, ascent, dogs | 4 leader, phones, WhatsApp badge, meeting point, directions, WIS
+      // The PDF's built-in font only draws Latin-1 characters. Map common
+      // punctuation to plain equivalents, keep accented letters, and replace
+      // anything else with "?" so it is visible rather than garbled.
+      const PDF_CHAR_MAP = {
+        "‘": "'", "’": "'", "‚": "'", "′": "'",
+        "“": '"', "”": '"', "„": '"', "″": '"',
+        "–": "-", "—": "-", "−": "-",
+        "…": "...", " ": " ", " ": " ", " ": " ",
+        "•": "-", "·": "-", "™": "TM",
+      };
+      function pdfText(value) {
+        const s = String(value ?? "").normalize("NFC").replace(/\r/g, "");
+        let out = "";
+        for (const ch of s) {
+          if (ch === "\n" || ch === "\t") { out += ch === "\t" ? " " : ch; continue; }
+          if (PDF_CHAR_MAP[ch]) { out += PDF_CHAR_MAP[ch]; continue; }
+          const code = ch.codePointAt(0);
+          const latin1 = (code >= 0x20 && code <= 0x7E) || (code >= 0xA0 && code <= 0xFF);
+          out += latin1 ? ch : "?";
+        }
+        return out;
+      }
+      // Single-line values (names, titles): line breaks become spaces
+      const pdfLine = (value) => pdfText(value).replace(/\s*\n\s*/g, " ").trim();
+
+      function pdfRow(key) {
+        const d = getBookingCardData(key);
+        const r = d.record;
+        const route = d.route || {};
+        const leader = findLeader(selectedLeaderId(r));
+        const dash = (v) => pdfText(v).trim() || "–";
+        const txt = (v) => pdfText(v).trim();
+        const grade = getMasterRouteGrade(route) || r.walk_grade || "";
+        const meeting = getMasterCoordinates(route);
+        const wis = getMasterWisUrl(route);
+
+        const col1 = dateTimeLines(r, route);
+
+        // First line is a blank placeholder; the bold walk name is drawn on it
+        const walkCell = [
+          " ",
+          txt(route.Route_Description),
+          txt(r.comments),
+          `WIS: ${wis || "–"}`,
+        ].filter(Boolean).join("\n");
+
+        const gradeCell = [
+          `Grade: ${[grade, route.Terrain, route.Scr].map(dash).join(" / ")}`,
+          `Dist: ${dash(route.Distance)}`,
+          `Asc: ${dash(route.Ascent)}`,
+          `Dogs: ${dash(route.Dogs)}`,
+        ].join("\n");
+
+        const leaderParts = [`Leader: ${pdfLine(dash(leader ? leaderFullName(leader) : r.leader_name))}`];
+        if (leader) {
+          [leader.phone_1, leader.phone_2].map(txt).filter(Boolean).forEach((p) => leaderParts.push(p));
+        }
+        let waLine = -1;
+        if (leader && leader.whats_app === "y") {
+          waLine = leaderParts.length;   // blank line; the badge is drawn on it
+          leaderParts.push("");
+        }
+        leaderParts.push("");
+        leaderParts.push(`Meeting Point: ${meeting ? `${meeting.latitude}, ${meeting.longitude}` : "–"}`);
+        if (meeting) leaderParts.push(`Map: ${meeting.url}`);
+        leaderParts.push("");
+        leaderParts.push(`Directions: ${dash(route.Directions)}`);
+
+        const cells = [col1, walkCell, gradeCell, leaderParts.join("\n")];
+        cells.waLine = waLine;
+        // Status badge only in leader and admin PDFs; walker PDFs are live walks only
+        cells.state = currentView === "walker" ? "" : pdfState(r);
+        cells.name = pdfLine(d.name) || "–";
+        return cells;
+      }
+
+      // Date, time and duration, one per line, no labels
+      function dateTimeLines(r, route) {
+        return [
+          formatWalkDate(r.date),
+          formatStartTime(r.start_time),
+          String(route.Total_Time ?? "").trim() || "–",
+        ].join("\n");
+      }
+
+      function buildWalksPdf(from, to) {
+        if (!window.jspdf || typeof window.jspdf.jsPDF !== "function") {
+          alert("The PDF library did not load. Check your connection and try again.");
+          return;
+        }
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+        if (typeof doc.autoTable !== "function") {
+          alert("The table plugin did not load. Check your connection and try again.");
+          return;
+        }
+        const keys = bookingsInRange(from, to);
+        const rows = keys.map(pdfRow);
+        const dmy = (iso) => iso.split("-").reverse().join("/");
+
+        doc.setFontSize(14);
+        doc.text(`Scheduled Walks: ${dmy(from)} to ${dmy(to)}`, 10, 12);
+        doc.setFontSize(9);
+        doc.setTextColor(100);
+        doc.text(`${keys.length} walk(s) · Generated ${new Date().toLocaleString("en-GB")}`, 10, 18);
+        doc.setTextColor(0);
+
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const drawBadge = (x, y, label, [fill, text]) => {
+          doc.setFontSize(6.5);
+          doc.setFont(undefined, "bold");
+          const width = doc.getTextWidth(label) + 4;
+          doc.setFillColor(...fill);
+          doc.roundedRect(x, y, width, 4, 1, 1, "F");
+          doc.setTextColor(...text);
+          doc.text(label, x + 2, y + 2.9);
+          doc.setTextColor(0);
+          doc.setFont(undefined, "normal");
+        };
+
+        doc.autoTable({
+          startY: 22,
+          head: [["Schedule", "Details", "Stats", "Leader & Location"]],
+          body: rows,
+          theme: "grid",
+          styles: { fontSize: 7.5, cellPadding: 2, valign: "top", overflow: "linebreak", lineColor: [200, 200, 200], lineWidth: 0.1 },
+          headStyles: { fillColor: [45, 91, 62], textColor: 255, fontStyle: "bold" },
+          columnStyles: {
+            0: { cellWidth: 34 },
+            1: { cellWidth: 72 },
+            2: { cellWidth: 50 },
+            3: { cellWidth: "auto" },
+          },
+          margin: { left: 10, right: 10, bottom: 12 },
+          // Keep each walk on one page, so the drawn name and badges line up with their cell
+          rowPageBreak: "avoid",
+          didDrawCell: (data) => {
+            if (data.section !== "body") return;
+            const x = data.cell.x + data.cell.padding("left");
+            // Status badge under the date, time and duration
+            const raw = data.row.raw || [];
+            if (data.column.index === 1 && raw.name) {
+              doc.setFontSize(7.5);
+              doc.setFont(undefined, "bold");
+              const line = doc.splitTextToSize(raw.name, data.cell.contentWidth)[0] || "";
+              doc.text(line, x, data.cell.y + data.cell.padding("top") + 2.1);
+              doc.setFont(undefined, "normal");
+            }
+            if (data.column.index === 0) {
+              const state = raw.state;
+              if (!state) return;
+              doc.setFontSize(7.5);
+              const textHeight = doc.getTextDimensions(data.cell.text).h;
+              drawBadge(x, data.cell.y + data.cell.padding("top") + textHeight + 1.5, state.toUpperCase(), PDF_BADGE[state]);
+            }
+            // (walk name is drawn below, in column 2)
+            // WhatsApp badge on the line after the phone numbers
+            if (data.column.index === 3) {
+              const idx = raw.waLine ?? -1;
+              if (idx < 0) return;
+              const prefix = String(raw[3] ?? "").split("\n").slice(0, idx).join("\n");
+              doc.setFontSize(7.5);
+              const prefixHeight = prefix
+                ? doc.getTextDimensions(doc.splitTextToSize(prefix, data.cell.contentWidth)).h
+                : 0;
+              drawBadge(x, data.cell.y + data.cell.padding("top") + prefixHeight + 0.5, "WHATSAPP", [[220, 252, 231], [22, 101, 52]]);
+            }
+          },
+          didDrawPage: (data) => {
+            doc.setFontSize(8);
+            doc.setTextColor(120);
+            doc.text(`Page ${data.pageNumber}`, pageWidth - 10, pageHeight - 6, { align: "right" });
+            doc.setTextColor(0);
+          },
+        });
+        doc.save(`walk-bookings-${from}-to-${to}.pdf`);
+      }
+
+      document.getElementById("pdf-submit").addEventListener("click", () => {
+        const { from, to } = pdfRange();
+        if (!from || !to || from > to) return;
+        if (bookingsInRange(from, to).length === 0) {
+          document.getElementById("pdf-count").textContent = "No walk bookings in this range. Choose different dates.";
+          return;
+        }
+        // Close the dialog first, so it closes even if the PDF step fails
+        pdfModal.classList.remove("active");
+        try {
+          buildWalksPdf(from, to);
+        } catch (err) {
+          console.error("PDF export failed:", err);
+          alert(`Could not create the PDF: ${err.message || err}`);
+        }
+      });
+
       /* ========================================================= EXPORT CSV ========================================================= */ document
       .getElementById("export-csv")
       .addEventListener("click", () => {
@@ -4653,20 +4962,6 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       });
       document.getElementById("social-cancel").addEventListener("click", closeSocialModal);
 
-      /* ========================================================= ONE-OFF: LOAD TEST LEADERS INTO /leaders =========================================================
-         Writes only leaders/{leader_id}. Does not touch walk_bookings or social_events.
-         Remove this block once the leaders path is in use. */
-      document.getElementById("seed-leaders").addEventListener("click", async () => {
-        if (!isAdminView() || !db) return;
-        if (!confirm(`Write ${LEADER_LOOKUP.length} test leaders to the leaders path? Existing leaders with the same IDs will be overwritten.`)) return;
-        try {
-          await Promise.all(LEADER_LOOKUP.map((l) => set(ref(db, "leaders/" + l.leader_id), l)));
-          alert(`Wrote ${LEADER_LOOKUP.length} test leaders to leaders/.`);
-        } catch (err) {
-          console.error("Seeding leaders failed.", err);
-          alert("Writing test leaders failed. Check the console and the database rules.");
-        }
-      });
       document.getElementById("social-delete").addEventListener("click", () => {
         if (!editingSocialKey || !isAdminView()) return;
         if (!confirm("Delete this social event?")) return;
@@ -4733,7 +5028,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         document.getElementById("admin-container").hidden = false;
         document.getElementById("statistics-dashboard").hidden = view === "walker";
 
-        ["add-walk-to-schedule", "add-social-event", "seed-leaders", "export-csv", "clear-all"].forEach((id) => {
+        ["add-walk-to-schedule", "add-social-event", "export-csv", "clear-all"].forEach((id) => {
           document.getElementById(id).hidden = !admin;
         });
 
