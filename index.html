@@ -246,8 +246,8 @@
     .day-cell {
       border: 1px solid var(--border);
       border-radius: 10px;
-      min-height: 86px;
-      padding: 6px;
+      min-height: 76px;
+      padding: 5px;
       background: #fff;
       display: flex;
       flex-direction: column;
@@ -991,13 +991,13 @@
       }
 
       .day-cell {
-        min-height: 100px;
-        padding: 5px;
+        min-height: 76px;
+        padding: 4px;
       }
 
       .slot {
         font-size: 0.65rem;
-        padding: 5px;
+        padding: 3px 5px;
       }
 
       .stats-summary {
@@ -5267,7 +5267,9 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
             doc.setTextColor(0);
           },
         });
-        doc.save(`walk-bookings-${from}-to-${to}.pdf`);
+        doc.save(currentView === "walker"
+          ? `CBMW Walk Programme ${from} to ${to}.pdf`
+          : `walk-bookings-${from}-to-${to}.pdf`);
       }
 
       document.getElementById("pdf-submit").addEventListener("click", () => {
