@@ -5454,12 +5454,16 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       setWeek();
       setInterval(setWeek, 15 * 60 * 1000); // roll over to the new week at midnight
       // Tell the WordPress page how tall the list is, so the frame fits it
+      // The page body keeps the full viewport height, so the list container is what is measured
+      const list = document.getElementById("admin-container");
       const sendHeight = () => {
         if (window.parent !== window) {
-          window.parent.postMessage({ type: "cbmw-week-height", height: document.documentElement.scrollHeight }, "*");
+          const height = Math.ceil(list.getBoundingClientRect().height) + 8;
+          window.parent.postMessage({ type: "cbmw-week-height", height }, "*");
         }
       };
-      new ResizeObserver(sendHeight).observe(document.body);
+      new ResizeObserver(sendHeight).observe(list);
+      sendHeight();
     }
 
     /* ========================================================= START ========================================================= */ if (VIEW_FROM_HOST) {
