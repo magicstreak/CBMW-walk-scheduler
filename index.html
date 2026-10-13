@@ -1678,6 +1678,7 @@
     /* Summer programme walks in the walker list: yellow edge, like the calendar */
     tr.summer-row td:first-child { box-shadow: inset 5px 0 0 #eab308; }
     .summer-badge { background: #fde68a; color: #713f12; }
+    tr.summer-row .summer-edit-btn { padding: 6px 12px; font-size: 0.85rem; }
     .summer-details { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 2px; }
     .summer-time { font-weight: 600; color: var(--text-muted); font-size: 0.85rem; }
     .walker-date-count { margin-left: 10px; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); }
@@ -1999,6 +2000,16 @@
     .social-card-meta { display: flex; gap: 14px; flex-wrap: wrap; color: var(--text-muted); font-weight: 600; font-size: 0.95rem; margin-bottom: 14px; }
     .social-card-line { margin: 0 0 12px; font-size: 0.95rem; }
     .social-card-desc { white-space: pre-wrap; line-height: 1.55; background: #fdf4ff; border: 1px solid #f5d0fe; border-radius: 10px; padding: 12px 14px; font-size: 0.95rem; }
+    /* Embedded on the WordPress page (?view=walker&embed=week): the walker list only */
+    body.embed-week { background: #fff; margin: 0; padding: 0; }
+    body.embed-week .page-header,
+    body.embed-week .view-toggle-container,
+    body.embed-week .calendar-container,
+    body.embed-week #statistics-dashboard,
+    body.embed-week .table-filters,
+    body.embed-week .admin-header > div[style],
+    body.embed-week .collapse-button { display: none !important; }
+    body.embed-week .admin-container { margin: 0; padding: 0; border: none; box-shadow: none; background: transparent; }
   </style>
 </head>
 
@@ -3634,18 +3645,28 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         rec.meeting_point ? `Meeting point: ${rec.meeting_point}` : "",
         rec.contact ? `Booking: ${rec.contact}` : "",
       ].map((v) => String(v ?? "").trim()).filter(Boolean);
-      // Column order follows the table header: expand, date, grade, walk number, name, description, then the hidden walker columns
+      const detailHtml = `${details.length ? `<div class="summer-details">${escapeHtml(details.join(" · "))}</div>` : ""}${rec.description ? `<div>${escapeHtml(rec.description)}</div>` : ""}`;
+      const actionHtml = isAdminView() ? '<button type="button" class="btn btn-secondary summer-edit-btn">Edit</button>' : "";
+      // Column order follows the table header: expand, date, grade, walk number, name, description (walker), leader, pueblo, comments, notes (admin/leader), actions
       const values = [
         "",
         `${escapeHtml(tableDate(rec.date))}<br><span class="summer-time">${escapeHtml(formatStartTime(rec.start_time))}</span>`,
         '<span class="badge summer-badge">Summer</span>',
         "",
         `<strong>${escapeHtml(rec.title || "Summer walk")}</strong>`,
-        `${details.length ? `<div class="summer-details">${escapeHtml(details.join(" · "))}</div>` : ""}${rec.description ? `<div>${escapeHtml(rec.description)}</div>` : ""}`,
-        "", "", "", "", "",
+        detailHtml,
+        escapeHtml(rec.leader || ""),
+        "",
+        "",
+        detailHtml,
+        actionHtml,
       ];
       tr.innerHTML = headCells.map((th, i) => `<td${th.hidden ? " hidden" : ""} data-label="${escapeHtml(th.textContent.trim())}">${values[i] ?? ""}</td>`).join("");
       tr.addEventListener("click", () => openSocialCard(skey));
+      tr.querySelector(".summer-edit-btn")?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        openSocialModal(rec.date, skey);
+      });
       return tr;
     }
 
@@ -3679,8 +3700,9 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
 
       populateAdminFilters();
       let sortedKeys = getAdminVisibleKeys();
-      // Walker View: summer programme walks join the list. Date sort places them by date; other sorts add them at the end.
-      if (walkerMode) {
+      // Summer programme walks join the list in every view. Date sort places them by date; other sorts add them at the end.
+      {
+        const searchNow = (document.getElementById("admin-filter-search")?.value || "").trim().toLowerCase();
         const gradeNow = document.getElementById("admin-filter-grade")?.value || "ALL";
         const fromNow = document.getElementById("admin-filter-from")?.value || "";
         const toNow = document.getElementById("admin-filter-to")?.value || "";
@@ -3690,6 +3712,12 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           .filter((k) => {
             const iso = isoOfDmy(globalSocial[k].date);
             return iso && (!fromNow || iso >= fromNow) && (!toNow || iso <= toNow);
+          })
+          .filter((k) => {
+            if (!searchNow) return true;
+            const rec = globalSocial[k];
+            return [rec.title, rec.leader, rec.description, rec.meeting_point, rec.contact]
+              .some((v) => String(v ?? "").toLowerCase().includes(searchNow));
           })
           .map((k) => `SUMMER:${k}`);
         if (summerKeys.length && adminSortColumn === "date") {
@@ -5377,6 +5405,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
     /* Walker View shows "Upcoming Walks" as the table title */
     function updateWalkOffersTitle() {
       const title = document.getElementById("walk-offers-title");
+      if (isEmbedWeek() && currentView === "walker") { title.textContent = "This week's walks"; return; }
       if (currentView !== "walker") { title.textContent = "Walk Offers"; return; }
       const fromVal = document.getElementById("admin-filter-from")?.value || "";
       const toVal = document.getElementById("admin-filter-to")?.value || "";
@@ -5403,6 +5432,36 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       title.style.cursor = "pointer";
     })();
 
+    /* ========================================================= EMBED: THIS WEEK'S WALKS =========================================================
+       Used by the WordPress page (?view=walker&embed=week): the walker list only, filtered to the current Sunday to Saturday week. */
+    function isEmbedWeek() {
+      return new URLSearchParams(window.location.search).get("embed") === "week";
+    }
+    function startEmbedWeek() {
+      document.body.classList.add("embed-week");
+      const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      const setWeek = () => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const sun = new Date(today);
+        sun.setDate(today.getDate() - today.getDay());
+        const sat = new Date(sun);
+        sat.setDate(sun.getDate() + 6);
+        document.getElementById("admin-filter-from").value = iso(sun);
+        document.getElementById("admin-filter-to").value = iso(sat);
+        renderAdminTable();
+      };
+      setWeek();
+      setInterval(setWeek, 15 * 60 * 1000); // roll over to the new week at midnight
+      // Tell the WordPress page how tall the list is, so the frame fits it
+      const sendHeight = () => {
+        if (window.parent !== window) {
+          window.parent.postMessage({ type: "cbmw-week-height", height: document.documentElement.scrollHeight }, "*");
+        }
+      };
+      new ResizeObserver(sendHeight).observe(document.body);
+    }
+
     /* ========================================================= START ========================================================= */ if (VIEW_FROM_HOST) {
       document.querySelector(`input[name="viewMode"][value="${VIEW_FROM_HOST}"]`).checked = true;
       document.querySelector(".view-toggle-container").classList.add("hidden");
@@ -5410,6 +5469,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
     // Data listeners start first, so an error while applying the host view cannot stop the data loading
     authReady.then(() => {
       initDataSync();
+      if (isEmbedWeek()) startEmbedWeek();
       if (VIEW_FROM_HOST) {
         try {
           setView(VIEW_FROM_HOST);
