@@ -1721,7 +1721,18 @@
       overflow: hidden;
       line-height: 1.4;
     }
+    /* Live walks changed after publishing */
+    .modified-panel { border: 1px solid #fde68a; background: #fffbeb; border-radius: 10px; padding: 12px 14px; margin: 14px 0; }
+    .modified-panel[hidden] { display: none; }
+    .modified-panel h4 { margin: 0 0 8px; font-size: 0.95rem; }
+    .modified-check { display: flex; gap: 8px; align-items: center; font-size: 0.9rem; margin-bottom: 8px; }
+    .modified-badge { display: inline-block; background: #fef3c7; color: #92400e; border-left: 4px solid #d97706; font-size: 0.72rem; font-weight: 700; padding: 2px 7px; border-radius: 6px; margin-right: 4px; }
+    .modified-banner { background: #fffbeb; border-left: 4px solid #d97706; color: #78350f; padding: 10px 14px; border-radius: 8px; margin: 0 0 14px; font-size: 0.92rem; }
     /* Cancelled walks */
+    /* Live walks changed after publishing: amber dashed outline on the calendar */
+    .slot.modified { outline: 2px dashed #d97706; outline-offset: -3px; }
+    .modified-chip { display: inline-block; margin-left: 6px; background: #fef3c7; color: #92400e; border-left: 4px solid #d97706; font-size: 0.72rem; font-weight: 700; padding: 2px 7px; border-radius: 6px; }
+    .hover-card-modified { margin: 0 0 10px; padding: 6px 10px; background: #fffbeb; border-left: 4px solid #d97706; border-radius: 6px; font-size: 0.8rem; color: #78350f; }
     .slot.cancelled {
       opacity: 0.75;
       border: 2px solid #dc2626;
@@ -2512,6 +2523,11 @@
                 placeholder="Anything helpful for the team creating the programme"></textarea>
             </div>
           </div>
+          <section class="modified-panel" id="modified-panel" hidden>
+            <h4>Live walk changes</h4>
+            <label class="modified-check"><input type="checkbox" id="input-modified" /> Mark as modified (walkers see a notice)</label>
+            <div class="form-group span-3"><label for="input-modified-note">What changed (shown to walkers)</label><textarea id="input-modified-note" rows="2" placeholder="e.g. Meeting time moved to 9:30"></textarea></div>
+          </section>
           <section class="override-panel" id="override-panel" hidden>
             <h4>Adjust for this booking only</h4>
             <p class="override-note">Empty fields use the master walk. Changes to the master walk still apply to any field left empty here.</p>
@@ -3169,6 +3185,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
                   );
                   if (isDraft(bookedData)) slotEl.classList.add("draft");
                   if (isCancelled(bookedData)) slotEl.classList.add("cancelled");
+                  else if (bookedData.modified === true) slotEl.classList.add("modified");
 
                   /*
                   * Get the Walk ID from:
@@ -3265,6 +3282,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
                 );
                   if (isDraft(bookedData)) slotEl.classList.add("draft");
                   if (isCancelled(bookedData)) slotEl.classList.add("cancelled");
+                  else if (bookedData.modified === true) slotEl.classList.add("modified");
 
                 setSlotLabel(slotEl, bookedSlotLabel(bookedData, walkID), grade, bookedData.start_time);
 
@@ -3808,7 +3826,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           </td>
           <td data-label="Grade"><span class="badge ${currentView === "walker" ? "badge-mono" : ""} grade-${escapeHtml(record.walk_grade || "")}">${escapeHtml(record.walk_grade || "-")}</span></td>
           <td class="walkid-col" data-label="Walk No">${escapeHtml(record.walk_number || record.walk_id || "-")}</td>
-          <td data-label="Walk name">${cancelledBadge(record)}${escapeHtml(displayWalkName || "-")}${walkerStats}</td>
+          <td data-label="Walk name">${cancelledBadge(record)}${modifiedBadge(record)}${escapeHtml(displayWalkName || "-")}${walkerStats}</td>
           <td class="walker-only-col" data-label="Description">${walkerDescriptionCell(record)}</td>
           <td class="hide-in-walker" data-label="Leader">${escapeHtml(record.leader_name || "-")}</td>
           <td class="hide-in-walker" data-label="Pueblo">${escapeHtml(displayPueblo || "-")}</td>
@@ -4006,10 +4024,11 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       return `
         <div class="hover-card-head">
           <span class="grade-chip grade-${escapeHtml(grade)}">${escapeHtml(grade || "-")}</span>
-          ${statusChip(d.record)}${cancelledChip(d.record)}
+          ${statusChip(d.record)}${cancelledChip(d.record)}${modifiedChipHtml(d.record)}
           <span>${escapeHtml(d.record.date || "")}</span>
         </div>
         <div class="hover-card-title">${escapeHtml(d.name || "Untitled walk")}</div>
+        ${modifiedHoverNote(d.record)}
         <div class="hover-card-stats">
           <div class="hover-card-stats-label">Walk stats</div>
           <div class="hover-card-stats-labels">Distance / Ascent / Grade / Terrain / SCR / X</div>
@@ -4139,6 +4158,22 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       return isCancelled(record) ? '<span class="cancelled-badge">Cancelled</span> ' : "";
     }
 
+    function modifiedBadge(record) {
+      return record?.modified === true && !isCancelled(record) ? '<span class="modified-badge">Changed</span> ' : "";
+    }
+    function modifiedChipHtml(record) {
+      return record?.modified === true && !isCancelled(record) ? '<span class="modified-chip">Changed</span>' : "";
+    }
+    function modifiedHoverNote(record) {
+      if (record?.modified !== true || isCancelled(record)) return "";
+      const note = String(record.modified_note ?? "").trim();
+      return `<div class="hover-card-modified">Changed since publishing${note ? ": " + escapeHtml(note) : ""}</div>`;
+    }
+    function modifiedBanner(record) {
+      if (record?.modified !== true || isCancelled(record)) return "";
+      const note = String(record.modified_note ?? "").trim();
+      return `<div class="modified-banner"><strong>This walk has changed since it was published.</strong>${note ? " " + escapeHtml(note) : ""}</div>`;
+    }
     function cancelBanner(record) {
       return isCancelled(record) ? '<div class="cancel-banner">This walk has been cancelled</div>' : "";
     }
@@ -4333,7 +4368,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
             : "This booking has no Walk Number linked to the master walks database."}</p>
           ${quoteBlock}`;
 
-      return cancelBanner(d.record) + body;
+      return cancelBanner(d.record) + modifiedBanner(d.record) + body;
     }
 
     function detailCardHtml(key) {
@@ -4587,6 +4622,9 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       }
 
       populateOverrideFields(existingData, walkNum, adminView && !admin);
+      document.getElementById("modified-panel").hidden = !(adminView && !admin);
+      document.getElementById("input-modified").checked = existingData?.modified === true;
+      document.getElementById("input-modified-note").value = existingData?.modified_note || "";
 
       if (existingData) {
         modalHeading.innerText = "Edit Walk Offer";
@@ -4739,6 +4777,14 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
             .value.trim(),
         };
         const existingRecord = globalBookings[compositeKey];
+        if (existingRecord?.cancelled === true) payload.cancelled = true;
+        if (isAdminView()) {
+          payload.modified = document.getElementById("input-modified").checked;
+          payload.modified_note = document.getElementById("input-modified-note").value.trim();
+        } else {
+          payload.modified = existingRecord?.modified === true;
+          payload.modified_note = existingRecord?.modified_note ?? "";
+        }
         if (isAdminView()) {
           let overrides;
           try {
