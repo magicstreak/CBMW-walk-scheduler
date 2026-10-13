@@ -353,6 +353,23 @@
       border-left-color: var(--color-VS);
     }
 
+    /* Leader and Admin views: booked walks filled with their grade colour. Walker view stays monochrome. */
+    body[data-view="leader"] .slot.booked:not(.cancelled),
+    body[data-view="admin"] .slot.booked:not(.cancelled) {
+      color: #fff;
+      box-shadow: none;
+    }
+    body[data-view="leader"] .slot.booked.grade-E:not(.cancelled),
+    body[data-view="admin"] .slot.booked.grade-E:not(.cancelled) { background: var(--color-E); border-left-color: var(--color-E); }
+    body[data-view="leader"] .slot.booked.grade-M:not(.cancelled),
+    body[data-view="admin"] .slot.booked.grade-M:not(.cancelled) { background: var(--color-M); border-left-color: var(--color-M); }
+    body[data-view="leader"] .slot.booked.grade-MS:not(.cancelled),
+    body[data-view="admin"] .slot.booked.grade-MS:not(.cancelled) { background: var(--color-MS); border-left-color: var(--color-MS); }
+    body[data-view="leader"] .slot.booked.grade-S:not(.cancelled),
+    body[data-view="admin"] .slot.booked.grade-S:not(.cancelled) { background: var(--color-S); border-left-color: var(--color-S); }
+    body[data-view="leader"] .slot.booked.grade-VS:not(.cancelled),
+    body[data-view="admin"] .slot.booked.grade-VS:not(.cancelled) { background: var(--color-VS); border-left-color: var(--color-VS); }
+
     /* ========================================================= BUTTONS ========================================================= */
     .btn {
       padding: 10px 20px;
