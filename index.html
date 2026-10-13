@@ -2975,26 +2975,10 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       refreshLeaderDetails();
     }
 
-    // Shows the chosen leader's contact details under the Name of Leader field (booking modal)
+    // Booking modal: only the leader's name is shown (chosen in the Name of Leader dropdown), so no details panel is filled in
     function refreshLeaderDetails() {
       const box = document.getElementById("leader-details");
-      const select = document.getElementById("input-leader");
-      if (!box || !select) return;
-      const leader = findLeader(select.value);
-      if (!leader) {
-        box.innerHTML = "";
-        return;
-      }
-      const linked = findLeader(leader.linked_leader);
-      box.innerHTML = `
-        <div class="offer-card-grid">
-          ${readOnlyFieldHtml("Leader ID", leader.leader_id)}
-          ${readOnlyFieldHtml("Phone 1", leader.phone_1)}
-          ${readOnlyFieldHtml("Phone 2", leader.phone_2)}
-          ${readOnlyFieldHtml("Email", leader.email_add)}
-          ${readOnlyFieldHtml("WhatsApp", leader.whats_app === "y" ? "Yes" : "No")}
-          ${readOnlyFieldHtml("Linked leader", linked ? `${leaderFullName(linked)} (${linked.leader_id})` : leader.linked_leader)}
-        </div>`;
+      if (box) box.innerHTML = "";
     }
 
     function getMasterRouteName(walk) {
