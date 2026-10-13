@@ -4020,7 +4020,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       const or = (v) => (v === undefined || v === null || String(v).trim() === "" ? "Not recorded" : escapeHtml(v));
       const dash = (v) => (v === undefined || v === null || String(v).trim() === "" ? "–" : escapeHtml(v));
       const description = String(r.Route_Description ?? "").trim();
-      const stats = [r.Distance, r.Ascent, grade, r.Terrain, r.Scr, xFlag(r)].map(dash).join(" / ");
+      const stats = [r.Distance, r.Ascent, grade, r.Terrain, ...[r.Scr, xFlag(r)].filter((v) => String(v ?? "").trim())].map(dash).join(" / ");
       return `
         <div class="hover-card-head">
           <span class="grade-chip grade-${escapeHtml(grade)}">${escapeHtml(grade || "-")}</span>
@@ -4031,7 +4031,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         ${modifiedHoverNote(d.record)}
         <div class="hover-card-stats">
           <div class="hover-card-stats-label">Walk stats</div>
-          <div class="hover-card-stats-labels">Distance / Ascent / Grade / Terrain / SCR / X</div>
+          <div class="hover-card-stats-labels">Distance / Ascent / Grade</div>
           <div class="hover-card-stats-value">${stats}</div>
         </div>
         <div class="hover-card-row"><span>Start</span>${or(d.record.start_time)}</div>
@@ -4355,7 +4355,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
             ${stat("Distance", dash(r.Distance))}
             ${stat("Ascent", dash(r.Ascent))}
             ${stat("Duration", dash(r.Total_Time))}
-            ${stat("Grade / Terrain / SCR / X", [grade, r.Terrain, r.Scr, xFlag(r)].map(dash).join(" / "))}
+            ${stat("Grade", [grade, r.Terrain, ...[r.Scr, xFlag(r)].filter((v) => String(v ?? "").trim())].map(dash).join(" / "))}
           </div>
           ${quoteBlock}
           <button type="button" class="walk-levels-link" data-open-levels>What do the walk levels mean?</button>
