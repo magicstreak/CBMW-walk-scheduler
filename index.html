@@ -240,14 +240,14 @@
     .days-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      gap: 10px;
+      gap: 6px;
     }
 
     .day-cell {
       border: 1px solid var(--border);
       border-radius: 10px;
-      min-height: 130px;
-      padding: 10px;
+      min-height: 86px;
+      padding: 6px;
       background: #fff;
       display: flex;
       flex-direction: column;
@@ -260,20 +260,20 @@
 
     .day-number {
       font-weight: 700;
-      margin-bottom: 8px;
-      font-size: 0.95rem;
+      margin-bottom: 4px;
+      font-size: 0.85rem;
     }
 
     .slots-container {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 3px;
       flex-grow: 1;
     }
 
     /* ========================================================= SLOTS ========================================================= */
     .slot {
-      padding: 6px 8px;
+      padding: 3px 6px;
       font-size: 0.75rem;
       border-radius: 6px;
       cursor: pointer;
@@ -4024,7 +4024,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       return `
         <div class="hover-card-head">
           <span class="grade-chip grade-${escapeHtml(grade)}">${escapeHtml(grade || "-")}</span>
-          ${statusChip(d.record)}${cancelledChip(d.record)}${modifiedChipHtml(d.record)}
+          ${currentView === "walker" ? "" : statusChip(d.record)}${cancelledChip(d.record)}${modifiedChipHtml(d.record)}
           <span>${escapeHtml(d.record.date || "")}</span>
         </div>
         <div class="hover-card-title">${escapeHtml(d.name || "Untitled walk")}</div>
