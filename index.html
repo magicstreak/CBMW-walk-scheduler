@@ -4423,7 +4423,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         leaderRows,
         d.pueblo && currentView !== "walker" ? walkInfoRow("Pueblo:", escapeHtml(d.pueblo)) : "",
         wisUrl
-          ? walkInfoRow("Route map:", `<a href="${escapeHtml(wisUrl)}" target="_blank" rel="noopener noreferrer">${currentView === "walker" ? "Walks In Spain" : "View map link"} ↗</a>`)
+          ? walkInfoRow("WiS link:", `<a href="${escapeHtml(wisUrl)}" target="_blank" rel="noopener noreferrer">${currentView === "walker" ? "Walks In Spain" : "View map link"} ↗</a>`)
           : "",
         gpxName && d.walkId
           ? walkInfoRow("GPX route:", `<a href="#" data-gpx-download="${escapeHtml(d.walkId)}" data-gpx-name="${escapeHtml(gpxName)}">Download GPX ↓</a>`)
