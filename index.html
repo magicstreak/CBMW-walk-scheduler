@@ -499,7 +499,7 @@
     .badge.badge-mono.grade-VS { border-left-color: var(--color-VS); }
     /* Distance and ascent: same style as the grade badges, in a neutral colour */
     .stat-badges { margin-top: 4px; display: flex; flex-wrap: wrap; gap: 4px; }
-    .badge.stat-badge { background: #64748b; font-weight: 600; }
+    .badge.stat-badge { background: transparent; color: #64748b; border: 1px solid #cbd5e1; font-weight: 500; font-size: 0.7rem; padding: 2px 6px; }
 
     /* ========================================================= STATISTICS ========================================================= */
     .stats-filter {
@@ -1685,13 +1685,16 @@
     }
     /* Walker View: date headers in the Upcoming Walks list */
     .offers-table tr.walker-date-group th {
-      background: #f1f5f9;
-      color: var(--text);
+      background: #e6efe9;
+      color: #2d5b3e;
       font-weight: 700;
+      font-size: 0.95rem;
       text-align: left;
-      padding: 8px 12px;
-      border-top: 1px solid var(--border);
+      padding: 9px 12px;
+      border-top: 1px solid #cfe0d4;
+      border-left: 4px solid #2d5b3e;
     }
+    .offers-table tr.walker-date-group:first-child th { border-top: none; }
     /* Summer programme walks in the walker list: yellow edge, like the calendar */
     tr.summer-row td:first-child { box-shadow: inset 5px 0 0 #eab308; }
     .summer-badge { background: #fde68a; color: #713f12; }
@@ -1702,6 +1705,47 @@
     .calendar-container.calendar-collapsed .weekdays,
     .calendar-container.calendar-collapsed .days-grid,
     .calendar-container.calendar-collapsed .legend-wrap { display: none; }
+    /* Walker View mode header: List / Month / Day switch, with the grade filter on the right */
+    .walker-mode-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 0 0 12px; }
+    .walker-mode-header .filter-field { display: flex; align-items: center; gap: 8px; }
+    .walker-mode-header .filter-field label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
+    .walker-mode-header .filter-field select { padding: 7px 10px; border: 1px solid #d4d4d8; border-radius: 8px; background: #fff; font: inherit; font-size: 0.9rem; }
+    body[data-view="leader"] .walker-mode-header,
+    body[data-view="admin"] .walker-mode-header { display: none; }
+    body.embed-week .walker-mode-header { display: none !important; }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="list"] .calendar-container,
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="day"] .calendar-container { display: none; }
+    /* Walker View: Month and Day pick their dates from the calendar or picker, so the From / To search filters are hidden */
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="month"] .walker-date-range,
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="day"] .walker-date-range { display: none; }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="month"] .walker-search-field,
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="day"] .walker-search-field { display: none; }
+    /* Walker View, Month and Day: no "Clear filters" button and no "Showing n of n" count */
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="month"] #admin-filter-clear,
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="month"] #admin-filter-count,
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="day"] #admin-filter-clear,
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="day"] #admin-filter-count { display: none; }
+    .walker-mode-switch { display: inline-flex; gap: 6px; flex-wrap: wrap; }
+    .walker-mode-btn {
+      padding: 8px 16px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: #fff;
+      color: var(--text);
+      font: inherit;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    .walker-mode-btn:hover { border-color: var(--primary); }
+    .walker-mode-btn[aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .walker-mode-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+    .walker-day-picker { display: flex; align-items: center; gap: 8px; }
+    .walker-day-picker[hidden] { display: none; }
+    .walk-meeting-map { display: block; width: 100%; height: 240px; border: 1px solid var(--border); border-radius: 10px; margin: 10px 0 4px; }
+    @media (max-width: 600px) { .walk-meeting-map { height: 200px; } }
+    .walker-day-picker label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
+    .walker-day-picker input { padding: 7px 10px; border: 1px solid #d4d4d8; border-radius: 8px; background: #fff; font: inherit; font-size: 0.9rem; }
     /* Booking overrides */
     .override-panel {
       border: 1px dashed #cbd5e1;
@@ -2064,6 +2108,18 @@
       <label for="view-admin">Admin View</label>
     </div>
   </div>
+  <!-- ======================================================= WALKER MODE HEADER (Walker View only) ======================================================= -->
+  <div class="walker-mode-header" id="walker-mode-header">
+    <div class="walker-mode-switch" role="group" aria-label="Walker calendar mode">
+      <button type="button" class="walker-mode-btn" data-walker-mode-btn="list" aria-pressed="true">List</button>
+      <button type="button" class="walker-mode-btn" data-walker-mode-btn="month" aria-pressed="false">Month</button>
+      <button type="button" class="walker-mode-btn" data-walker-mode-btn="day" aria-pressed="false">Day</button>
+    </div>
+    <div class="walker-day-picker" id="walker-day-picker" hidden>
+      <label for="walker-day-input">Date</label>
+      <input type="date" id="walker-day-input" />
+    </div>
+  </div>
   <!-- ======================================================= CALENDAR ======================================================= -->
   <div class="calendar-container">
     <div class="calendar-header">
@@ -2169,7 +2225,7 @@
     <div class="walk-offers-body">
     <!-- ======================================================= WALK OFFERS FILTERS ======================================================= -->
     <div class="table-filters">
-      <div class="filter-field grow">
+      <div class="filter-field grow walker-search-field">
         <label for="admin-filter-search">Search</label>
         <input type="search" id="admin-filter-search" placeholder="Search all columns" />
       </div>
@@ -2207,11 +2263,11 @@
           <button type="button" class="nav-btn" id="admin-filter-date-clear" hidden>Clear date</button>
         </div>
       </div>
-      <div class="filter-field">
+      <div class="filter-field walker-date-range">
         <label for="admin-filter-from">From</label>
         <input type="date" id="admin-filter-from" />
       </div>
-      <div class="filter-field">
+      <div class="filter-field walker-date-range">
         <label for="admin-filter-to">To</label>
         <input type="date" id="admin-filter-to" />
       </div>
@@ -3321,24 +3377,8 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           // Add slots to day
           dayCell.appendChild(slotsContainer);
 
-          // Walker View: clicking a day sets the From and To date filters to that day; click again to clear
           const dayIso = `${dateISO.slice(6, 10)}-${dateISO.slice(3, 5)}-${dateISO.slice(0, 2)}`;
-          if (currentView === "walker") {
-            dayCell.classList.add("selectable-day");
-            const fromEl = document.getElementById("admin-filter-from");
-            const toEl = document.getElementById("admin-filter-to");
-            if (fromEl && toEl && fromEl.value === dayIso && toEl.value === dayIso) dayCell.classList.add("selected-day");
-            dayCell.addEventListener("click", (e) => {
-              if (e.target.closest(".slot")) return; // slot clicks open their own card
-              const fromEl = document.getElementById("admin-filter-from");
-              const toEl = document.getElementById("admin-filter-to");
-              const alreadySet = fromEl.value === dayIso && toEl.value === dayIso;
-              fromEl.value = alreadySet ? "" : dayIso;
-              toEl.value = alreadySet ? "" : dayIso;
-              renderCalendar();
-              renderAdminTable();
-            });
-          }
+
 
           // Add day to calendar
           daysGrid.appendChild(dayCell);
@@ -3493,7 +3533,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       ["admin-filter-from", "admin-filter-to"]
         .forEach((id) => { document.getElementById(id).value = ""; });
       renderAdminTable();
-      if (currentView === "walker") renderCalendar();
+      if (currentView === "walker") { syncWalkerRange(); updateWalkOffersTitle(); renderCalendar(); }
     });
 
     // Status toggle in the Walk Offers table: Draft <-> Live in one click
@@ -4327,6 +4367,11 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       const dogs = String(r.Dogs ?? "").trim();
       const wisUrl = getMasterWisUrl(d.route);
       const meeting = getMasterCoordinates(d.route);
+      // Map of the meeting point under the location details (only for valid coordinates)
+      const meetingMapOk = meeting && meeting.url && Number.isFinite(Number(meeting.latitude)) && Number.isFinite(Number(meeting.longitude));
+      const meetingMap = meetingMapOk
+        ? `<iframe class="walk-meeting-map" title="Meeting point map" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?q=${encodeURIComponent(Number(meeting.latitude))},${encodeURIComponent(Number(meeting.longitude))}&amp;z=14&amp;output=embed"></iframe>`
+        : "";
 
       const stat = (label, value) => `
         <div class="walk-stat">
@@ -4353,11 +4398,11 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       const organiser = [
         leaderRows,
         d.pueblo && currentView !== "walker" ? walkInfoRow("Pueblo:", escapeHtml(d.pueblo)) : "",
-        meeting && meeting.url
-          ? walkInfoRow("Meeting point:", `<a href="${escapeHtml(meeting.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(meeting.latitude)}, ${escapeHtml(meeting.longitude)} ↗</a>`)
-          : "",
         wisUrl
           ? walkInfoRow("Route map:", `<a href="${escapeHtml(wisUrl)}" target="_blank" rel="noopener noreferrer">${currentView === "walker" ? "Walks In Spain" : "View map link"} ↗</a>`)
+          : "",
+        meeting && meeting.url
+          ? walkInfoRow("Meeting point:", `<a href="${escapeHtml(meeting.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(meeting.latitude)}, ${escapeHtml(meeting.longitude)} ↗</a>`)
           : "",
       ].join("");
 
@@ -4378,6 +4423,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           <button type="button" class="walk-levels-link" data-open-levels>What do the walk levels mean?</button>
           <div class="walk-section-title">Leader and location</div>
           <div class="walk-info">${organiser}</div>
+          ${meetingMap}
           ${directions ? `<div class="walk-section-title">Driving directions</div><div class="walk-directions">${escapeHtml(directions)}</div>` : ""}
           ${dogs ? `<div class="walk-dogs">🐾 ${escapeHtml(dogs)}</div>` : ""}`
         : `<p class="detail-missing">${d.walkId
@@ -5400,10 +5446,12 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       .addEventListener("click", () => {
         currentDate.setMonth(currentDate.getMonth() - 1);
         renderCalendar();
+        afterMonthChange();
       });
     document.getElementById("next-month").addEventListener("click", () => {
       currentDate.setMonth(currentDate.getMonth() + 1);
       renderCalendar();
+      afterMonthChange();
     });
       /* ========================================================= MODAL BUTTON ========================================================= */ document
       .getElementById("close-modal")
@@ -5412,6 +5460,70 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       .getElementById("clear-all")
       .addEventListener("click", clearAllRecords);
       /* ========================================================= VIEW SWITCHER ========================================================= */
+      /* ===== Walker View: List / Month / Day mode =====
+         List: all upcoming walks (today onwards), calendar hidden.
+         Month: the displayed month's walks, calendar shown.
+         Day: the selected day's walks, calendar shown; click a day to choose it. */
+      let walkerMode = "list";
+      let walkerDay = "";
+      const modeIso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      const gradeFieldHome = (() => {
+        const field = document.getElementById("admin-filter-grade")?.closest(".filter-field");
+        return field ? { field, parent: field.parentNode, next: field.nextSibling } : null;
+      })();
+      // The grade filter sits in the mode header in Walker View and returns to the Walk Offers filters in the other views
+      function placeGradeFilter() {
+        if (!gradeFieldHome) return;
+        if (currentView === "walker") document.getElementById("walker-mode-header").appendChild(gradeFieldHome.field);
+        else gradeFieldHome.parent.insertBefore(gradeFieldHome.field, gradeFieldHome.next);
+      }
+      function setWalkerRange(from, to) {
+        const fromEl = document.getElementById("admin-filter-from");
+        const toEl = document.getElementById("admin-filter-to");
+        if (fromEl) fromEl.value = from;
+        if (toEl) toEl.value = to;
+      }
+      function syncWalkerRange() {
+        if (currentView !== "walker") return;
+        if (walkerMode === "list") {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          setWalkerRange(modeIso(today), "");
+        } else if (walkerMode === "month") {
+          const first = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+          const last = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+          setWalkerRange(modeIso(first), modeIso(last));
+        } else {
+          setWalkerRange(walkerDay, walkerDay);
+        }
+      }
+      function setWalkerMode(mode) {
+        walkerMode = mode;
+        if (mode === "day") {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const inMonth = today.getFullYear() === currentDate.getFullYear() && today.getMonth() === currentDate.getMonth();
+          walkerDay = modeIso(inMonth ? today : new Date(currentDate.getFullYear(), currentDate.getMonth(), 1));
+        }
+        document.body.dataset.walkerMode = mode;
+        const picker = document.getElementById("walker-day-picker");
+        if (picker) {
+          picker.hidden = mode !== "day";
+          document.getElementById("walker-day-input").value = walkerDay;
+        }
+        document.querySelectorAll("[data-walker-mode-btn]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.walkerModeBtn === mode)));
+        syncWalkerRange();
+        updateWalkOffersTitle();
+        renderCalendar();
+        renderAdminTable();
+      }
+      // Month arrows and "Go to month": the month range follows the displayed month; the day in Day mode stays selected
+      function afterMonthChange() {
+        syncWalkerRange();
+        updateWalkOffersTitle();
+        renderAdminTable();
+      }
+
       function setView(view) {
         currentView = view;
         editingOfferKey = null;
@@ -5423,6 +5535,8 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         document.querySelector(".calendar-container").classList.remove("calendar-collapsed");
         document.getElementById("calendar-collapse").textContent = "Hide calendar";
         document.body.dataset.view = view;
+        placeGradeFilter();
+        if (view !== "walker") setWalkerRange("", "");
         const admin = view === "admin";
         const showPanels = view !== "walker";
 
@@ -5438,6 +5552,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         renderCalendar();
         renderAdminTable();
         if (showPanels) updateStatistics();
+        if (view === "walker") setWalkerMode(walkerMode);
       }
 
       document.querySelectorAll('input[name="viewMode"]').forEach((radio) => {
@@ -5445,6 +5560,16 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           if (e.target.checked) setView(e.target.value);
         });
       });
+    document.querySelectorAll("[data-walker-mode-btn]").forEach((btn) => {
+      btn.addEventListener("click", () => setWalkerMode(btn.dataset.walkerModeBtn));
+    });
+    document.getElementById("walker-day-input").addEventListener("change", (e) => {
+      walkerDay = e.target.value || modeIso(new Date(new Date().setHours(0, 0, 0, 0)));
+      e.target.value = walkerDay;
+      syncWalkerRange();
+      updateWalkOffersTitle();
+      renderAdminTable();
+    });
     // Clear the selected day from the Date filter
     document.getElementById("admin-filter-date-clear").addEventListener("click", () => {
       selectedWalkerDate = null;
@@ -5459,6 +5584,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       if (!y || !m) return;
       currentDate = new Date(y, m - 1, 1);
       renderCalendar();
+      afterMonthChange();
     });
 
     (function () {
@@ -5478,6 +5604,8 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       const title = document.getElementById("walk-offers-title");
       if (isEmbedWeek() && currentView === "walker") { title.textContent = "This week's walks"; return; }
       if (currentView !== "walker") { title.textContent = "Walk Offers"; return; }
+      if (walkerMode === "list") { title.textContent = "Upcoming Walks"; return; }
+      if (walkerMode === "month") { title.textContent = `Walks in ${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`; return; }
       const fromVal = document.getElementById("admin-filter-from")?.value || "";
       const toVal = document.getElementById("admin-filter-to")?.value || "";
       if (fromVal && fromVal === toVal) {
@@ -5544,6 +5672,8 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
     // Data listeners start first, so an error while applying the host view cannot stop the data loading
     authReady.then(() => {
       initDataSync();
+      placeGradeFilter();
+      if (!isEmbedWeek() && !VIEW_FROM_HOST && currentView === "walker") setWalkerMode(walkerMode);
       if (isEmbedWeek()) startEmbedWeek();
       if (VIEW_FROM_HOST) {
         try {
