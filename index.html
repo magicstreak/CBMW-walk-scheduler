@@ -2956,6 +2956,29 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       } catch (_) { return ""; }
     }
 
+    // Downloadable GPX route: the file text is kept in Firebase at walk_gpx/{walk key} and fetched only when clicked
+    document.addEventListener("click", async (e) => {
+      const link = e.target.closest("[data-gpx-download]");
+      if (!link) return;
+      e.preventDefault();
+      try {
+        const snap = await get(ref(dbWalks, "walk_gpx/" + link.dataset.gpxDownload));
+        const file = snap.val();
+        if (!file || !file.text) return alert("The GPX file could not be found.");
+        const url = URL.createObjectURL(new Blob([file.text], { type: "application/gpx+xml" }));
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = file.name || link.dataset.gpxName || "route.gpx";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      } catch (err) {
+        console.error("GPX download failed:", err);
+        alert("Could not download the GPX file. Check the database connection.");
+      }
+    });
+
     function renderMasterRouteValue(label, value) {
       if (label === "Meeting point" && value && value.url) {
         return `<a href="${escapeHtml(value.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(value.latitude)}, ${escapeHtml(value.longitude)} · Open in Google Maps ↗</a>`;
@@ -4367,6 +4390,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       const dogs = String(r.Dogs ?? "").trim();
       const wisUrl = getMasterWisUrl(d.route);
       const meeting = getMasterCoordinates(d.route);
+      const gpxName = String(d.route?.GPX_Name ?? "").trim();
       // Map of the meeting point under the location details (only for valid coordinates)
       const meetingMapOk = meeting && meeting.url && Number.isFinite(Number(meeting.latitude)) && Number.isFinite(Number(meeting.longitude));
       const meetingMap = meetingMapOk
@@ -4400,6 +4424,9 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         d.pueblo && currentView !== "walker" ? walkInfoRow("Pueblo:", escapeHtml(d.pueblo)) : "",
         wisUrl
           ? walkInfoRow("Route map:", `<a href="${escapeHtml(wisUrl)}" target="_blank" rel="noopener noreferrer">${currentView === "walker" ? "Walks In Spain" : "View map link"} ↗</a>`)
+          : "",
+        gpxName && d.walkId
+          ? walkInfoRow("GPX route:", `<a href="#" data-gpx-download="${escapeHtml(d.walkId)}" data-gpx-name="${escapeHtml(gpxName)}">Download GPX ↓</a>`)
           : "",
         meeting && meeting.url
           ? walkInfoRow("Meeting point:", `<a href="${escapeHtml(meeting.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(meeting.latitude)}, ${escapeHtml(meeting.longitude)} ↗</a>`)
