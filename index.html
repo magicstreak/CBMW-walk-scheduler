@@ -54,6 +54,12 @@
     }
 
     /* ========================================================= PAGE HEADER ========================================================= */
+    .page-header { position: relative; padding-left: 120px; min-height: 100px; display: flex; flex-direction: column; justify-content: center; }
+    .page-logo { position: absolute; top: 0; left: 0; height: 100px; width: auto; }
+    @media (max-width: 600px) {
+      .page-header { padding-left: 0; min-height: 0; display: block; }
+      .page-logo { position: static; display: block; height: 100px; margin: 0 auto 8px; }
+    }
     .page-header {
       text-align: center;
       margin-bottom: 32px;
@@ -1635,8 +1641,14 @@
     .filter-field[hidden],
     .offers-table th[hidden],
     .offers-table td[hidden] { display: none !important; }
+    th[data-leader-sort] .sort-indicator { display: none; }
+    .past-walks-toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 0.9rem; color: var(--text-muted); cursor: pointer; align-self: center; }
+    .past-walks-toggle[hidden] { display: none; }
     .preview-banner[hidden] { display: none; }
     .preview-banner { margin: 0 0 12px; padding: 10px 14px; border-radius: 8px; background: #fff7e0; border: 1px solid #f0c36d; color: #6b4b00; font-size: 0.92rem; }
+    /* Preview: drafts on the calendar are hatched and labelled so they are not mistaken for live walks */
+    body.previewing .slot.booked.draft { background: repeating-linear-gradient(45deg, #f1f5f9 0 6px, #e2e8f0 6px 12px); border: 2px dashed #64748b; }
+    body.previewing .slot.booked.draft::before { content: "DRAFT · "; font-weight: 700; font-size: 0.7rem; letter-spacing: 0.04em; color: #475569; }
     .walk-card-inline { padding: 16px 20px 20px; color: #1f2937; background: #fff; }
     .walk-card-inline .walk-quote { margin-bottom: 14px; }
     .day-cell.selectable-day { cursor: pointer; }
@@ -2112,7 +2124,7 @@
       vertical-align: middle;
     }
     /* Instruction line: shown in Leader and Admin views only, driven by the view attribute on <body> */
-    body[data-view="walker"] #page-instruction { display: none; }
+    body:not([data-view="leader"]):not([data-view="admin"]) #page-instruction { display: none; }
     /* ========================================================= SOCIAL EVENTS ========================================================= */
     .slot.social {
       background: linear-gradient(135deg, #fef3c7, #fbcfe8);
@@ -2165,6 +2177,7 @@
 <body>
   <!-- ======================================================= HEADER ======================================================= -->
   <header class="page-header">
+    <img class="page-logo" src="data:image/png;base64,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" alt="Costa Blanca Mountain Walkers logo" />
     <h1>Walk Schedule</h1>
     <p id="page-instruction">Click on a slot to schedule or edit a walk.</p>
   </header>
@@ -2276,14 +2289,15 @@
   </div>
   <!-- ======================================================= ADMIN ======================================================= -->
   <div class="admin-container" id="admin-container">
-    <div class="preview-banner" id="preview-banner" hidden>Walker preview: this is how walkers see the walks. Nothing can be changed here. Use the button to go back.</div>
+    <div class="preview-banner" id="preview-banner" hidden>Preview: this is how the walks will look to walkers. Drafts are shown with their status and are not visible to walkers. Nothing can be changed here.</div>
     <div class="admin-header">
       <h3 id="walk-offers-title">Upcoming Walks</h3>
       <div style="display: flex; gap: 8px; flex-wrap: wrap">
 
         <button class="btn btn-success" id="add-walk-to-schedule" hidden>Add Walk</button>
         <button class="btn btn-success" id="add-social-event" hidden>Add Event</button>
-        <button class="btn" id="preview-walker-btn" aria-pressed="false" hidden>Preview as walker</button>
+        <button class="btn" id="preview-walker-btn" aria-pressed="false" hidden>Preview</button>
+        <label class="past-walks-toggle" id="past-walks-label" hidden><input type="checkbox" id="past-walks-check" /> Show past walks</label>
         <button class="btn btn-success" id="export-pdf">Download</button>
         <button class="btn btn-success" id="export-csv" hidden>Export to CSV</button>
         <button class="btn btn-danger" id="clear-all" hidden>
@@ -2434,7 +2448,7 @@
         </div>
 
         <div class="stat-card">
-          <div class="stat-label">MS — Moderate Strenuous</div>
+          <div class="stat-label">MS — Moderately Strenuous</div>
 
           <div class="stat-value" style="color: var(--color-MS)" id="stat-MS">
             0
@@ -2564,37 +2578,37 @@
             <table class="leader-table">
               <thead>
                 <tr>
-                  <th class="sortable-header" data-leader-sort="leader">
+                  <th data-leader-sort="leader">
                     Leader
                     <span class="sort-indicator"> ↑ </span>
                   </th>
 
-                  <th class="sortable-header" data-leader-sort="E" style="text-align: center">
+                  <th data-leader-sort="E" style="text-align: center">
                     E
                     <span class="sort-indicator"> ↕ </span>
                   </th>
 
-                  <th class="sortable-header" data-leader-sort="M" style="text-align: center">
+                  <th data-leader-sort="M" style="text-align: center">
                     M
                     <span class="sort-indicator"> ↕ </span>
                   </th>
 
-                  <th class="sortable-header" data-leader-sort="MS" style="text-align: center">
+                  <th data-leader-sort="MS" style="text-align: center">
                     MS
                     <span class="sort-indicator"> ↕ </span>
                   </th>
 
-                  <th class="sortable-header" data-leader-sort="S" style="text-align: center">
+                  <th data-leader-sort="S" style="text-align: center">
                     S
                     <span class="sort-indicator"> ↕ </span>
                   </th>
 
-                  <th class="sortable-header" data-leader-sort="VS" style="text-align: center">
+                  <th data-leader-sort="VS" style="text-align: center">
                     VS
                     <span class="sort-indicator"> ↕ </span>
                   </th>
 
-                  <th class="sortable-header" data-leader-sort="total" style="text-align: center">
+                  <th data-leader-sort="total" style="text-align: center">
                     Total
                     <span class="sort-indicator"> ↕ </span>
                   </th>
@@ -2681,7 +2695,7 @@
             <div class="override-grid">
               <div class="form-group"><label for="ov-Distance">Distance</label><input id="ov-Distance" type="text" /></div>
               <div class="form-group"><label for="ov-Ascent">Ascent</label><input id="ov-Ascent" type="text" /></div>
-              <div class="form-group"><label for="ov-Total_Time">Duration</label><input id="ov-Total_Time" type="text" /></div>
+              <div class="form-group"><label for="ov-Total_Time">Total time</label><input id="ov-Total_Time" type="text" /></div>
               <div class="form-group"><label for="ov-Terrain">Terrain</label><input id="ov-Terrain" type="text" /></div>
               <div class="form-group"><label for="ov-Scr">SCR</label><input id="ov-Scr" type="text" /></div>
               <div class="form-group"><label for="ov-Dogs">Dogs</label><input id="ov-Dogs" type="text" /></div>
@@ -3058,7 +3072,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         return `<a href="${escapeHtml(value.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(value.latitude)}, ${escapeHtml(value.longitude)} · Open in Google Maps ↗</a>`;
       }
       if (label === "WIS_URL" && value) {
-        return `<a href="${escapeHtml(value)}" target="_blank" rel="noopener noreferrer">Open walk information ↗</a>`;
+        return `<a href="${escapeHtml(value)}" target="_blank" rel="noopener noreferrer">Walks In Spain ↗</a>`;
       }
       return escapeHtml(value || "Not recorded");
     }
@@ -3224,7 +3238,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       }
     }
       /* ========================================================= CLEAR ALL ========================================================= */ function clearAllRecords() {
-      if (!confirm("Are you sure you want to delete EVERY record?")) {
+      if (!confirm("Are you sure you want to delete every walk booking? Social events are kept.")) {
         return;
       }
       if (isFirebaseActive) {
@@ -3335,7 +3349,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
               const keyPrefix = `${dateISO}_${grade}_`;
 
               const matchingBookings = Object.entries(globalBookings || {})
-                .filter(([key, b]) => key.startsWith(keyPrefix) && isVisibleInView(b));
+                .filter(([key, b]) => key.startsWith(keyPrefix) && (previewReturnView || isVisibleInView(b)));
 
 
               // --------------------------------------------------------
@@ -3431,7 +3445,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
               const keyPrefix = `${dateISO}_${grade}_`;
 
               const matchingBookings = Object.entries(globalBookings || {})
-                .filter(([key, b]) => key.startsWith(keyPrefix) && isVisibleInView(b));
+                .filter(([key, b]) => key.startsWith(keyPrefix) && (previewReturnView || isVisibleInView(b)));
 
 
               /*
@@ -3561,7 +3575,8 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         if (leader !== "ALL" && r.leader_name !== leader) return false;
         if (pueblo !== "ALL" && r.pueblo !== pueblo) return false;
         if (status !== "ALL" && bookingStatus(r) !== status) return false;
-        if (!isVisibleInView(r)) return false;
+        if (!previewReturnView && !isVisibleInView(r)) return false;
+        if (currentView !== "walker" && !showPastWalks && isPastDate(r.date)) return false;
         if (search) {
           const haystack = [r.date, r.start_time, r.walk_grade, r.walk_number, r.walk_name,
             r.leader_name, r.notes, r.pueblo, r.comments].join(" ").toLowerCase();
@@ -3787,6 +3802,18 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
     }
 
     adminTableBody.addEventListener("click", (e) => {
+      const deleteDraftBtn = e.target.closest('[data-action="delete-draft"]');
+      if (deleteDraftBtn && currentView === "leader") {
+        const key = deleteDraftBtn.dataset.key;
+        const record = globalBookings[key];
+        if (!record || !isDraft(record)) return;
+        if (confirm(`Delete this draft walk ${record.walk_number || record.walk_id || ""}? This removes it completely.`)) {
+          expandedOfferRows.delete(key);
+          editingOfferKey = null;
+          saveBookingRecord(key, null);
+        }
+        return;
+      }
       const editBtn = e.target.closest('[data-action="edit-offer"]');
       if (editBtn && canEditBookingInline()) {
         editingOfferKey = editBtn.dataset.key;
@@ -3859,8 +3886,11 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       });
 
       const walkerMode = currentView === "walker";
-      document.querySelectorAll(".notes-col, .status-col, .walkid-col, .hide-in-walker").forEach((el) => {
+      document.querySelectorAll(".notes-col, .walkid-col, .hide-in-walker").forEach((el) => {
         el.hidden = walkerMode;
+      });
+      document.querySelectorAll(".status-col").forEach((el) => {
+        el.hidden = walkerMode && !previewReturnView;
       });
       document.querySelectorAll(".walker-only-col").forEach((el) => {
         el.hidden = !walkerMode;
@@ -3887,6 +3917,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         const isoOfDmy = (d) => { const p = String(d || "").split("-"); return p.length === 3 ? `${p[2]}-${p[1]}-${p[0]}` : ""; };
         const summerKeys = gradeNow !== "ALL" ? [] : Object.keys(globalSocial || {})
           .filter((k) => globalSocial[k]?.type === "summer")
+          .filter((k) => currentView === "walker" || showPastWalks || !isPastDate(globalSocial[k].date))
           .filter((k) => {
             const iso = isoOfDmy(globalSocial[k].date);
             return iso && (!fromNow || iso >= fromNow) && (!toNow || iso <= toNow);
@@ -3919,7 +3950,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           renderedValue = `<a href="${escapeHtml(value.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(value.latitude)}, ${escapeHtml(value.longitude)} · Google Maps ↗</a>`;
         } else if (label === "WIS_URL" && value) {
           const safeUrl = getMasterWisUrl({WIS_URL: value});
-          renderedValue = safeUrl ? `<a href="${escapeHtml(safeUrl)}" target="_blank" rel="noopener noreferrer">Open walk information ↗</a>` : "Not recorded";
+          renderedValue = safeUrl ? `<a href="${escapeHtml(safeUrl)}" target="_blank" rel="noopener noreferrer">Walks In Spain ↗</a>` : "Not recorded";
         } else {
           renderedValue = escapeHtml(value === undefined || value === null || String(value).trim() === "" ? "Not recorded" : value);
         }
@@ -3976,7 +4007,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           <td data-label="Date" class="date-time-cell">
             <div class="dt-line"><strong>${escapeHtml(tableDate(record.date))}</strong></div>
             <div class="dt-line"><span>${escapeHtml(formatStartTime(record.start_time) || "-")}</span></div>
-            ${currentView === "walker" ? "" : `<div class="dt-line dt-status status-col"><button type="button" class="status-toggle status-${bookingStatus(record)}" data-status-key="${escapeHtml(key)}" ${isAdminView() ? 'title="Click to switch between Draft and Live"' : 'title="Status is set by the admin" disabled'}>${bookingStatus(record) === "live" ? "Live" : "Draft"}</button></div>`}
+            ${currentView === "walker" && !previewReturnView ? "" : `<div class="dt-line dt-status status-col"><button type="button" class="status-toggle status-${bookingStatus(record)}" data-status-key="${escapeHtml(key)}" ${isAdminView() ? 'title="Click to switch between Draft and Live"' : 'title="Status is set by the admin" disabled'}>${bookingStatus(record) === "live" ? "Live" : "Draft"}</button></div>`}
           </td>
           <td data-label="Grade"><span class="badge ${currentView === "walker" ? "badge-mono" : ""} grade-${escapeHtml(record.walk_grade || "")}">${escapeHtml(record.walk_grade || "-")}</span></td>
           <td class="walkid-col" data-label="Walk No">${escapeHtml(record.walk_number || record.walk_id || "-")}</td>
@@ -3994,8 +4025,11 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         `;
 
         tr.querySelector(".edit-walk-btn").hidden = (currentMode === "view") || (currentView === "leader" && !isDraft(record));
-        tr.querySelectorAll(".notes-col, .status-col, .walkid-col, .hide-in-walker").forEach((el) => {
+        tr.querySelectorAll(".notes-col, .walkid-col, .hide-in-walker").forEach((el) => {
           el.hidden = walkerMode;
+        });
+        tr.querySelectorAll(".status-col").forEach((el) => {
+          el.hidden = walkerMode && !previewReturnView;
         });
         tr.querySelectorAll(".walker-only-col").forEach((el) => {
           el.hidden = !walkerMode;
@@ -4082,6 +4116,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
                 <section class="offer-detail-card">
                   <h4><span class="card-icon" aria-hidden="true">🗓️</span> Booked Walking Slot Details
                     ${canEditRecordInline(record) && editingOfferKey !== key ? `<button type="button" class="btn btn-secondary inline-edit-btn" data-action="edit-offer" data-key="${escapeHtml(key)}">Edit</button>` : ""}
+                    ${currentView === "leader" && isDraft(record) && editingOfferKey !== key ? `<button type="button" class="btn btn-danger inline-edit-btn" style="margin-left:0" data-action="delete-draft" data-key="${escapeHtml(key)}">Delete draft</button>` : ""}
                   </h4>
                   ${canEditRecordInline(record) && editingOfferKey === key
                     ? inlineEditFormHtml(key, record, masterValues.pueblo, masterValues.name)
@@ -4154,7 +4189,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       if (label === "Meeting point" && value && value.url) {
         rendered = `<a href="${escapeHtml(value.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(value.latitude)}, ${escapeHtml(value.longitude)} · Open in Google Maps ↗</a>`;
       } else if (label === "WIS_URL" && value) {
-        rendered = `<a href="${escapeHtml(value)}" target="_blank" rel="noopener noreferrer">Open walk information ↗</a>`;
+        rendered = `<a href="${escapeHtml(value)}" target="_blank" rel="noopener noreferrer">Walks In Spain ↗</a>`;
       } else {
         const empty = value === undefined || value === null || String(value).trim() === "";
         rendered = empty ? "Not recorded" : escapeHtml(value);
@@ -4192,7 +4227,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         <div class="hover-card-row"><span>Total time</span>${or(r.Total_Time)}</div>
         ${description ? `<div class="hover-card-desc">${escapeHtml(description)}</div>` : ""}
         <div class="hover-card-meta">Walk ${escapeHtml(d.walkId || "-")} · Leader ${escapeHtml(d.record.leader_name || "-")}</div>
-        <div class="hover-card-hint">Click for full details</div>`;
+        <div class="hover-card-hint">${currentView === "leader" && isDraft(d.record) ? "Click to edit" : "Click for full details"}</div>`;
     }
 
     function positionHoverCard(e) {
@@ -4497,7 +4532,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         leaderRows,
         d.pueblo && currentView !== "walker" ? walkInfoRow("Pueblo:", escapeHtml(d.pueblo)) : "",
         wisUrl
-          ? walkInfoRow("WiS link:", `<a href="${escapeHtml(wisUrl)}" target="_blank" rel="noopener noreferrer">${currentView === "walker" ? "Walks In Spain" : "View map link"} ↗</a>`)
+          ? walkInfoRow("WiS link:", `<a href="${escapeHtml(wisUrl)}" target="_blank" rel="noopener noreferrer">Walks In Spain ↗</a>`)
           : "",
         gpxName && d.walkId
           ? walkInfoRow("GPX route:", `<a href="#" data-gpx-download="${escapeHtml(d.walkId)}" data-gpx-name="${escapeHtml(gpxName)}">Download GPX ↓</a>`)
@@ -4517,7 +4552,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         ? `<div class="walk-stats">
             ${stat("Distance", dash(r.Distance))}
             ${stat("Ascent", dash(r.Ascent))}
-            ${stat("Duration", dash(r.Total_Time))}
+            ${stat("Total time", dash(r.Total_Time))}
             ${stat("Grade", [grade, r.Terrain, ...[r.Scr, xFlag(r)].filter((v) => String(v ?? "").trim())].map(dash).join(" / "))}
           </div>
           ${quoteBlock}
@@ -5462,7 +5497,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           return;
         }
         let csv =
-          "Date,Start Time,Grade,Walk Number,Name of Walk,Leader,Pueblo,Comments,Notes\n";
+          "Date,Start Time,Grade,Walk Number,Name of Walk,Leader,Pueblo,Comments,Notes,Status,Cancelled\n";
         records.forEach((r) => {
           const row = [
             r.date,
@@ -5474,6 +5509,8 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
             r.pueblo || "",
             r.comments || "",
             r.notes || "",
+            bookingStatus(r) === "live" ? "Live" : "Draft",
+            r.cancelled === true ? "Yes" : "No",
           ]
             .map((value) => `"${String(value).replace(/"/g, '""')}"`)
             .join(",");
@@ -5626,16 +5663,24 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       }
 
       /* Preview as walker: shows Walker View for the same page, then returns to the view it came from */
-      let previewReturnView = null;
+      var previewReturnView = null;
+
+      /* Past walks: hidden from the Walk Offers list in Leader and Admin View until the button is pressed */
+      var showPastWalks = false;
+      function togglePastWalks(checked) {
+        showPastWalks = checked;
+        renderAdminTable();
+      }
 
       function updatePreviewControls() {
         const btn = document.getElementById("preview-walker-btn");
         const banner = document.getElementById("preview-banner");
         const back = previewReturnView;
         btn.hidden = currentView === "walker" && !back;
-        btn.textContent = back ? `Back to ${back === "admin" ? "Admin View" : "Leader View"}` : "Preview as walker";
+        btn.textContent = back ? `Back to ${back === "admin" ? "Admin View" : "Leader View"}` : "Preview";
         btn.setAttribute("aria-pressed", String(Boolean(back)));
         banner.hidden = !back;
+        document.body.classList.toggle("previewing", Boolean(back));
       }
 
       function syncViewRadio(view) {
@@ -5653,14 +5698,17 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         const from = currentView;
         setView("walker");
         previewReturnView = from;
-        syncViewRadio("walker");
+        syncViewRadio(from);
         updatePreviewControls();
+        renderCalendar();
+        renderAdminTable();
       }
 
       function setView(view) {
         previewReturnView = null;
         currentView = view;
         updatePreviewControls();
+        document.getElementById("past-walks-label").hidden = view === "walker";
         editingOfferKey = null;
         selectedWalkerDate = null;
         updateWalkOffersTitle();
@@ -5696,6 +5744,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         });
       });
     document.getElementById("preview-walker-btn").addEventListener("click", togglePreviewAsWalker);
+    document.getElementById("past-walks-check").addEventListener("change", (e) => togglePastWalks(e.target.checked));
     document.getElementById("filters-toggle").addEventListener("click", (e) => {
       const open = document.body.classList.toggle("filters-open");
       e.currentTarget.setAttribute("aria-expanded", String(open));
