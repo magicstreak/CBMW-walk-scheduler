@@ -3787,6 +3787,18 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
     }
 
     adminTableBody.addEventListener("click", (e) => {
+      const deleteDraftBtn = e.target.closest('[data-action="delete-draft"]');
+      if (deleteDraftBtn && currentView === "leader") {
+        const key = deleteDraftBtn.dataset.key;
+        const record = globalBookings[key];
+        if (!record || !isDraft(record)) return;
+        if (confirm(`Delete this draft walk ${record.walk_number || record.walk_id || ""}? This removes it completely.`)) {
+          expandedOfferRows.delete(key);
+          editingOfferKey = null;
+          saveBookingRecord(key, null);
+        }
+        return;
+      }
       const editBtn = e.target.closest('[data-action="edit-offer"]');
       if (editBtn && canEditBookingInline()) {
         editingOfferKey = editBtn.dataset.key;
@@ -4082,6 +4094,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
                 <section class="offer-detail-card">
                   <h4><span class="card-icon" aria-hidden="true">🗓️</span> Booked Walking Slot Details
                     ${canEditRecordInline(record) && editingOfferKey !== key ? `<button type="button" class="btn btn-secondary inline-edit-btn" data-action="edit-offer" data-key="${escapeHtml(key)}">Edit</button>` : ""}
+                    ${currentView === "leader" && isDraft(record) && editingOfferKey !== key ? `<button type="button" class="btn btn-danger inline-edit-btn" style="margin-left:0" data-action="delete-draft" data-key="${escapeHtml(key)}">Delete draft</button>` : ""}
                   </h4>
                   ${canEditRecordInline(record) && editingOfferKey === key
                     ? inlineEditFormHtml(key, record, masterValues.pueblo, masterValues.name)
