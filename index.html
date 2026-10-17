@@ -1636,6 +1636,8 @@
     .offers-table th[hidden],
     .offers-table td[hidden] { display: none !important; }
     th[data-leader-sort] .sort-indicator { display: none; }
+    .past-walks-toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 0.9rem; color: var(--text-muted); cursor: pointer; align-self: center; }
+    .past-walks-toggle[hidden] { display: none; }
     .preview-banner[hidden] { display: none; }
     .preview-banner { margin: 0 0 12px; padding: 10px 14px; border-radius: 8px; background: #fff7e0; border: 1px solid #f0c36d; color: #6b4b00; font-size: 0.92rem; }
     /* Preview: drafts on the calendar are hatched and labelled so they are not mistaken for live walks */
@@ -2288,6 +2290,7 @@
         <button class="btn btn-success" id="add-walk-to-schedule" hidden>Add Walk</button>
         <button class="btn btn-success" id="add-social-event" hidden>Add Event</button>
         <button class="btn" id="preview-walker-btn" aria-pressed="false" hidden>Preview</button>
+        <label class="past-walks-toggle" id="past-walks-label" hidden><input type="checkbox" id="past-walks-check" /> Show past walks</label>
         <button class="btn btn-success" id="export-pdf">Download</button>
         <button class="btn btn-success" id="export-csv" hidden>Export to CSV</button>
         <button class="btn btn-danger" id="clear-all" hidden>
@@ -3566,6 +3569,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         if (pueblo !== "ALL" && r.pueblo !== pueblo) return false;
         if (status !== "ALL" && bookingStatus(r) !== status) return false;
         if (!previewReturnView && !isVisibleInView(r)) return false;
+        if (currentView !== "walker" && !showPastWalks && isPastDate(r.date)) return false;
         if (search) {
           const haystack = [r.date, r.start_time, r.walk_grade, r.walk_number, r.walk_name,
             r.leader_name, r.notes, r.pueblo, r.comments].join(" ").toLowerCase();
@@ -3906,6 +3910,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         const isoOfDmy = (d) => { const p = String(d || "").split("-"); return p.length === 3 ? `${p[2]}-${p[1]}-${p[0]}` : ""; };
         const summerKeys = gradeNow !== "ALL" ? [] : Object.keys(globalSocial || {})
           .filter((k) => globalSocial[k]?.type === "summer")
+          .filter((k) => currentView === "walker" || showPastWalks || !isPastDate(globalSocial[k].date))
           .filter((k) => {
             const iso = isoOfDmy(globalSocial[k].date);
             return iso && (!fromNow || iso >= fromNow) && (!toNow || iso <= toNow);
@@ -5653,6 +5658,13 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       /* Preview as walker: shows Walker View for the same page, then returns to the view it came from */
       var previewReturnView = null;
 
+      /* Past walks: hidden from the Walk Offers list in Leader and Admin View until the button is pressed */
+      var showPastWalks = false;
+      function togglePastWalks(checked) {
+        showPastWalks = checked;
+        renderAdminTable();
+      }
+
       function updatePreviewControls() {
         const btn = document.getElementById("preview-walker-btn");
         const banner = document.getElementById("preview-banner");
@@ -5689,6 +5701,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         previewReturnView = null;
         currentView = view;
         updatePreviewControls();
+        document.getElementById("past-walks-label").hidden = view === "walker";
         editingOfferKey = null;
         selectedWalkerDate = null;
         updateWalkOffersTitle();
@@ -5724,6 +5737,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         });
       });
     document.getElementById("preview-walker-btn").addEventListener("click", togglePreviewAsWalker);
+    document.getElementById("past-walks-check").addEventListener("change", (e) => togglePastWalks(e.target.checked));
     document.getElementById("filters-toggle").addEventListener("click", (e) => {
       const open = document.body.classList.toggle("filters-open");
       e.currentTarget.setAttribute("aria-expanded", String(open));
