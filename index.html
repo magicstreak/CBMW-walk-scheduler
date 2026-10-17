@@ -1635,6 +1635,8 @@
     .filter-field[hidden],
     .offers-table th[hidden],
     .offers-table td[hidden] { display: none !important; }
+    .preview-banner[hidden] { display: none; }
+    .preview-banner { margin: 0 0 12px; padding: 10px 14px; border-radius: 8px; background: #fff7e0; border: 1px solid #f0c36d; color: #6b4b00; font-size: 0.92rem; }
     .walk-card-inline { padding: 16px 20px 20px; color: #1f2937; background: #fff; }
     .walk-card-inline .walk-quote { margin-bottom: 14px; }
     .day-cell.selectable-day { cursor: pointer; }
@@ -1644,6 +1646,75 @@
       background: #f0f7f2;
     }
 
+
+    /* ========================================================= PHONE LAYOUT: WALKER VIEW =========================================================
+       Walker View on phones: the list becomes stacked cards, the filters open from a button, and the walk card fits the screen. */
+    .filters-toggle { display: none; }
+    @media (max-width: 640px) {
+      body:not([data-view="leader"]):not([data-view="admin"]) .page-header { padding: 14px 8px 6px; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .page-header h1 { font-size: 1.6rem; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .page-header p { font-size: 0.9rem; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .view-toggle-container { margin-bottom: 8px; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .walker-mode-header { gap: 8px; margin-bottom: 8px; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .walker-mode-btn { padding: 7px 12px; font-size: 0.85rem; }
+
+      body:not([data-view="leader"]):not([data-view="admin"]) .filters-toggle {
+        display: inline-flex; align-items: center; gap: 6px; margin: 0 0 10px;
+        padding: 8px 14px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff;
+        color: var(--text); font: inherit; font-weight: 600; font-size: 0.9rem; cursor: pointer;
+      }
+      body:not([data-view="leader"]):not([data-view="admin"]) .filters-toggle::after { content: "▾"; font-size: 0.8rem; }
+      body:not([data-view="leader"]):not([data-view="admin"]).filters-open .filters-toggle::after { content: "▴"; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .table-filters { display: none; }
+      body:not([data-view="leader"]):not([data-view="admin"]).filters-open .table-filters { display: flex; }
+
+      /* List as cards: grade and date on the first line, name below */
+      body:not([data-view="leader"]):not([data-view="admin"]) .offers-table thead { display: none; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .offers-table,
+      body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tbody { display: block; width: 100%; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr.walk-row-clickable,
+      body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr.walk-row,
+      body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr:not(.walker-date-group):not(.offer-details-row) {
+        display: grid; grid-template-columns: 40px 1fr auto; column-gap: 10px; align-items: start;
+        padding: 10px 6px; border-bottom: 1px solid #ececf1;
+      }
+      body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr > td { display: block; border: none; padding: 0; min-width: 0; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr > td:nth-child(1) { grid-column: 1; grid-row: 1 / span 2; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr > td:nth-child(2) { grid-column: 2; grid-row: 1; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr > td:nth-child(3) { grid-column: 3; grid-row: 1; justify-self: end; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr > td:nth-child(5) { grid-column: 2 / span 2; grid-row: 2; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr > td:nth-child(6) { grid-column: 2 / span 2; grid-row: 3; min-width: 0; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr > td:nth-child(6) .walker-desc { font-size: 0.85rem; color: #4b5563; line-height: 1.35; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr > td:nth-child(6) .walker-desc-text { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr > td:nth-child(6) .walker-desc-comments { display: block; margin-top: 4px; font-style: italic; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr > td:nth-child(n+4):not(:nth-child(5)):not(:nth-child(6)) { display: none !important; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .offers-table .expand-toggle { width: 30px; height: 30px; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr.walker-date-group { display: block; padding: 0; border: none; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr.walker-date-group th { display: block; padding: 8px 10px; font-size: 0.95rem; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr.offer-details-row { display: block; padding: 0; border-bottom: 1px solid #ececf1; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr.offer-details-row > td { display: block; width: 100%; padding: 0; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .walk-card-inline { padding: 12px 10px 16px; box-sizing: border-box; width: 100%; overflow-wrap: anywhere; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .walk-stats { grid-template-columns: 1fr 1fr; gap: 8px; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .walk-stat { padding: 8px 10px; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr.expanded-parent { background: #f4f9f6; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr.expanded-parent > td { background: transparent !important; }
+      /* Month view on phones: arrows in one row above a full-width grid; booked days show grade colour bars, not labels */
+      body:not([data-view="leader"]):not([data-view="admin"]) .calendar-container { padding: 12px 10px; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .calendar-header h2 { font-size: 1.25rem; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .walker-calendar-tools { flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .calendar-sandwich { display: flex; flex-wrap: wrap; gap: 8px; }
+      body:not([data-view="leader"]):not([data-view="admin"]) #prev-month,
+      body:not([data-view="leader"]):not([data-view="admin"]) #next-month { order: -1; flex: 1 1 0; width: auto; height: 40px; font-size: 1.2rem; border-radius: 8px; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .calendar-grid-wrap { flex: 0 0 100%; min-width: 0; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .weekdays { gap: 2px; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .weekdays > div { font-size: 0.68rem; letter-spacing: -0.02em; padding: 0; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .days-grid { gap: 4px; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .day-cell { min-height: 58px; padding: 3px; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot { font-size: 0; padding: 0; min-height: 8px; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot * { display: none !important; }
+      /* The view switch keeps its labels on one line */
+      .view-segment label { white-space: nowrap; padding: 8px 10px; font-size: 0.85rem; }
+    }
     /* ========================================================= RESPONSIVE: WALK OFFERS TABLE ========================================================= */
     /* Calendar layout is unchanged. The table keeps its columns and scrolls sideways inside its box. */
     @media (max-width: 1024px) {
@@ -2205,12 +2276,14 @@
   </div>
   <!-- ======================================================= ADMIN ======================================================= -->
   <div class="admin-container" id="admin-container">
+    <div class="preview-banner" id="preview-banner" hidden>Walker preview: this is how walkers see the walks. Nothing can be changed here. Use the button to go back.</div>
     <div class="admin-header">
       <h3 id="walk-offers-title">Upcoming Walks</h3>
       <div style="display: flex; gap: 8px; flex-wrap: wrap">
 
         <button class="btn btn-success" id="add-walk-to-schedule" hidden>Add Walk</button>
         <button class="btn btn-success" id="add-social-event" hidden>Add Event</button>
+        <button class="btn" id="preview-walker-btn" aria-pressed="false" hidden>Preview as walker</button>
         <button class="btn btn-success" id="export-pdf">Download</button>
         <button class="btn btn-success" id="export-csv" hidden>Export to CSV</button>
         <button class="btn btn-danger" id="clear-all" hidden>
@@ -2224,7 +2297,8 @@
     </div>
     <div class="walk-offers-body">
     <!-- ======================================================= WALK OFFERS FILTERS ======================================================= -->
-    <div class="table-filters">
+    <button type="button" class="filters-toggle" id="filters-toggle" aria-expanded="false" aria-controls="walker-filters">Filters</button>
+    <div class="table-filters" id="walker-filters">
       <div class="filter-field grow walker-search-field">
         <label for="admin-filter-search">Search</label>
         <input type="search" id="admin-filter-search" placeholder="Search all columns" />
@@ -5551,8 +5625,42 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         renderAdminTable();
       }
 
+      /* Preview as walker: shows Walker View for the same page, then returns to the view it came from */
+      let previewReturnView = null;
+
+      function updatePreviewControls() {
+        const btn = document.getElementById("preview-walker-btn");
+        const banner = document.getElementById("preview-banner");
+        const back = previewReturnView;
+        btn.hidden = currentView === "walker" && !back;
+        btn.textContent = back ? `Back to ${back === "admin" ? "Admin View" : "Leader View"}` : "Preview as walker";
+        btn.setAttribute("aria-pressed", String(Boolean(back)));
+        banner.hidden = !back;
+      }
+
+      function syncViewRadio(view) {
+        const radio = document.getElementById(`view-${view}`);
+        if (radio) radio.checked = true;
+      }
+
+      function togglePreviewAsWalker() {
+        const back = previewReturnView;
+        if (back) {
+          setView(back);
+          syncViewRadio(back);
+          return;
+        }
+        const from = currentView;
+        setView("walker");
+        previewReturnView = from;
+        syncViewRadio("walker");
+        updatePreviewControls();
+      }
+
       function setView(view) {
+        previewReturnView = null;
         currentView = view;
+        updatePreviewControls();
         editingOfferKey = null;
         selectedWalkerDate = null;
         updateWalkOffersTitle();
@@ -5587,6 +5695,11 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           if (e.target.checked) setView(e.target.value);
         });
       });
+    document.getElementById("preview-walker-btn").addEventListener("click", togglePreviewAsWalker);
+    document.getElementById("filters-toggle").addEventListener("click", (e) => {
+      const open = document.body.classList.toggle("filters-open");
+      e.currentTarget.setAttribute("aria-expanded", String(open));
+    });
     document.querySelectorAll("[data-walker-mode-btn]").forEach((btn) => {
       btn.addEventListener("click", () => setWalkerMode(btn.dataset.walkerModeBtn));
     });
