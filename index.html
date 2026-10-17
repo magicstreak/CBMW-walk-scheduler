@@ -1635,6 +1635,7 @@
     .filter-field[hidden],
     .offers-table th[hidden],
     .offers-table td[hidden] { display: none !important; }
+    th[data-leader-sort] .sort-indicator { display: none; }
     .preview-banner[hidden] { display: none; }
     .preview-banner { margin: 0 0 12px; padding: 10px 14px; border-radius: 8px; background: #fff7e0; border: 1px solid #f0c36d; color: #6b4b00; font-size: 0.92rem; }
     .walk-card-inline { padding: 16px 20px 20px; color: #1f2937; background: #fff; }
@@ -2434,7 +2435,7 @@
         </div>
 
         <div class="stat-card">
-          <div class="stat-label">MS — Moderate Strenuous</div>
+          <div class="stat-label">MS — Moderately Strenuous</div>
 
           <div class="stat-value" style="color: var(--color-MS)" id="stat-MS">
             0
@@ -2564,37 +2565,37 @@
             <table class="leader-table">
               <thead>
                 <tr>
-                  <th class="sortable-header" data-leader-sort="leader">
+                  <th data-leader-sort="leader">
                     Leader
                     <span class="sort-indicator"> ↑ </span>
                   </th>
 
-                  <th class="sortable-header" data-leader-sort="E" style="text-align: center">
+                  <th data-leader-sort="E" style="text-align: center">
                     E
                     <span class="sort-indicator"> ↕ </span>
                   </th>
 
-                  <th class="sortable-header" data-leader-sort="M" style="text-align: center">
+                  <th data-leader-sort="M" style="text-align: center">
                     M
                     <span class="sort-indicator"> ↕ </span>
                   </th>
 
-                  <th class="sortable-header" data-leader-sort="MS" style="text-align: center">
+                  <th data-leader-sort="MS" style="text-align: center">
                     MS
                     <span class="sort-indicator"> ↕ </span>
                   </th>
 
-                  <th class="sortable-header" data-leader-sort="S" style="text-align: center">
+                  <th data-leader-sort="S" style="text-align: center">
                     S
                     <span class="sort-indicator"> ↕ </span>
                   </th>
 
-                  <th class="sortable-header" data-leader-sort="VS" style="text-align: center">
+                  <th data-leader-sort="VS" style="text-align: center">
                     VS
                     <span class="sort-indicator"> ↕ </span>
                   </th>
 
-                  <th class="sortable-header" data-leader-sort="total" style="text-align: center">
+                  <th data-leader-sort="total" style="text-align: center">
                     Total
                     <span class="sort-indicator"> ↕ </span>
                   </th>
@@ -2681,7 +2682,7 @@
             <div class="override-grid">
               <div class="form-group"><label for="ov-Distance">Distance</label><input id="ov-Distance" type="text" /></div>
               <div class="form-group"><label for="ov-Ascent">Ascent</label><input id="ov-Ascent" type="text" /></div>
-              <div class="form-group"><label for="ov-Total_Time">Duration</label><input id="ov-Total_Time" type="text" /></div>
+              <div class="form-group"><label for="ov-Total_Time">Total time</label><input id="ov-Total_Time" type="text" /></div>
               <div class="form-group"><label for="ov-Terrain">Terrain</label><input id="ov-Terrain" type="text" /></div>
               <div class="form-group"><label for="ov-Scr">SCR</label><input id="ov-Scr" type="text" /></div>
               <div class="form-group"><label for="ov-Dogs">Dogs</label><input id="ov-Dogs" type="text" /></div>
@@ -3058,7 +3059,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         return `<a href="${escapeHtml(value.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(value.latitude)}, ${escapeHtml(value.longitude)} · Open in Google Maps ↗</a>`;
       }
       if (label === "WIS_URL" && value) {
-        return `<a href="${escapeHtml(value)}" target="_blank" rel="noopener noreferrer">Open walk information ↗</a>`;
+        return `<a href="${escapeHtml(value)}" target="_blank" rel="noopener noreferrer">Walks In Spain ↗</a>`;
       }
       return escapeHtml(value || "Not recorded");
     }
@@ -3224,7 +3225,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       }
     }
       /* ========================================================= CLEAR ALL ========================================================= */ function clearAllRecords() {
-      if (!confirm("Are you sure you want to delete EVERY record?")) {
+      if (!confirm("Are you sure you want to delete every walk booking? Social events are kept.")) {
         return;
       }
       if (isFirebaseActive) {
@@ -3931,7 +3932,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           renderedValue = `<a href="${escapeHtml(value.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(value.latitude)}, ${escapeHtml(value.longitude)} · Google Maps ↗</a>`;
         } else if (label === "WIS_URL" && value) {
           const safeUrl = getMasterWisUrl({WIS_URL: value});
-          renderedValue = safeUrl ? `<a href="${escapeHtml(safeUrl)}" target="_blank" rel="noopener noreferrer">Open walk information ↗</a>` : "Not recorded";
+          renderedValue = safeUrl ? `<a href="${escapeHtml(safeUrl)}" target="_blank" rel="noopener noreferrer">Walks In Spain ↗</a>` : "Not recorded";
         } else {
           renderedValue = escapeHtml(value === undefined || value === null || String(value).trim() === "" ? "Not recorded" : value);
         }
@@ -4167,7 +4168,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       if (label === "Meeting point" && value && value.url) {
         rendered = `<a href="${escapeHtml(value.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(value.latitude)}, ${escapeHtml(value.longitude)} · Open in Google Maps ↗</a>`;
       } else if (label === "WIS_URL" && value) {
-        rendered = `<a href="${escapeHtml(value)}" target="_blank" rel="noopener noreferrer">Open walk information ↗</a>`;
+        rendered = `<a href="${escapeHtml(value)}" target="_blank" rel="noopener noreferrer">Walks In Spain ↗</a>`;
       } else {
         const empty = value === undefined || value === null || String(value).trim() === "";
         rendered = empty ? "Not recorded" : escapeHtml(value);
@@ -4205,7 +4206,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         <div class="hover-card-row"><span>Total time</span>${or(r.Total_Time)}</div>
         ${description ? `<div class="hover-card-desc">${escapeHtml(description)}</div>` : ""}
         <div class="hover-card-meta">Walk ${escapeHtml(d.walkId || "-")} · Leader ${escapeHtml(d.record.leader_name || "-")}</div>
-        <div class="hover-card-hint">Click for full details</div>`;
+        <div class="hover-card-hint">${currentView === "leader" && isDraft(d.record) ? "Click to edit" : "Click for full details"}</div>`;
     }
 
     function positionHoverCard(e) {
@@ -4510,7 +4511,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         leaderRows,
         d.pueblo && currentView !== "walker" ? walkInfoRow("Pueblo:", escapeHtml(d.pueblo)) : "",
         wisUrl
-          ? walkInfoRow("WiS link:", `<a href="${escapeHtml(wisUrl)}" target="_blank" rel="noopener noreferrer">${currentView === "walker" ? "Walks In Spain" : "View map link"} ↗</a>`)
+          ? walkInfoRow("WiS link:", `<a href="${escapeHtml(wisUrl)}" target="_blank" rel="noopener noreferrer">Walks In Spain ↗</a>`)
           : "",
         gpxName && d.walkId
           ? walkInfoRow("GPX route:", `<a href="#" data-gpx-download="${escapeHtml(d.walkId)}" data-gpx-name="${escapeHtml(gpxName)}">Download GPX ↓</a>`)
@@ -4530,7 +4531,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         ? `<div class="walk-stats">
             ${stat("Distance", dash(r.Distance))}
             ${stat("Ascent", dash(r.Ascent))}
-            ${stat("Duration", dash(r.Total_Time))}
+            ${stat("Total time", dash(r.Total_Time))}
             ${stat("Grade", [grade, r.Terrain, ...[r.Scr, xFlag(r)].filter((v) => String(v ?? "").trim())].map(dash).join(" / "))}
           </div>
           ${quoteBlock}
@@ -5475,7 +5476,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           return;
         }
         let csv =
-          "Date,Start Time,Grade,Walk Number,Name of Walk,Leader,Pueblo,Comments,Notes\n";
+          "Date,Start Time,Grade,Walk Number,Name of Walk,Leader,Pueblo,Comments,Notes,Status,Cancelled\n";
         records.forEach((r) => {
           const row = [
             r.date,
@@ -5487,6 +5488,8 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
             r.pueblo || "",
             r.comments || "",
             r.notes || "",
+            bookingStatus(r) === "live" ? "Live" : "Draft",
+            r.cancelled === true ? "Yes" : "No",
           ]
             .map((value) => `"${String(value).replace(/"/g, '""')}"`)
             .join(",");
