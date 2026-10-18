@@ -4037,6 +4037,11 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         tr.querySelector(".action-cancel").hidden = (currentMode === "view");
 
         const toggleExpanded = () => {
+          // Walker View (and Preview, which shows the same view) opens the same card as a calendar click
+          if (walkerMode) {
+            openDetailCard(key);
+            return;
+          }
           if (expandedOfferRows.has(key)) expandedOfferRows.delete(key);
           else expandedOfferRows.add(key);
           renderAdminTable();
@@ -5689,6 +5694,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       }
 
       function togglePreviewAsWalker() {
+        expandedOfferRows.clear(); // switching into or out of Preview closes any open walk
         const back = previewReturnView;
         if (back) {
           setView(back);
@@ -5854,9 +5860,10 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       sendHeight();
     }
 
-    /* ========================================================= START ========================================================= */ if (VIEW_FROM_HOST) {
+    /* ========================================================= START ========================================================= */ // The view switch is hidden on every page. Leaders and walkers open their view from a hub card or the WordPress admin link (?view=...).
+    document.querySelector(".view-toggle-container").classList.add("hidden");
+    if (VIEW_FROM_HOST) {
       document.querySelector(`input[name="viewMode"][value="${VIEW_FROM_HOST}"]`).checked = true;
-      document.querySelector(".view-toggle-container").classList.add("hidden");
     }
     // Data listeners start first, so an error while applying the host view cannot stop the data loading
     authReady.then(() => {
