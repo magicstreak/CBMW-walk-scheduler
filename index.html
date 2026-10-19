@@ -862,6 +862,8 @@
 
     /* ========================================================= EXPANDABLE ADMIN DETAIL CARDS ========================================================= */
     .offers-table .expand-column { width: 42px; text-align: center; }
+    /* Walker View: no chevron column. The date and time take the freed space */
+    body[data-view="walker"] .offers-table .expand-column { display: none !important; }
     .offers-table .expand-toggle {
       width: 30px; height: 30px; padding: 0;
       border: 1px solid var(--border); border-radius: 8px;
@@ -1941,6 +1943,8 @@
     /* Flexible columns: share the remaining space, wrapping text */
     .offers-table th[data-admin-sort="walk_name"],
     .offers-table td[data-label="Walk name"] { min-width: 200px; font-weight: 700; }
+    body[data-view="walker"] .offers-table th[data-admin-sort="date"],
+    body[data-view="walker"] .offers-table td[data-label="Date"] { width: 150px; }
     .offers-table th.walker-only-col,
     .offers-table td[data-label="Description"] { min-width: 240px; }
     .offers-table th[data-admin-sort="comments"],
@@ -4019,7 +4023,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           </td>
           <td data-label="Grade"><span class="badge ${currentView === "walker" ? "badge-mono" : ""} grade-${escapeHtml(record.walk_grade || "")}">${escapeHtml(record.walk_grade || "-")}</span></td>
           <td class="walkid-col" data-label="Walk No">${escapeHtml(record.walk_number || record.walk_id || "-")}</td>
-          <td data-label="Walk name">${cancelledBadge(record)}${modifiedBadge(record)}${escapeHtml(displayWalkName || "-")}${walkerStats}</td>
+          <td data-label="Walk name">${cancelledBadge(record)}${modifiedBadge(record)}<strong>${escapeHtml(displayWalkName || "-")}</strong>${walkerStats}</td>
           <td class="walker-only-col" data-label="Description">${walkerDescriptionCell(record)}</td>
           <td class="hide-in-walker" data-label="Leader">${escapeHtml(record.leader_name || "-")}</td>
           <td class="hide-in-walker" data-label="Pueblo">${escapeHtml(displayPueblo || "-")}</td>
