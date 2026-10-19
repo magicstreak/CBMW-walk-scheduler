@@ -506,6 +506,11 @@
     /* Distance and ascent: same style as the grade badges, in a neutral colour */
     .stat-badges { margin-top: 4px; display: flex; flex-wrap: wrap; gap: 4px; }
     .badge.stat-badge { background: transparent; color: #64748b; border: 1px solid #cbd5e1; font-weight: 500; font-size: 0.7rem; padding: 2px 6px; }
+    /* Walker View, desktop: icons with values instead of pills (tablets and phones keep the pills) */
+    @media (min-width: 901px) {
+      body[data-view="walker"] .badge.stat-badge { display: inline-flex; align-items: center; gap: 4px; background: none; border: none; padding: 0; margin-right: 10px; color: #475569; font-size: 0.85rem; font-weight: 600; }
+      body[data-view="walker"] .stat-ico { display: inline-block; width: 15px; height: 15px; flex: none; color: #2d5b3e; }
+    }
 
     /* ========================================================= STATISTICS ========================================================= */
     .stats-filter {
@@ -4003,10 +4008,15 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         // Distance and ascent under the walk name, as unlabelled badges in every view
         const walkerStats = (() => {
           const rt = bookingRoute(record) || {};
-          const badges = [rt.Distance, rt.Ascent]
-            .map((v) => String(v ?? "").trim())
-            .filter(Boolean)
-            .map((v) => `<span class="badge stat-badge">${escapeHtml(v)}</span>`);
+          const icons = {
+            distance: '<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
+            ascent: '<path d="M3 20l6-10 4 6 3-4 5 8z"/>',
+            duration: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+          };
+          const badges = [["distance", rt.Distance], ["ascent", rt.Ascent], ["duration", rt.Total_Time]]
+            .map(([kind, v]) => [kind, String(v ?? "").trim()])
+            .filter(([, v]) => v)
+            .map(([kind, v]) => `<span class="badge stat-badge"><svg class="stat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[kind]}</svg>${escapeHtml(v)}</span>`);
           return badges.length ? `<div class="stat-badges">${badges.join(" ")}</div>` : "";
         })();
         const tr = document.createElement("tr");
