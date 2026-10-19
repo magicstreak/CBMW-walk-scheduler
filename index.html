@@ -2949,6 +2949,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
     let walkMap = null;
     let walkMapLayer = null;
     let walkMapFrame = 0;
+    let walkMapShown = false;
     function renderWalkMap() {
       if (walkerMode !== "map" || currentView !== "walker") return;
       const note = document.getElementById("walker-map-note");
@@ -2956,6 +2957,13 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         note.textContent = "The map needs an internet connection to load.";
         return;
       }
+      // Build a fresh map each time Map mode is entered, so it is sized while its panel is visible
+      if (walkMap && !walkMapShown) {
+        walkMap.remove();
+        walkMap = null;
+        walkMapLayer = null;
+      }
+      walkMapShown = true;
       if (!walkMap) {
         walkMap = L.map("walker-map-canvas").setView([38.8, 0.05], 10);
         L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -2999,7 +3007,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
     window.addEventListener("resize", () => { if (walkMap && walkerMode === "map") walkMap.invalidateSize(); });
     // Rebuilding the list (filters, dates, mode) also refreshes the map
     new MutationObserver(() => {
-      if (walkerMode !== "map") return;
+      if (walkerMode !== "map") { walkMapShown = false; return; }
       cancelAnimationFrame(walkMapFrame);
       walkMapFrame = requestAnimationFrame(renderWalkMap);
     }).observe(adminTableBody, { childList: true });
