@@ -1700,6 +1700,13 @@
       body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr > td:nth-child(6) .walker-desc-text { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
       body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr > td:nth-child(6) .walker-desc-comments { display: block; margin-top: 4px; font-style: italic; }
       body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr > td:nth-child(n+4):not(:nth-child(5)):not(:nth-child(6)) { display: none !important; }
+      /* Walker View on phone: no chevron. Date, time and grade stacked on the left; name and description stacked on the right */
+      body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr > td:nth-child(1) { display: none !important; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr:not(.walker-date-group):not(.offer-details-row) { grid-template-columns: 110px minmax(0, 1fr); }
+      body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr > td:nth-child(2) { grid-column: 1; grid-row: 1; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr > td:nth-child(3) { grid-column: 1; grid-row: 2; justify-self: start; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr > td:nth-child(5) { grid-column: 2; grid-row: 1; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr > td:nth-child(6) { grid-column: 2; grid-row: 2; }
       body:not([data-view="leader"]):not([data-view="admin"]) .offers-table .expand-toggle { width: 30px; height: 30px; }
       body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr.walker-date-group { display: block; padding: 0; border: none; }
       body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr.walker-date-group th { display: block; padding: 8px 10px; font-size: 0.95rem; }
@@ -1941,6 +1948,7 @@
     .offers-table th[data-admin-sort="notes"],
     .offers-table td[data-label="Notes"] { min-width: 150px; }
     .offers-table td { overflow-wrap: anywhere; }
+
 
     /* Actions stack vertically so the column stays narrow */
     .offers-table td.action-cancel { white-space: normal; }
