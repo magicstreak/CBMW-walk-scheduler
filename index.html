@@ -506,6 +506,12 @@
     /* Distance and ascent: same style as the grade badges, in a neutral colour */
     .stat-badges { margin-top: 4px; display: flex; flex-wrap: wrap; gap: 4px; }
     .badge.stat-badge { background: transparent; color: #64748b; border: 1px solid #cbd5e1; font-weight: 500; font-size: 0.7rem; padding: 2px 6px; }
+    .stat-ico { display: none; }
+    /* Walker View, desktop: icons with values instead of pills (tablets and phones keep the pills) */
+    @media (min-width: 901px) and (hover: hover) and (pointer: fine) {
+      body[data-view="walker"] .badge.stat-badge { display: inline-flex; align-items: center; gap: 4px; background: none; border: none; padding: 0; margin-right: 10px; color: #475569; font-size: 0.85rem; font-weight: 600; }
+      body[data-view="walker"] .stat-ico { display: inline-block; width: 15px; height: 15px; flex: none; color: #2d5b3e; }
+    }
 
     /* ========================================================= STATISTICS ========================================================= */
     .stats-filter {
@@ -862,6 +868,8 @@
 
     /* ========================================================= EXPANDABLE ADMIN DETAIL CARDS ========================================================= */
     .offers-table .expand-column { width: 42px; text-align: center; }
+    /* Walker View: no chevron column. The date and time take the freed space */
+    body[data-view="walker"] .offers-table .expand-column { display: none !important; }
     .offers-table .expand-toggle {
       width: 30px; height: 30px; padding: 0;
       border: 1px solid var(--border); border-radius: 8px;
@@ -1700,6 +1708,13 @@
       body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr > td:nth-child(6) .walker-desc-text { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
       body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr > td:nth-child(6) .walker-desc-comments { display: block; margin-top: 4px; font-style: italic; }
       body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr > td:nth-child(n+4):not(:nth-child(5)):not(:nth-child(6)) { display: none !important; }
+      /* Walker View on phone: no chevron. Date, time and grade stacked on the left; name and description stacked on the right */
+      body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr > td:nth-child(1) { display: none !important; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr:not(.walker-date-group):not(.offer-details-row) { grid-template-columns: 110px minmax(0, 1fr); }
+      body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr > td:nth-child(2) { grid-column: 1; grid-row: 1; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr > td:nth-child(3) { grid-column: 1; grid-row: 2; justify-self: start; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr > td:nth-child(5) { grid-column: 2; grid-row: 1; font-weight: 700; }
+      body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr > td:nth-child(6) { grid-column: 2; grid-row: 2; }
       body:not([data-view="leader"]):not([data-view="admin"]) .offers-table .expand-toggle { width: 30px; height: 30px; }
       body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr.walker-date-group { display: block; padding: 0; border: none; }
       body:not([data-view="leader"]):not([data-view="admin"]) .offers-table tr.walker-date-group th { display: block; padding: 8px 10px; font-size: 0.95rem; }
@@ -1933,7 +1948,9 @@
 
     /* Flexible columns: share the remaining space, wrapping text */
     .offers-table th[data-admin-sort="walk_name"],
-    .offers-table td[data-label="Walk name"] { min-width: 200px; }
+    .offers-table td[data-label="Walk name"] { min-width: 200px; font-weight: 700; }
+    body[data-view="walker"] .offers-table th[data-admin-sort="date"],
+    body[data-view="walker"] .offers-table td[data-label="Date"] { width: 150px; }
     .offers-table th.walker-only-col,
     .offers-table td[data-label="Description"] { min-width: 240px; }
     .offers-table th[data-admin-sort="comments"],
@@ -1941,6 +1958,7 @@
     .offers-table th[data-admin-sort="notes"],
     .offers-table td[data-label="Notes"] { min-width: 150px; }
     .offers-table td { overflow-wrap: anywhere; }
+
 
     /* Actions stack vertically so the column stays narrow */
     .offers-table td.action-cancel { white-space: normal; }
@@ -3991,10 +4009,15 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         // Distance and ascent under the walk name, as unlabelled badges in every view
         const walkerStats = (() => {
           const rt = bookingRoute(record) || {};
-          const badges = [rt.Distance, rt.Ascent]
-            .map((v) => String(v ?? "").trim())
-            .filter(Boolean)
-            .map((v) => `<span class="badge stat-badge">${escapeHtml(v)}</span>`);
+          const icons = {
+            distance: '<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
+            ascent: '<path d="M3 20l6-10 4 6 3-4 5 8z"/>',
+            duration: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+          };
+          const badges = [["distance", rt.Distance], ["ascent", rt.Ascent], ["duration", rt.Total_Time]]
+            .map(([kind, v]) => [kind, String(v ?? "").trim()])
+            .filter(([, v]) => v)
+            .map(([kind, v]) => `<span class="badge stat-badge"><svg class="stat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[kind]}</svg>${escapeHtml(v)}</span>`);
           return badges.length ? `<div class="stat-badges">${badges.join(" ")}</div>` : "";
         })();
         const tr = document.createElement("tr");
@@ -4011,7 +4034,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           </td>
           <td data-label="Grade"><span class="badge ${currentView === "walker" ? "badge-mono" : ""} grade-${escapeHtml(record.walk_grade || "")}">${escapeHtml(record.walk_grade || "-")}</span></td>
           <td class="walkid-col" data-label="Walk No">${escapeHtml(record.walk_number || record.walk_id || "-")}</td>
-          <td data-label="Walk name">${cancelledBadge(record)}${modifiedBadge(record)}${escapeHtml(displayWalkName || "-")}${walkerStats}</td>
+          <td data-label="Walk name">${cancelledBadge(record)}${modifiedBadge(record)}<strong>${escapeHtml(displayWalkName || "-")}</strong>${walkerStats}</td>
           <td class="walker-only-col" data-label="Description">${walkerDescriptionCell(record)}</td>
           <td class="hide-in-walker" data-label="Leader">${escapeHtml(record.leader_name || "-")}</td>
           <td class="hide-in-walker" data-label="Pueblo">${escapeHtml(displayPueblo || "-")}</td>
