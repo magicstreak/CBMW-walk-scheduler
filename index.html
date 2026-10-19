@@ -15,6 +15,9 @@
   <!-- PDF export: jsPDF and the AutoTable plugin -->
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+  <!-- Walker View map: Leaflet -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <style>
     :root {
       --primary: #2d5b3e;
@@ -1812,7 +1815,15 @@
     body[data-view="admin"] .walker-mode-header { display: none; }
     body.embed-week .walker-mode-header { display: none !important; }
     body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="list"] .calendar-container,
-    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="day"] .calendar-container { display: none; }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="day"] .calendar-container,
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="map"] .calendar-container { display: none; }
+    /* Walker View, Map mode: the map replaces the walk list */
+    .walker-map { display: none; }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="map"] .walker-map { display: block; }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="map"] .walk-offers-body { display: none; }
+    .walker-map-note { margin: 0 0 8px; font-size: 0.9rem; color: var(--text-muted, #64748b); }
+    #walker-map-canvas { height: 62vh; min-height: 360px; border-radius: 12px; border: 1px solid var(--border, #e4e4e7); overflow: hidden; }
+    @media (max-width: 600px) { #walker-map-canvas { height: 55vh; min-height: 300px; } }
     /* Walker View: Month and Day pick their dates from the calendar or picker, so the From / To search filters are hidden */
     body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="month"] .walker-date-range,
     body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="day"] .walker-date-range { display: none; }
@@ -2216,11 +2227,17 @@
       <button type="button" class="walker-mode-btn" data-walker-mode-btn="list" aria-pressed="true">List</button>
       <button type="button" class="walker-mode-btn" data-walker-mode-btn="month" aria-pressed="false">Month</button>
       <button type="button" class="walker-mode-btn" data-walker-mode-btn="day" aria-pressed="false">Day</button>
+      <button type="button" class="walker-mode-btn" data-walker-mode-btn="map" aria-pressed="false">Map</button>
     </div>
     <div class="walker-day-picker" id="walker-day-picker" hidden>
       <label for="walker-day-input">Date</label>
       <input type="date" id="walker-day-input" />
     </div>
+  </div>
+  <!-- ======================================================= WALKER MAP (Walker View, Map mode) ======================================================= -->
+  <div class="walker-map" id="walker-map" hidden>
+    <p class="walker-map-note" id="walker-map-note" aria-live="polite"></p>
+    <div id="walker-map-canvas" role="region" aria-label="Map of walk meeting points"></div>
   </div>
   <!-- ======================================================= CALENDAR ======================================================= -->
   <div class="calendar-container">
@@ -2927,6 +2944,58 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
     const modal = document.getElementById("booking-modal");
     const bookingForm = document.getElementById("kv-booking-form");
     const adminTableBody = document.getElementById("admin-table-body");
+
+    // Walker View map: pins at each walk's meeting point, for the walks the list shows
+    let walkMap = null;
+    let walkMapLayer = null;
+    let walkMapFrame = 0;
+    function renderWalkMap() {
+      if (walkerMode !== "map" || currentView !== "walker") return;
+      const note = document.getElementById("walker-map-note");
+      if (typeof L === "undefined") {
+        note.textContent = "The map needs an internet connection to load.";
+        return;
+      }
+      if (!walkMap) {
+        walkMap = L.map("walker-map-canvas").setView([38.8, 0.05], 10);
+        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 18,
+          attribution: "&copy; OpenStreetMap contributors",
+        }).addTo(walkMap);
+        walkMapLayer = L.layerGroup().addTo(walkMap);
+      }
+      walkMap.invalidateSize();
+      walkMapLayer.clearLayers();
+      const points = [];
+      let missing = 0;
+      document.querySelectorAll("#admin-table-body tr[data-walk-key]").forEach((tr) => {
+        const key = tr.dataset.walkKey;
+        const record = globalBookings[key];
+        if (!record) return;
+        const route = bookingRoute(record) || {};
+        const coords = getMasterCoordinates(route);
+        if (!coords) { missing += 1; return; }
+        const lat = Number(coords.latitude);
+        const lon = Number(coords.longitude);
+        const name = route.Route_Name || route.Walk_Name || record.walk_name || `Walk ${record.walk_number || ""}`;
+        const marker = L.marker([lat, lon]).bindTooltip(
+          `<strong>${escapeHtml(name)}</strong><br>${escapeHtml(tableDate(record.date))} ${escapeHtml(formatStartTime(record.start_time) || "")} · ${escapeHtml(record.walk_grade || "")}`,
+          { direction: "top" }
+        );
+        marker.on("click", () => openDetailCard(key));
+        marker.addTo(walkMapLayer);
+        points.push([lat, lon]);
+      });
+      if (points.length) walkMap.fitBounds(points, { padding: [30, 30], maxZoom: 12 });
+      const shown = `${points.length} walk${points.length === 1 ? "" : "s"} on the map`;
+      note.textContent = missing ? `${shown}. ${missing} without a meeting point are not shown.` : `${shown}. Tap a pin for the walk.`;
+    }
+    // Rebuilding the list (filters, dates, mode) also refreshes the map
+    new MutationObserver(() => {
+      if (walkerMode !== "map") return;
+      cancelAnimationFrame(walkMapFrame);
+      walkMapFrame = requestAnimationFrame(renderWalkMap);
+    }).observe(adminTableBody, { childList: true });
     const modalHeading = document.getElementById("modal-heading");
     const puebloFilter = document.getElementById("pueblo-filter");
       /* ========================================================= GRADE COLOURS FOR CHART ========================================================= */ const gradeColours =
@@ -4021,6 +4090,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           return badges.length ? `<div class="stat-badges">${badges.join(" ")}</div>` : "";
         })();
         const tr = document.createElement("tr");
+        tr.dataset.walkKey = key;
         tr.classList.toggle("cancelled-row", isCancelled(record));
         tr.classList.toggle("expanded-parent", expanded);
         tr.innerHTML = `
@@ -5651,7 +5721,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       }
       function syncWalkerRange() {
         if (currentView !== "walker") return;
-        if (walkerMode === "list") {
+        if (walkerMode === "list" || walkerMode === "map") {
           const today = new Date();
           today.setHours(0, 0, 0, 0);
           setWalkerRange(modeIso(today), "");
@@ -5823,6 +5893,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       if (isEmbedWeek() && currentView === "walker") { title.textContent = "This week's walks"; return; }
       if (currentView !== "walker") { title.textContent = "Walk Offers"; return; }
       if (walkerMode === "list") { title.textContent = "Upcoming Walks"; return; }
+      if (walkerMode === "map") { title.textContent = "Walk Map"; return; }
       if (walkerMode === "month") { title.textContent = `Walks in ${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`; return; }
       const fromVal = document.getElementById("admin-filter-from")?.value || "";
       const toVal = document.getElementById("admin-filter-to")?.value || "";
