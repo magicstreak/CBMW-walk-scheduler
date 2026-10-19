@@ -1822,8 +1822,8 @@
     body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="map"] .walker-map { display: block; }
     body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="map"] .walk-offers-body { display: none; }
     .walker-map-note { margin: 0 0 8px; font-size: 0.9rem; color: var(--text-muted, #64748b); }
-    #walker-map-canvas { height: 62vh; min-height: 360px; border-radius: 12px; border: 1px solid var(--border, #e4e4e7); overflow: hidden; }
-    @media (max-width: 600px) { #walker-map-canvas { height: 55vh; min-height: 300px; } }
+    #walker-map-canvas { width: 100%; height: max(480px, calc(100vh - 230px)); border-radius: 12px; border: 1px solid var(--border, #e4e4e7); overflow: hidden; }
+    @media (max-width: 600px) { #walker-map-canvas { height: max(380px, calc(100vh - 260px)); } }
     /* Walker View: Month and Day pick their dates from the calendar or picker, so the From / To search filters are hidden */
     body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="month"] .walker-date-range,
     body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="day"] .walker-date-range { display: none; }
@@ -2964,7 +2964,6 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         }).addTo(walkMap);
         walkMapLayer = L.layerGroup().addTo(walkMap);
       }
-      walkMap.invalidateSize();
       walkMapLayer.clearLayers();
       const points = [];
       let missing = 0;
@@ -2986,10 +2985,18 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         marker.addTo(walkMapLayer);
         points.push([lat, lon]);
       });
-      if (points.length) walkMap.fitBounds(points, { padding: [30, 30], maxZoom: 12 });
+      // Measure and centre once the panel is visible; the map may have been created while hidden
+      const fit = () => {
+        walkMap.invalidateSize();
+        if (points.length) walkMap.fitBounds(points, { padding: [30, 30], maxZoom: 12 });
+      };
+      fit();
+      setTimeout(fit, 150);
       const shown = `${points.length} walk${points.length === 1 ? "" : "s"} on the map`;
       note.textContent = missing ? `${shown}. ${missing} without a meeting point are not shown.` : `${shown}. Tap a pin for the walk.`;
     }
+    // Keep the map sized correctly when the window or orientation changes
+    window.addEventListener("resize", () => { if (walkMap && walkerMode === "map") walkMap.invalidateSize(); });
     // Rebuilding the list (filters, dates, mode) also refreshes the map
     new MutationObserver(() => {
       if (walkerMode !== "map") return;
