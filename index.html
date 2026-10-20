@@ -1056,11 +1056,30 @@
     .sort-indicator {
       display: inline-block;
       margin-left: 6px;
-      font-size: 0.7rem;
-      color: #475569;
+      font-size: 0.75rem;
+      color: #64748b;
+      opacity: 0.35;
     }
 
     .sort-indicator.active {
+      color: var(--primary);
+      opacity: 1;
+      font-weight: 700;
+    }
+
+    /* Header row: a firmer tinted band, so it reads as a header */
+    .offers-table thead th {
+      background: #e2e8f0;
+      font-weight: 800;
+      font-size: 0.85rem;
+      letter-spacing: 0.02em;
+      color: #1f2937;
+    }
+
+    /* The sorted column is shown in green, with a solid arrow */
+    .offers-table thead th.admin-sortable-header[aria-sort="ascending"],
+    .offers-table thead th.admin-sortable-header[aria-sort="descending"] {
+      background: #e8f1eb;
       color: var(--primary);
     }
 
@@ -1072,7 +1091,11 @@
     }
 
     .admin-sortable-header:hover {
-      background: #eef2f7;
+      background: #e2e8f0;
+    }
+
+    .admin-sortable-header:hover .sort-indicator {
+      opacity: 0.8;
     }
 
     .admin-sortable-header:focus-visible {
@@ -1125,7 +1148,7 @@
       flex-wrap: wrap;
       margin-bottom: 20px;
       padding: 14px;
-      background: var(--bg-muted);
+      background: #f1f5f9;
       border-radius: 10px;
     }
 
@@ -1786,9 +1809,9 @@
     }
     /* Walker View: date headers in the Upcoming Walks list */
     .offers-table tr.walker-date-group th {
-      background: #e6efe9;
+      background: #f6faf7;
       color: #2d5b3e;
-      font-weight: 700;
+      font-weight: 500;
       font-size: 0.95rem;
       text-align: left;
       padding: 9px 12px;
@@ -1829,6 +1852,11 @@
     body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="day"] .walker-date-range { display: none; }
     body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="month"] .walker-search-field,
     body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="day"] .walker-search-field { display: none; }
+    /* Walker View tidy-up: narrower search, Download on the right of the header */
+    body:not([data-view="leader"]):not([data-view="admin"]) .walker-search-field { flex: 0 1 240px; }
+    /* Leader and Admin Views keep their existing header layout */
+    .admin-header-right { display: contents; }
+    body:not([data-view="leader"]):not([data-view="admin"]) .admin-header-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
     /* Walker View, Month and Day: no "Clear filters" button and no "Showing n of n" count */
     body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="month"] #admin-filter-clear,
     body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="month"] #admin-filter-count,
@@ -2329,6 +2357,8 @@
       <h3 id="walk-offers-title">Upcoming Walks</h3>
       <div style="display: flex; gap: 8px; flex-wrap: wrap">
 
+        <div class="admin-header-right">
+      <div class="admin-header-actions" style="display: flex; gap: 8px; flex-wrap: wrap">
         <button class="btn btn-success" id="add-walk-to-schedule" hidden>Add Walk</button>
         <button class="btn btn-success" id="add-social-event" hidden>Add Event</button>
         <button class="btn" id="preview-walker-btn" aria-pressed="false" hidden>Preview</button>
@@ -2338,11 +2368,12 @@
         <button class="btn btn-danger" id="clear-all" hidden>
           Clear All Bookings
         </button>
-   
+        </div>
       </div>
       <button type="button" class="collapse-button" id="walk-offers-collapse" aria-expanded="true" aria-label="Collapse walk offers">
         <span class="collapse-icon">⌃</span>
       </button>
+      </div>
     </div>
     <div class="walk-offers-body">
     <!-- ======================================================= WALK OFFERS FILTERS ======================================================= -->
@@ -5722,11 +5753,11 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         const field = document.getElementById("admin-filter-grade")?.closest(".filter-field");
         return field ? { field, parent: field.parentNode, next: field.nextSibling } : null;
       })();
-      // The grade filter sits in the mode header in Walker View and returns to the Walk Offers filters in the other views
+      // The grade filter stays with the other filters in every view, so the view buttons sit together on their own
       function placeGradeFilter() {
         if (!gradeFieldHome) return;
-        if (currentView === "walker") document.getElementById("walker-mode-header").appendChild(gradeFieldHome.field);
-        else gradeFieldHome.parent.insertBefore(gradeFieldHome.field, gradeFieldHome.next);
+        if (gradeFieldHome.field.parentNode === gradeFieldHome.parent) return;
+        gradeFieldHome.parent.insertBefore(gradeFieldHome.field, gradeFieldHome.next);
       }
       function setWalkerRange(from, to) {
         const fromEl = document.getElementById("admin-filter-from");
