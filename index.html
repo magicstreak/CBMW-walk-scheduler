@@ -2277,27 +2277,6 @@
       <input type="month" id="walker-goto-month" class="walker-only" />
       <button type="button" class="nav-btn" id="calendar-collapse" aria-expanded="true">Hide calendar</button>
     </div>
-    <dialog id="walk-levels-dialog" aria-labelledby="walk-levels-title">
-      <div class="walk-levels-body">
-        <button type="button" class="walk-levels-close" data-close-levels>Close</button>
-        <h2 id="walk-levels-title">Walk Levels</h2>
-        <p><strong>E - Easy:</strong> A walk of up to 4½ hours on good surfaced tracks and less than 200 metres total ascent.</p>
-        <p><strong>M - Moderate:</strong> up to 12km, less than 400 metres total ascent and less than 50% rough going.</p>
-        <p><strong>MS - Moderately Strenuous:</strong> Up to 600 metres total ascent and/or no more than 15 km with some rough going taken at a reasonable pace.</p>
-        <p><strong>S - Strenuous:</strong> More than 600 metres total ascent and/or more than 15km with steep, loose or heavily vegetated sections.</p>
-        <p><strong>VS - Very Strenuous:</strong> More than 800 metres total ascent and/or more than 20km with steep, loose or heavily vegetated sections.</p>
-        <p><strong>X - Experienced walkers routes:</strong> Routes which require considerable stamina and/or significant scrambling skills on rough, steep or exposed sections.</p>
-        <p><strong>Scr - Scrambling:</strong> This implies the need for handholds to ascend steep rock pitches with a sense of exposure to vertigo and where a slip could lead to a serious accident.</p>
-        <p><strong>Scr0</strong> Very easy scrambling. Short sections requiring the use of handholds on not very steep or sustained sections. No exposure.</p>
-        <p><strong>Scr1</strong> Easy scrambling, requiring the use of handholds on not very steep or sustained sections. No exposure.</p>
-        <p><strong>Scr2</strong> Scrambling with some technical moves over steep and more continuous sections. With the probability of some exposure.</p>
-        <p><strong>Scr3</strong> Technically difficult scrambling. Sometimes over prolonged sections, possibly very exposed and with steep drops to one or both sides. Not easy to reverse down or escape from.</p>
-        <h3>Terrain</h3>
-        <p><strong>A</strong> - All good tracks</p>
-        <p><strong>B</strong> - Less than half the route on rough ground</p>
-        <p><strong>C</strong> - More than half the route on rough ground or routes with difficult steep awkward/rocky sections.</p>
-      </div>
-    </dialog>
 
     <div class="legend-wrap">
       <button type="button" class="legend-link" aria-label="Grade legend" aria-describedby="grade-legend">
@@ -2880,6 +2859,28 @@
     </div>
   </div>
   <!-- ======================================================= FIREBASE ======================================================= -->
+  <!-- Walk levels dialog: kept at page level so it is not hidden with the calendar -->
+  <dialog id="walk-levels-dialog" aria-labelledby="walk-levels-title">
+    <div class="walk-levels-body">
+      <button type="button" class="walk-levels-close" data-close-levels>Close</button>
+      <h2 id="walk-levels-title">Walk Levels</h2>
+      <p><strong>E - Easy:</strong> A walk of up to 4½ hours on good surfaced tracks and less than 200 metres total ascent.</p>
+      <p><strong>M - Moderate:</strong> up to 12km, less than 400 metres total ascent and less than 50% rough going.</p>
+      <p><strong>MS - Moderately Strenuous:</strong> Up to 600 metres total ascent and/or no more than 15 km with some rough going taken at a reasonable pace.</p>
+      <p><strong>S - Strenuous:</strong> More than 600 metres total ascent and/or more than 15km with steep, loose or heavily vegetated sections.</p>
+      <p><strong>VS - Very Strenuous:</strong> More than 800 metres total ascent and/or more than 20km with steep, loose or heavily vegetated sections.</p>
+      <p><strong>X - Experienced walkers routes:</strong> Routes which require considerable stamina and/or significant scrambling skills on rough, steep or exposed sections.</p>
+      <p><strong>Scr - Scrambling:</strong> This implies the need for handholds to ascend steep rock pitches with a sense of exposure to vertigo and where a slip could lead to a serious accident.</p>
+      <p><strong>Scr0</strong> Very easy scrambling. Short sections requiring the use of handholds on not very steep or sustained sections. No exposure.</p>
+      <p><strong>Scr1</strong> Easy scrambling, requiring the use of handholds on not very steep or sustained sections. No exposure.</p>
+      <p><strong>Scr2</strong> Scrambling with some technical moves over steep and more continuous sections. With the probability of some exposure.</p>
+      <p><strong>Scr3</strong> Technically difficult scrambling. Sometimes over prolonged sections, possibly very exposed and with steep drops to one or both sides. Not easy to reverse down or escape from.</p>
+      <h3>Terrain</h3>
+      <p><strong>A</strong> - All good tracks</p>
+      <p><strong>B</strong> - Less than half the route on rough ground</p>
+      <p><strong>C</strong> - More than half the route on rough ground or routes with difficult steep awkward/rocky sections.</p>
+    </div>
+  </dialog>
   <script type="module">
     import {initializeApp} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import {
