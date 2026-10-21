@@ -3688,8 +3688,10 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       const val = (id) => (document.getElementById(id) ? document.getElementById(id).value : "ALL");
       const search = (document.getElementById("admin-filter-search")?.value || "").trim().toLowerCase();
       const grade = val("admin-filter-grade");
-      const leader = currentView === "walker" ? "ALL" : val("admin-filter-leader");
-      const pueblo = currentView === "walker" ? "ALL" : val("admin-filter-pueblo");
+      // Preview shows the walker look but keeps the Leader and Pueblo filters the admin or leader chose
+      const walkerLook = currentView === "walker" && !previewReturnView;
+      const leader = walkerLook ? "ALL" : val("admin-filter-leader");
+      const pueblo = walkerLook ? "ALL" : val("admin-filter-pueblo");
       const status = val("admin-filter-status");
       // Date range (YYYY-MM-DD from the date inputs); booking dates are DD-MM-YYYY
       const rangeFrom = document.getElementById("admin-filter-from")?.value || "";
@@ -4024,6 +4026,10 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         el.hidden = walkerMode;
       });
       document.querySelectorAll(".status-col").forEach((el) => {
+        el.hidden = walkerMode && !previewReturnView;
+      });
+      // Leader and Pueblo filters stay visible in Preview, so the applied filter can be seen
+      document.querySelectorAll(".table-filters .hide-in-walker").forEach((el) => {
         el.hidden = walkerMode && !previewReturnView;
       });
       document.querySelectorAll(".walker-only-col").forEach((el) => {
