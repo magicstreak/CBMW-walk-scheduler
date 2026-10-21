@@ -4299,7 +4299,20 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         adminTableBody.appendChild(empty);
       }
 
-      const total = Object.values(globalBookings).filter(Boolean).length;
+      // Total = every row the table could show with no filters: bookings and summer walks,
+      // using the same view and past-walk rules as the rows above.
+      const bookingTotal = Object.keys(globalBookings).filter((k) => {
+        const r = globalBookings[k];
+        if (!r) return false;
+        if (!previewReturnView && !isVisibleInView(r)) return false;
+        if (currentView !== "walker" && !showPastWalks && isPastDate(r.date)) return false;
+        return true;
+      }).length;
+      const summerTotal = Object.keys(globalSocial || {})
+        .filter((k) => globalSocial[k]?.type === "summer")
+        .filter((k) => currentView === "walker" || showPastWalks || !isPastDate(globalSocial[k].date))
+        .length;
+      const total = bookingTotal + summerTotal;
       const countEl = document.getElementById("admin-filter-count");
       if (countEl) {
         countEl.textContent = `Showing ${sortedKeys.length} of ${total}`;
