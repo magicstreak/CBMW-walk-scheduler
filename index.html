@@ -2334,6 +2334,7 @@
     <div class="preview-banner" id="preview-banner" hidden>Preview: this is how the walks will look to walkers. Drafts are shown with their status and are not visible to walkers. Nothing can be changed here.</div>
     <div class="admin-header">
       <h3 id="walk-offers-title">Upcoming Walks</h3>
+      <span id="draft-count" hidden style="font-size:0.9rem; background:#fef3c7; color:#92400e; padding:2px 10px; border-radius:999px; font-weight:600; margin-left:8px; align-self:center"></span>
       <div style="display: flex; gap: 8px; flex-wrap: wrap">
 
         <div class="admin-header-right">
@@ -4313,6 +4314,13 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         .filter((k) => currentView === "walker" || showPastWalks || !isPastDate(globalSocial[k].date))
         .length;
       const total = bookingTotal + summerTotal;
+      // Badge: how many bookings are still drafts, so the admin sees what is waiting
+      const draftEl = document.getElementById("draft-count");
+      if (draftEl) {
+        const drafts = Object.values(globalBookings).filter((r) => r && isDraft(r)).length;
+        draftEl.hidden = currentView !== "admin" || drafts === 0;
+        draftEl.textContent = `${drafts} draft${drafts === 1 ? "" : "s"} waiting`;
+      }
       const countEl = document.getElementById("admin-filter-count");
       if (countEl) {
         countEl.textContent = `Showing ${sortedKeys.length} of ${total}`;
