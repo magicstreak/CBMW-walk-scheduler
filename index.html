@@ -2234,6 +2234,11 @@
     .booking-request-item { padding: 10px 0; border-top: 1px solid #e2e8f0; }
     .booking-request-item:first-of-type { border-top: none; }
     .booking-request-actions { display: flex; gap: 8px; margin-top: 6px; }
+        .booking-request-pending { background: #fef3c7; color: #92400e; border-left: 4px solid #d97706; padding: 10px 12px; border-radius: 6px; font-size: 1rem; font-weight: 800; }
+    .pending-request-badge { display: inline-block; background: #fef3c7; color: #92400e; border-left: 4px solid #d97706; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-right: 4px; }
+        .list-request-btn { margin: 2px 0; }
+    td.action-cancel .btn[hidden], td.action-cancel span[hidden] { display: none !important; }
+    .list-request-pending { font-size: 0.8rem; font-weight: 700; color: #92400e; background: #fef3c7; border-left: 4px solid #d97706; padding: 2px 8px; border-radius: 4px; }
     </style>
 </head>
 
@@ -4037,8 +4042,10 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       adminTableBody.innerHTML = "";
 
       const currentMode = admin === true ? "adminView" : "view";
+      // The actions column is shown to admins, and to leaders (drafts: Edit; live walks: request buttons)
+      const showActions = currentMode === "adminView" || currentView === "leader";
       document.querySelectorAll(".action-cancel-head").forEach((th) => {
-        th.hidden = (currentMode === "view");
+        th.hidden = !showActions;
       });
 
       const walkerMode = currentView === "walker";
@@ -4177,7 +4184,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           </td>
           <td data-label="Grade"><span class="badge ${currentView === "walker" ? "badge-mono" : ""} grade-${escapeHtml(record.walk_grade || "")}">${escapeHtml(record.walk_grade || "-")}</span></td>
           <td class="walkid-col" data-label="Walk No">${escapeHtml(record.walk_number || record.walk_id || "-")}</td>
-          <td data-label="Walk name">${cancelledBadge(record)}${modifiedBadge(record)}<strong>${escapeHtml(displayWalkName || "-")}</strong>${walkerStats}</td>
+          <td data-label="Walk name">${pendingRequestBadge(key)}${cancelledBadge(record)}${modifiedBadge(record)}<strong>${escapeHtml(displayWalkName || "-")}</strong>${walkerStats}</td>
           <td class="walker-only-col" data-label="Description">${walkerDescriptionCell(record)}</td>
           <td class="hide-in-walker" data-label="Leader">${escapeHtml(record.leader_name || "-")}</td>
           <td class="hide-in-walker" data-label="Pueblo">${escapeHtml(displayPueblo || "-")}</td>
@@ -4187,10 +4194,22 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
             <button class="btn btn-success edit-walk-btn" type="button">Edit</button>
             <button class="btn cancel-walk-btn ${isCancelled(record) ? "reinstate" : "cancel"}" type="button">${isCancelled(record) ? "Reinstate walk" : "Cancel walk"}</button>
             <button class="btn btn-danger" type="button">Delete</button>
+            <button class="btn btn-small list-request-btn" type="button" data-list-request="change">Request change</button>
+            <button class="btn btn-small btn-danger list-request-btn" type="button" data-list-request="cancel">Request cancellation</button>
+            <span class="list-request-pending muted">Change pending</span>
           </td>
         `;
 
         tr.querySelector(".edit-walk-btn").hidden = (currentMode === "view") || (currentView === "leader" && !isDraft(record));
+        // Leaders never cancel or delete directly. Live walks get request buttons instead.
+        const leaderLive = currentView === "leader" && !isDraft(record);
+        const pendingHere = !!pendingRequestFor(key);
+        tr.querySelector(".cancel-walk-btn").hidden = currentView === "leader";
+        tr.querySelector(".btn-danger:not(.list-request-btn)").hidden = currentView === "leader";
+        tr.querySelectorAll(".list-request-btn").forEach((btn) => {
+          btn.hidden = !leaderLive || pendingHere || (isCancelled(record) && btn.dataset.listRequest === "cancel") || isCancelled(record);
+        });
+        tr.querySelector(".list-request-pending").hidden = !(leaderLive && pendingHere);
         tr.querySelectorAll(".notes-col, .walkid-col, .hide-in-walker").forEach((el) => {
           el.hidden = walkerMode;
         });
@@ -4200,7 +4219,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         tr.querySelectorAll(".walker-only-col").forEach((el) => {
           el.hidden = !walkerMode;
         });
-        tr.querySelector(".action-cancel").hidden = (currentMode === "view");
+        tr.querySelector(".action-cancel").hidden = !showActions;
 
         const toggleExpanded = () => {
           // Walker View (and Preview, which shows the same view) opens the same card as a calendar click
@@ -4223,6 +4242,12 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         tr.querySelector(".edit-walk-btn")?.addEventListener("click", () =>
           openBookingModal(record.date, record.walk_grade, record, record.walk_number || record.walk_id)
         );
+        tr.querySelectorAll(".list-request-btn").forEach((btn) => btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          openDetailCard(key);
+          bookingRequestMode = btn.dataset.listRequest;
+          renderDetailCard();
+        }));
         tr.querySelector(".cancel-walk-btn")?.addEventListener("click", () => {
           const reinstating = isCancelled(record);
           const msg = reinstating
@@ -4772,10 +4797,10 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           </div>
           <button class="walk-card-close" type="button" data-action="close" aria-label="Close">×</button>
         </div>
+        ${bookingRequestActionsHtml(key)}
         <div class="walk-card-body">
           ${walkCardBodyHtml(key)}
-        </div>
-        ${bookingRequestActionsHtml(key)}`;
+        </div>`;
     }
 
     function renderDetailCard() {
@@ -4853,7 +4878,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       const record = globalBookings[key];
       if (currentView !== "leader" || !record || isDraft(record)) return "";
       if (pendingRequestFor(key)) {
-        return `<div class="booking-request-bar"><strong>Change pending.</strong>&nbsp;An admin will review your request.</div>`;
+        return `<div class="booking-request-bar booking-request-pending">Change pending: an admin will review your request.</div>`;
       }
       const rejected = lastRejectedRequestFor(key);
       const note = rejected
@@ -4864,6 +4889,13 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           <button type="button" class="btn btn-small" data-booking-request="change">Request change</button>
           <button type="button" class="btn btn-small btn-danger" data-booking-request="cancel">Request cancellation</button>
         </div>`;
+    }
+    // Small label on the walk's row in the admin list, so pending changes stand out (not shown to walkers)
+    function pendingRequestBadge(key) {
+      if (currentView === "walker") return "";
+      const r = pendingRequestFor(key);
+      if (!r) return "";
+      return `<span class="pending-request-badge">${r.type === "cancel" ? "Cancellation pending" : "Change pending"}</span>`;
     }
     function bookingRequestFormHtml(key, type) {
       const d = getBookingCardData(key);
