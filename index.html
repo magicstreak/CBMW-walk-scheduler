@@ -2228,7 +2228,13 @@
     body.embed-week .offers-table tr.walker-date-group th { background: #f4f9f6; color: #2d5b3e; font-size: 0.95rem; font-weight: 700; padding: 10px 16px; border-top: 1px solid #e4e4e7; }
     body.embed-week .offers-table tr.walker-date-group:first-child th { border-top: none; }
     body.embed-week .offers-table tbody tr:not(.walker-date-group):hover td { background: #fafafa; }
-  </style>
+      .booking-request-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 12px 0 0; }
+    .booking-request-form label { display: grid; gap: 4px; margin-bottom: 10px; font-weight: 600; }
+    .booking-request-form input, .booking-request-form select, .booking-request-form textarea { font: inherit; font-weight: 400; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; }
+    .booking-request-item { padding: 10px 0; border-top: 1px solid #e2e8f0; }
+    .booking-request-item:first-of-type { border-top: none; }
+    .booking-request-actions { display: flex; gap: 8px; margin-top: 6px; }
+    </style>
 </head>
 
 <body>
@@ -2332,6 +2338,10 @@
   <!-- ======================================================= ADMIN ======================================================= -->
   <div class="admin-container" id="admin-container">
     <div class="preview-banner" id="preview-banner" hidden>Preview: this is how the walks will look to walkers. Drafts are shown with their status and are not visible to walkers. Nothing can be changed here.</div>
+    <section id="booking-requests-panel" hidden style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:12px 16px; margin:0 0 16px">
+      <h3 style="margin:0 0 4px">Change requests from leaders <span class="muted" id="booking-requests-count"></span></h3>
+      <div id="booking-requests-list"></div>
+    </section>
     <div class="admin-header">
       <h3 id="walk-offers-title">Upcoming Walks</h3>
       <span id="draft-count" hidden style="font-size:0.9rem; background:#fef3c7; color:#92400e; padding:2px 10px; border-radius:999px; font-weight:600; margin-left:8px; align-self:center"></span>
@@ -2954,6 +2964,8 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       ["E", "M", "MS", "S", "VS"];
     let currentDate = new Date();
     let globalBookings = {};
+    let bookingRequests = {};   // booking_requests/{id}: leader requests for live walks
+    let bookingRequestMode = null; // null | "change" | "cancel" while a leader fills in a request
     let globalSocial = {};
     let editingSocialKey = null;
     let masterWalks = {};
@@ -3090,11 +3102,18 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
 
       // Booking database remains the source of scheduled dates and booking fields.
       if (isFirebaseActive) {
+        onValue(ref(db, "booking_requests"), (snapshot) => {
+          bookingRequests = snapshot.val() || {};
+          renderBookingRequestsPanel();
+          refreshOpenDetailCard();
+        }, (error) => console.error("Unable to load booking requests:", error));
+
         onValue(ref(db, "walk_bookings"), (snapshot) => {
           globalBookings = snapshot.val() || {};
           renderCalendar();
           refreshOpenDetailCard();
           renderAdminTable();
+          renderBookingRequestsPanel(); // requests may have arrived before the bookings
           updateStatistics();
         }, (error) => {
           console.error("Unable to load walk bookings:", error);
@@ -4755,7 +4774,8 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         </div>
         <div class="walk-card-body">
           ${walkCardBodyHtml(key)}
-        </div>`;
+        </div>
+        ${bookingRequestActionsHtml(key)}`;
     }
 
     function renderDetailCard() {
@@ -4765,7 +4785,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         return;
       }
       detailCard.classList.add("walk-card-wrap");
-      detailCard.innerHTML = detailCardHtml(openCardKey);
+      detailCard.innerHTML = bookingRequestMode ? bookingRequestFormHtml(openCardKey, bookingRequestMode) : detailCardHtml(openCardKey);
     }
 
     /* ---------- Click card for an open (unbooked) slot in walker view ---------- */
@@ -4794,6 +4814,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       if (!globalBookings[key]) return;
       hideHoverCard();
       openCardKey = key;
+      bookingRequestMode = null;
       renderDetailCard();
       detailOverlay.classList.add("active");
     }
@@ -4808,7 +4829,166 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
 
     function closeDetailCard() {
       openCardKey = null;
+      bookingRequestMode = null;
       detailOverlay.classList.remove("active");
+    }
+
+    /* ========================================================= BOOKING CHANGE REQUESTS =========================================================
+       Leaders ask for changes or cancellations to live walks. An admin approves or rejects each one.
+       Stored in booking_requests/{request_id}. The walk itself only changes on approval. */
+    const BR_LABELS = { start_time: "Start time", comments: "Programme comments", notes: "Notes for the team" };
+    const brLeaderName = (l) => `${l?.first_name || ""} ${l?.surname || ""}`.trim();
+    const pendingRequestFor = (key) => Object.values(bookingRequests).find((r) => r && r.status === "pending" && r.booking_key === key) || null;
+    function lastRejectedRequestFor(key) {
+      return Object.values(bookingRequests)
+        .filter((r) => r && r.status === "rejected" && r.booking_key === key)
+        .sort((a, b) => String(b.reviewed_at || "").localeCompare(String(a.reviewed_at || "")))[0] || null;
+    }
+    function saveBookingRequest(id, data) {
+      bookingRequests[id] = data;
+      if (isFirebaseActive) set(ref(db, "booking_requests/" + id), data);
+    }
+    // Leader view, live walks only: buttons to ask for a change or cancellation
+    function bookingRequestActionsHtml(key) {
+      const record = globalBookings[key];
+      if (currentView !== "leader" || !record || isDraft(record)) return "";
+      if (pendingRequestFor(key)) {
+        return `<div class="booking-request-bar"><strong>Change pending.</strong>&nbsp;An admin will review your request.</div>`;
+      }
+      const rejected = lastRejectedRequestFor(key);
+      const note = rejected
+        ? `<div class="booking-request-bar muted">Your last request was not approved${rejected.reject_reason ? ": " + escapeHtml(rejected.reject_reason) : "."}</div>`
+        : "";
+      if (isCancelled(record)) return note;
+      return `${note}<div class="booking-request-bar">
+          <button type="button" class="btn btn-small" data-booking-request="change">Request change</button>
+          <button type="button" class="btn btn-small btn-danger" data-booking-request="cancel">Request cancellation</button>
+        </div>`;
+    }
+    function bookingRequestFormHtml(key, type) {
+      const d = getBookingCardData(key);
+      const record = globalBookings[key] || {};
+      const leaderOptions = LEADER_LOOKUP.map((l) => `<option value="${escapeHtml(l.leader_id)}">${escapeHtml(brLeaderName(l))}</option>`).join("");
+      const title = type === "cancel" ? "Request cancellation" : "Request a change";
+      const fields = type === "change" ? `
+          <label>Start time<input type="text" id="br-start" value="${escapeHtml(record.start_time || "")}" /></label>
+          <label>Programme comments<textarea id="br-comments" rows="2">${escapeHtml(record.comments || "")}</textarea></label>
+          <label>Notes for the team<textarea id="br-notes" rows="2">${escapeHtml(record.notes || "")}</textarea></label>` : "";
+      return `
+        <div class="walk-card-header">
+          <div>
+            <h3 id="detail-title">${escapeHtml(title)}</h3>
+            <div class="walk-card-date">${escapeHtml(d?.name || "Walk")}</div>
+          </div>
+          <button class="walk-card-close" type="button" data-action="close" aria-label="Close">×</button>
+        </div>
+        <form class="walk-card-body booking-request-form" id="booking-request-form" data-type="${type}">
+          <label>Your name<select id="br-leader" required><option value="">Choose your name</option>${leaderOptions}</select></label>
+          ${fields}
+          <label>Why? <textarea id="br-reason" rows="3" required></textarea></label>
+          <div class="detail-actions">
+            <button type="button" class="btn btn-secondary" data-booking-request="back">Back</button>
+            <button type="submit" class="btn btn-primary">Send request</button>
+          </div>
+        </form>`;
+    }
+    function submitBookingRequest(form) {
+      const key = openCardKey;
+      const record = globalBookings[key];
+      if (!record) return;
+      const type = form.dataset.type;
+      const leader = LEADER_LOOKUP.find((l) => l.leader_id === document.getElementById("br-leader").value);
+      const reason = document.getElementById("br-reason").value.trim();
+      if (!leader) return alert("Choose your name first.");
+      if (record.leader_name && record.leader_name !== brLeaderName(leader)) {
+        return alert("You can only ask for changes to walks you lead.");
+      }
+      if (!reason) return alert("Please say why.");
+      const changes = {};
+      if (type === "change") {
+        const next = {
+          start_time: document.getElementById("br-start").value.trim(),
+          comments: document.getElementById("br-comments").value.trim(),
+          notes: document.getElementById("br-notes").value.trim(),
+        };
+        for (const k of Object.keys(next)) {
+          if (next[k] !== String(record[k] ?? "").trim()) changes[k] = next[k];
+        }
+        if (!Object.keys(changes).length) return alert("Nothing has changed yet.");
+      }
+      const before = {};
+      Object.keys(changes).forEach((k) => { before[k] = record[k] ?? ""; });
+      const id = `${key}_${Date.now()}`;
+      saveBookingRequest(id, {
+        request_id: id,
+        booking_key: key,
+        type,
+        status: "pending",
+        requested_by: leader.leader_id,
+        requested_by_name: brLeaderName(leader),
+        requested_at: new Date().toISOString(),
+        reason,
+        changes,
+        before,
+      });
+      bookingRequestMode = null;
+      renderDetailCard();
+    }
+    // Admin: pending requests above the walk offers table
+    function renderBookingRequestsPanel() {
+      const panel = document.getElementById("booking-requests-panel");
+      if (!panel) return;
+      const pending = Object.values(bookingRequests)
+        .filter((r) => r && r.status === "pending")
+        .sort((a, b) => String(a.requested_at).localeCompare(String(b.requested_at)));
+      panel.hidden = currentView !== "admin" || pending.length === 0;
+      document.getElementById("booking-requests-count").textContent = pending.length ? `(${pending.length})` : "";
+      document.getElementById("booking-requests-list").innerHTML = pending.map((r) => {
+        const rec = globalBookings[r.booking_key];
+        const name = getBookingCardData(r.booking_key)?.name || rec?.walk_name || `Walk ${rec?.walk_number || ""}`;
+        const slot = rec ? [rec.walk_grade, rec.pueblo].filter(Boolean).join(" · ") : "";
+        const when = rec ? `${formatWalkDate(rec.date)} • ${formatStartTime(rec.start_time)}` : "Booking no longer exists";
+        const what = r.type === "cancel"
+          ? "<p><strong>Asks to cancel this walk.</strong></p>"
+          : `<ul class="change-list">${Object.entries(r.changes || {}).map(([k, v]) =>
+              `<li><strong>${escapeHtml(BR_LABELS[k] || k)}:</strong> ${escapeHtml(r.before?.[k] || "(blank)")} → ${escapeHtml(v || "(blank)")}</li>`).join("")}</ul>`;
+        return `<div class="booking-request-item">
+          <div><strong>${escapeHtml(name)}</strong> <span class="muted">${escapeHtml(when)}${slot ? " · " + escapeHtml(slot) : ""}</span></div>
+          <div class="muted">${r.type === "cancel" ? "Cancellation" : "Change"} requested by ${escapeHtml(r.requested_by_name || r.requested_by || "a leader")}</div>
+          ${what}
+          <div class="muted">Reason: ${escapeHtml(r.reason || "")}</div>
+          <div class="booking-request-actions">
+            ${rec
+              ? `<button type="button" class="btn btn-small btn-primary" data-br-approve="${escapeHtml(r.request_id)}">Approve</button>
+            <button type="button" class="btn btn-small btn-danger" data-br-reject="${escapeHtml(r.request_id)}">Reject</button>`
+              : `<button type="button" class="btn btn-small" data-br-dismiss="${escapeHtml(r.request_id)}">Dismiss (walk was removed)</button>`}
+          </div>
+        </div>`;
+      }).join("");
+    }
+    function approveBookingRequest(id) {
+      const r = bookingRequests[id];
+      if (!r || r.status !== "pending") return;
+      const rec = globalBookings[r.booking_key];
+      if (!rec) return alert("This booking no longer exists.");
+      if (r.type === "cancel") {
+        saveBookingRecord(r.booking_key, { ...rec, cancelled: true });
+      } else {
+        saveBookingRecord(r.booking_key, { ...rec, ...r.changes, modified: true, modified_note: r.reason });
+      }
+      saveBookingRequest(id, { ...r, status: "approved", reviewed_at: new Date().toISOString() });
+    }
+    function dismissBookingRequest(id) {
+      const r = bookingRequests[id];
+      if (!r || r.status !== "pending") return;
+      saveBookingRequest(id, { ...r, status: "dismissed", reviewed_at: new Date().toISOString() });
+    }
+    function rejectBookingRequest(id) {
+      const r = bookingRequests[id];
+      if (!r || r.status !== "pending") return;
+      const why = prompt("Reason for not approving (the leader will see this):", "");
+      if (why === null) return;
+      saveBookingRequest(id, { ...r, status: "rejected", reject_reason: why.trim(), reviewed_at: new Date().toISOString() });
     }
 
     function refreshOpenDetailCard() {
@@ -4943,8 +5123,30 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
 
     detailOverlay.addEventListener("click", (e) => {
       if (e.target === detailOverlay) return closeDetailCard();
+      const requestBtn = e.target.closest("[data-booking-request]");
+      if (requestBtn && openCardKey !== null) {
+        const action = requestBtn.dataset.bookingRequest;
+        bookingRequestMode = action === "back" ? null : action;
+        renderDetailCard();
+        return;
+      }
       const btn = e.target.closest("[data-action='close']");
       if (btn) closeDetailCard();
+    });
+
+    detailOverlay.addEventListener("submit", (e) => {
+      if (e.target.id !== "booking-request-form") return;
+      e.preventDefault();
+      submitBookingRequest(e.target);
+    });
+
+    document.getElementById("booking-requests-panel").addEventListener("click", (e) => {
+      const ok = e.target.closest("[data-br-approve]");
+      const no = e.target.closest("[data-br-reject]");
+      if (ok) approveBookingRequest(ok.dataset.brApprove);
+      if (no) rejectBookingRequest(no.dataset.brReject);
+      const gone = e.target.closest("[data-br-dismiss]");
+      if (gone) dismissBookingRequest(gone.dataset.brDismiss);
     });
 
     document.addEventListener("keydown", (e) => {
@@ -5891,6 +6093,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         document.querySelector(".calendar-container").classList.remove("calendar-collapsed");
         document.getElementById("calendar-collapse").textContent = "Hide calendar";
         document.body.dataset.view = view;
+        renderBookingRequestsPanel();
         document.getElementById("page-title").textContent = view === "walker" ? "Walk Programme" : "Programme Planner";
         placeGradeFilter();
         if (view !== "walker") setWalkerRange("", "");
