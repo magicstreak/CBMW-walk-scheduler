@@ -379,6 +379,50 @@
     body[data-view="leader"] .slot.booked.grade-VS:not(.cancelled),
     body[data-view="admin"] .slot.booked.grade-VS:not(.cancelled) { background: var(--color-VS); border-left-color: var(--color-VS); }
 
+    /* Leader and Admin views: booked walks stand out more. Grade colours stay as they are. */
+    body[data-view="leader"] .slot.booked:not(.cancelled),
+    body[data-view="admin"] .slot.booked:not(.cancelled) {
+      font-weight: 700;
+      font-size: 0.8rem;
+      border: 1px solid rgba(15, 23, 42, 0.35);
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.25);
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
+    }
+
+    /* Leader and Admin views: drafts are white with a dashed outline and a DRAFT label; live walks keep the solid grade colour. */
+    body[data-view="leader"] .slot.booked.draft:not(.cancelled),
+    body[data-view="admin"] .slot.booked.draft:not(.cancelled) {
+      background: #ffffff !important;
+      color: #1e293b;
+      border: 2px dashed #64748b;
+      border-left-width: 6px;
+      text-shadow: none;
+      box-shadow: none;
+    }
+    body[data-view="leader"] .slot.booked.draft:not(.cancelled)::before,
+    body[data-view="admin"] .slot.booked.draft:not(.cancelled)::before {
+      content: "DRAFT · ";
+      font-weight: 800;
+      font-size: 0.7rem;
+      letter-spacing: 0.04em;
+      color: #475569;
+    }
+    body[data-view="leader"] .slot.booked.draft.grade-E:not(.cancelled) { border-color: var(--color-E); border-left-width: 6px; }
+    body[data-view="leader"] .slot.booked.draft.grade-E:not(.cancelled),
+    body[data-view="admin"] .slot.booked.draft.grade-E:not(.cancelled) { border-color: var(--color-E); border-left-width: 6px; }
+    body[data-view="leader"] .slot.booked.draft.grade-M:not(.cancelled) { border-color: var(--color-M); border-left-width: 6px; }
+    body[data-view="leader"] .slot.booked.draft.grade-M:not(.cancelled),
+    body[data-view="admin"] .slot.booked.draft.grade-M:not(.cancelled) { border-color: var(--color-M); border-left-width: 6px; }
+    body[data-view="leader"] .slot.booked.draft.grade-MS:not(.cancelled) { border-color: var(--color-MS); border-left-width: 6px; }
+    body[data-view="leader"] .slot.booked.draft.grade-MS:not(.cancelled),
+    body[data-view="admin"] .slot.booked.draft.grade-MS:not(.cancelled) { border-color: var(--color-MS); border-left-width: 6px; }
+    body[data-view="leader"] .slot.booked.draft.grade-S:not(.cancelled) { border-color: var(--color-S); border-left-width: 6px; }
+    body[data-view="leader"] .slot.booked.draft.grade-S:not(.cancelled),
+    body[data-view="admin"] .slot.booked.draft.grade-S:not(.cancelled) { border-color: var(--color-S); border-left-width: 6px; }
+    body[data-view="leader"] .slot.booked.draft.grade-VS:not(.cancelled) { border-color: var(--color-VS); border-left-width: 6px; }
+    body[data-view="leader"] .slot.booked.draft.grade-VS:not(.cancelled),
+    body[data-view="admin"] .slot.booked.draft.grade-VS:not(.cancelled) { border-color: var(--color-VS); border-left-width: 6px; }
+
     /* ========================================================= BUTTONS ========================================================= */
     .btn {
       padding: 10px 20px;
