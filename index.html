@@ -3695,6 +3695,21 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
 
 
           // Add day to calendar
+          // Walker View: clicking a day (not a walk) filters the walk list to that day, and clicking it again clears the filter
+          if (currentView === "walker") {
+            const dayIso = modeIso(specificDate);
+            const fromNow = document.getElementById("admin-filter-from")?.value || "";
+            const toNow = document.getElementById("admin-filter-to")?.value || "";
+            dayCell.classList.add("selectable-day");
+            if (fromNow === dayIso && toNow === dayIso) dayCell.classList.add("selected-day");
+            dayCell.addEventListener("click", (e) => {
+              if (e.target.closest(".slot")) return; // walk clicks open the walk card instead
+              if (fromNow === dayIso && toNow === dayIso) syncWalkerRange();
+              else setWalkerRange(dayIso, dayIso);
+              renderCalendar();
+              renderAdminTable();
+            });
+          }
           daysGrid.appendChild(dayCell);
         }
       }
