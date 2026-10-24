@@ -5,11 +5,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Walk Schedule</title>
-  <!-- Google Sans -->
+  <!-- Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&display=swap"
-    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <!-- PDF export: jsPDF and the AutoTable plugin -->
@@ -43,7 +42,7 @@
 
     body {
       font-family:
-        "Google Sans",
+        "Inter",
         system-ui,
         -apple-system,
         sans-serif;
@@ -1885,7 +1884,7 @@
     body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="day"] .calendar-container,
     body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="map"] .calendar-container { display: none; }
     /* Walker View, Map mode: the map replaces the walk list */
-    .walker-map { display: none; }
+    .walker-map { display: none; width: 100%; align-self: stretch; box-sizing: border-box; }
     body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="map"] .walker-map { display: block; }
     body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="map"] .walk-offers-body { display: none; }
     .walker-map-note { margin: 0 0 8px; font-size: 0.9rem; color: var(--text-muted, #64748b); }
@@ -2014,6 +2013,35 @@
     /* ========================================================= WALK OFFERS COLUMN WIDTHS =========================================================
        Sized by column name, not position, so hiding columns in Walker View does not shift the others. */
     .offers-table { table-layout: auto; width: 100%; }
+    /* Walker list always spans the full card width (set explicitly so no browser shrinks it to its content) */
+    body[data-view="walker"] .table-wrapper { width: 100%; }
+    body[data-view="walker"] .offers-table { width: 100% !important; min-width: 100%; }
+    /* Walk photo thumbnail column: walker view only */
+    .walk-thumb {
+      width: 100%; max-width: 152px; aspect-ratio: 3 / 2; border-radius: 10px; overflow: hidden;
+      background: #eef2f0; color: #6b7280; font-size: 0.8rem; display: flex; align-items: center; justify-content: center;
+    }
+    .walk-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    body:not([data-view="walker"]) .offers-table .walker-image-col { display: none !important; }
+    @media (max-width: 640px) { .offers-table .walker-image-col { display: none !important; } }
+    /* Walker View on wider screens: fixed layout so the header always spans the full table.
+       Date and Grade keep fixed widths; Walk name and Description share the rest equally. */
+    @media (min-width: 641px) {
+      body[data-view="walker"] .offers-table { table-layout: fixed; }
+      body[data-view="walker"] .offers-table th[data-admin-sort="walk_grade"],
+      body[data-view="walker"] .offers-table td[data-label="Grade"] { width: 84px; }
+      body[data-view="walker"] .offers-table th.walker-only-col,
+      body[data-view="walker"] .offers-table td.walker-only-col { display: none !important; }
+      body[data-view="walker"] .offers-table .walker-desc-inline { display: block; margin-top: 4px; }
+      body[data-view="walker"] .offers-table thead .sort-indicator { display: none; }
+      body[data-view="walker"] .offers-table td[data-label="Date"] strong { display: block; font-size: 1.05rem; font-weight: 800; color: #111827; }
+      body[data-view="walker"] .offers-table td[data-label="Date"] .dt-line:not(:first-child) span { display: block; font-size: 1.4rem; font-weight: 800; color: #111827; line-height: 1.1; }
+      body[data-view="walker"] .offers-table td[data-label="Walk name"] { font-size: 1.05rem; }
+      body[data-view="walker"] .offers-table td[data-label="Walk name"] .walker-desc-inline { font-weight: 400; }
+      body[data-view="walker"] .offers-table th.walker-image-col,
+      body[data-view="walker"] .offers-table td.walker-image-col { display: table-cell; width: 176px; padding-left: 12px; vertical-align: middle; }
+      body[data-view="walker"] .offers-table td.walker-image-col .walk-thumb { width: 152px; height: 104px; }
+    }
 
     /* Fixed-size columns: keep them compact */
     .offers-table th[data-admin-sort="date"],
@@ -2477,6 +2505,7 @@
             <th class="admin-sortable-header walkid-col" data-admin-sort="walk_number" tabindex="0">Walk Number <span class="sort-indicator">↕</span></th>
             <th class="admin-sortable-header" data-admin-sort="walk_name" tabindex="0">Name of Walk <span class="sort-indicator">↕</span></th>
             <th class="walker-only-col" hidden>Description</th>
+            <th class="walker-image-col" data-label="Photo">Photo</th>
             <th class="admin-sortable-header hide-in-walker" data-admin-sort="leader_name" tabindex="0">Leader <span class="sort-indicator">↕</span></th>
             <th class="admin-sortable-header hide-in-walker" data-admin-sort="pueblo" tabindex="0">Pueblo <span class="sort-indicator">↕</span></th>
             <th class="admin-sortable-header hide-in-walker" data-admin-sort="comments" tabindex="0">Comments <span class="sort-indicator">↕</span></th>
@@ -3195,6 +3224,57 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       }
     }
 
+    // Walk photo thumbnails (walker view): photo from walk_photos/{walk id}, else the walk's Image_URL, else a placeholder
+    const walkPhotoCache = new Map();
+    const walkPhotoPending = new Set();
+    let thumbHydrateQueued = false;
+    function masterWalkKey(walkId) {
+      const key = String(walkId ?? "").trim();
+      if (!key) return "";
+      if (Object.prototype.hasOwnProperty.call(masterWalks, key)) return key;
+      const hit = Object.entries(masterWalks).find(([id, walk]) =>
+        String(id).trim() === key ||
+        String(walk?.Walk_ID ?? walk?.walkid ?? walk?.Walk_Number ?? "").trim() === key);
+      return hit ? hit[0] : "";
+    }
+    function walkThumbHtml(record) {
+      const masterKey = masterWalkKey(record?.walk_number || record?.walk_id || "");
+      if (!masterKey) return '<div class="walk-thumb"><span>No photo</span></div>';
+      return `<div class="walk-thumb" data-photo-key="${escapeHtml(masterKey)}"><span>No photo</span></div>`;
+    }
+    function applyWalkThumb(el, src) {
+      if (!src) return;
+      const img = document.createElement("img");
+      img.alt = "";
+      img.loading = "lazy";
+      img.src = src;
+      el.replaceChildren(img);
+    }
+    function hydrateWalkThumbs() {
+      thumbHydrateQueued = false;
+      if (currentView !== "walker" || !isWalksFirebaseActive) return;
+      document.querySelectorAll(".walk-thumb[data-photo-key]").forEach((el) => {
+        const k = el.dataset.photoKey;
+        if (walkPhotoCache.has(k)) { applyWalkThumb(el, walkPhotoCache.get(k)); return; }
+        const linked = masterWalks[k]?.Image_URL;
+        if (linked) { walkPhotoCache.set(k, String(linked)); applyWalkThumb(el, String(linked)); return; }
+        if (walkPhotoPending.has(k)) return;
+        walkPhotoPending.add(k);
+        get(ref(dbWalks, "walk_photos/" + k)).then((snap) => {
+          const v = snap.val();
+          const src = v && v.data ? String(v.data) : "";
+          walkPhotoCache.set(k, src);
+          document.querySelectorAll(".walk-thumb[data-photo-key]").forEach((node) => {
+            if (node.dataset.photoKey === k) applyWalkThumb(node, src);
+          });
+        }).catch(() => walkPhotoCache.set(k, "")).finally(() => walkPhotoPending.delete(k));
+      });
+    }
+    function queueWalkThumbHydrate() {
+      if (thumbHydrateQueued) return;
+      thumbHydrateQueued = true;
+      setTimeout(hydrateWalkThumbs, 0);
+    }
     function getMasterWalk(walkId) {
       if (walkId === undefined || walkId === null) return null;
       const key = String(walkId).trim();
@@ -4078,8 +4158,9 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         `${escapeHtml(tableDate(rec.date))}<br><span class="summer-time">${escapeHtml(formatStartTime(rec.start_time))}</span>`,
         '<span class="badge summer-badge">Summer</span>',
         "",
-        `<strong>${escapeHtml(rec.title || "Summer walk")}</strong>`,
+        `<strong>${escapeHtml(rec.title || "Summer walk")}</strong>${currentView === "walker" ? `<div class="walker-desc-inline">${detailHtml}</div>` : ""}`,
         detailHtml,
+        "",
         escapeHtml(rec.leader || ""),
         "",
         "",
@@ -4195,7 +4276,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         const groupRow = document.createElement("tr");
         groupRow.className = "walker-date-group";
         const groupCount = sortedKeys.filter((k) => dateOfKey(k) === dateStr).length;
-        groupRow.innerHTML = `<th colspan="${document.querySelectorAll(".offers-table thead th:not([hidden])").length}" scope="rowgroup">${escapeHtml(tableDate(dateStr))}<span class="walker-date-count">${groupCount} ${groupCount === 1 ? "walk" : "walks"}</span></th>`;
+        groupRow.innerHTML = `<th colspan="${[...document.querySelectorAll(".offers-table thead th")].filter((th) => !th.hidden && getComputedStyle(th).display !== "none").length}" scope="rowgroup">${escapeHtml(tableDate(dateStr))}<span class="walker-date-count">${groupCount} ${groupCount === 1 ? "walk" : "walks"}</span></th>`;
         adminTableBody.appendChild(groupRow);
       };
       sortedKeys.forEach((key) => {
@@ -4243,8 +4324,9 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           </td>
           <td data-label="Grade"><span class="badge ${currentView === "walker" ? "badge-mono" : ""} grade-${escapeHtml(record.walk_grade || "")}">${escapeHtml(record.walk_grade || "-")}</span></td>
           <td class="walkid-col" data-label="Walk No">${escapeHtml(record.walk_number || record.walk_id || "-")}</td>
-          <td data-label="Walk name">${pendingRequestBadge(key)}${cancelledBadge(record)}${modifiedBadge(record)}<strong>${escapeHtml(displayWalkName || "-")}</strong>${walkerStats}</td>
+          <td data-label="Walk name">${pendingRequestBadge(key)}${cancelledBadge(record)}${modifiedBadge(record)}<strong>${escapeHtml(displayWalkName || "-")}</strong>${walkerStats}${currentView === "walker" ? `<div class="walker-desc-inline">${walkerDescriptionCell(record)}</div>` : ""}</td>
           <td class="walker-only-col" data-label="Description">${walkerDescriptionCell(record)}</td>
+          <td class="walker-image-col" data-label="Photo">${walkThumbHtml(record)}</td>
           <td class="hide-in-walker" data-label="Leader">${escapeHtml(record.leader_name || "-")}</td>
           <td class="hide-in-walker" data-label="Pueblo">${escapeHtml(displayPueblo || "-")}</td>
           <td class="hide-in-walker" data-label="Comments">${escapeHtml(record.comments || "-")}</td>
@@ -4324,6 +4406,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         });
 
         adminTableBody.appendChild(tr);
+        queueWalkThumbHydrate();
 
         if (expanded) {
           const detailsRow = document.createElement("tr");
@@ -4360,7 +4443,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           ] : [];
 
           if (walkerMode) {
-            const visibleColumns = document.querySelectorAll(".offers-table thead th:not([hidden])").length;
+            const visibleColumns = [...document.querySelectorAll(".offers-table thead th")].filter((th) => !th.hidden && getComputedStyle(th).display !== "none").length;
             detailsRow.innerHTML = `<td colspan="${visibleColumns}"><div class="walk-card-inline">${walkCardBodyHtml(key)}</div></td>`;
             adminTableBody.appendChild(detailsRow);
             return;
@@ -6334,9 +6417,10 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       placeGradeFilter();
       if (!isEmbedWeek() && !VIEW_FROM_HOST && currentView === "walker") setWalkerMode(walkerMode);
       if (isEmbedWeek()) startEmbedWeek();
-      if (VIEW_FROM_HOST) {
+      // No view in the address means Walker View; the host page can still choose another view
+      if (VIEW_FROM_HOST || !isEmbedWeek()) {
         try {
-          setView(VIEW_FROM_HOST);
+          setView(VIEW_FROM_HOST || "walker");
         } catch (err) {
           console.error("Could not apply the view set by the host page:", err);
         }
