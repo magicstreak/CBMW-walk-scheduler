@@ -3247,6 +3247,8 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       const img = document.createElement("img");
       img.alt = "";
       img.loading = "lazy";
+      // A photo link that cannot be loaded falls back to the placeholder instead of a broken-image icon
+      img.onerror = () => { el.replaceChildren(Object.assign(document.createElement("span"), { textContent: "No photo" })); };
       img.src = src;
       el.replaceChildren(img);
     }
