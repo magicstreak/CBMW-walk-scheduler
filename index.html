@@ -3,7 +3,6 @@
 
 <head>
   <meta charset="UTF-8" />
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Walk Schedule</title>
   <!-- Inter -->
@@ -2039,6 +2038,20 @@
       body[data-view="walker"] .offers-table td[data-label="Date"] .dt-line:not(:first-child) span { display: block; font-size: 1.4rem; font-weight: 800; color: #111827; line-height: 1.1; }
       body[data-view="walker"] .offers-table td[data-label="Walk name"] { font-size: 1.05rem; }
       body[data-view="walker"] .offers-table td[data-label="Walk name"] .walker-desc-inline { font-weight: 400; }
+      /* Walker list as a grid: each row shares the same four columns, so the list always fills the card width */
+      body[data-view="walker"] .offers-table { display: block; table-layout: auto; width: 100% !important; }
+      body[data-view="walker"] .offers-table thead,
+      body[data-view="walker"] .offers-table tbody { display: block; width: 100%; }
+      body[data-view="walker"] .offers-table thead tr,
+      body[data-view="walker"] .offers-table tbody tr { display: grid; grid-template-columns: 150px 84px minmax(0, 1fr) 176px; width: 100%; }
+      body[data-view="walker"] .offers-table thead th,
+      body[data-view="walker"] .offers-table tbody td { display: block; min-width: 0; }
+      body[data-view="walker"] .offers-table thead th[hidden],
+      body[data-view="walker"] .offers-table tbody td[hidden] { display: none !important; }
+      body[data-view="walker"] .offers-table tr.walker-date-group,
+      body[data-view="walker"] .offers-table tr.offer-details-row { grid-template-columns: minmax(0, 1fr); }
+      body[data-view="walker"] .offers-table tr.walker-date-group > th,
+      body[data-view="walker"] .offers-table tr.offer-details-row > td { grid-column: 1 / -1; }
       body[data-view="walker"] .offers-table th.walker-image-col,
       body[data-view="walker"] .offers-table td.walker-image-col { display: table-cell; width: 176px; padding-left: 12px; vertical-align: middle; }
       body[data-view="walker"] .offers-table td.walker-image-col .walk-thumb { width: 152px; height: 104px; }
