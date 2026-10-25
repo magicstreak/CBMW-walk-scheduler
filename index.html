@@ -3272,20 +3272,18 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       document.querySelectorAll(".walk-thumb[data-photo-key]").forEach((el) => {
         const k = el.dataset.photoKey;
         if (walkPhotoCache.has(k)) { applyWalkThumb(el, walkPhotoCache.get(k)); return; }
+        const linked = masterWalks[k]?.Image_URL;
+        if (linked) { walkPhotoCache.set(k, String(linked)); applyWalkThumb(el, String(linked)); return; }
         if (walkPhotoPending.has(k)) return;
         walkPhotoPending.add(k);
-        // Uploaded photo first; the walk's Image URL is only a fallback (some image hosts have certificate problems)
-        const linked = masterWalks[k]?.Image_URL ? String(masterWalks[k].Image_URL) : "";
-        const finish = (src) => {
+        get(ref(dbWalks, "walk_photos/" + k)).then((snap) => {
+          const v = snap.val();
+          const src = v && v.data ? String(v.data) : "";
           walkPhotoCache.set(k, src);
           document.querySelectorAll(".walk-thumb[data-photo-key]").forEach((node) => {
             if (node.dataset.photoKey === k) applyWalkThumb(node, src);
           });
-        };
-        get(ref(dbWalks, "walk_photos/" + k)).then((snap) => {
-          const v = snap.val();
-          finish(v && v.data ? String(v.data) : linked);
-        }).catch(() => finish(linked)).finally(() => walkPhotoPending.delete(k));
+        }).catch(() => walkPhotoCache.set(k, "")).finally(() => walkPhotoPending.delete(k));
       });
     }
     function queueWalkThumbHydrate() {
