@@ -2039,6 +2039,10 @@
       background: #eef2f0; color: #6b7280; font-size: 0.9rem; display: flex; align-items: center; justify-content: center;
     }
     .walk-card-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    /* Placeholder: soft sky with a mountain line-drawing */
+    .walk-thumb-empty { background: linear-gradient(180deg, #dfeee6 0%, #f4f7f2 100%) !important; }
+    .walk-thumb-empty svg { width: 46%; max-width: 96px; height: auto; }
+    .walk-card-photo.walk-thumb-empty svg { width: 22%; max-width: 140px; }
     body:not([data-view="walker"]) .offers-table .walker-image-col { display: none !important; }
     @media (max-width: 640px) { .offers-table .walker-image-col { display: none !important; } }
     /* Walker View on wider screens: fixed layout so the header always spans the full table.
@@ -3268,10 +3272,12 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         String(walk?.Walk_ID ?? walk?.walkid ?? walk?.Walk_Number ?? "").trim() === key);
       return hit ? hit[0] : "";
     }
+    // Shown when a walk has no photo: a simple mountain illustration instead of text
+    const WALK_PHOTO_PLACEHOLDER = '<svg viewBox="0 0 120 80" aria-hidden="true" focusable="false"><circle cx="92" cy="22" r="7" fill="#f4d58d"/><path d="M0 80 L34 30 L52 52 L70 26 L120 80 Z" fill="#9dbaa5"/><path d="M20 80 L50 40 L66 60 L84 38 L108 80 Z" fill="#5f8a6e"/><path d="M50 40 L56 48 L50 46 L44 50 Z" fill="#ffffff" opacity="0.85"/><path d="M70 26 L76 34 L70 32 L64 35 Z" fill="#ffffff" opacity="0.85"/></svg>';
     function walkThumbHtml(record) {
       const masterKey = masterWalkKey(record?.walk_number || record?.walk_id || "");
-      if (!masterKey) return '<div class="walk-thumb"><span>No photo</span></div>';
-      return `<div class="walk-thumb" data-photo-key="${escapeHtml(masterKey)}"><span>No photo</span></div>`;
+      if (!masterKey) return `<div class="walk-thumb walk-thumb-empty">${WALK_PHOTO_PLACEHOLDER}</div>`;
+      return `<div class="walk-thumb walk-thumb-empty" data-photo-key="${escapeHtml(masterKey)}">${WALK_PHOTO_PLACEHOLDER}</div>`;
     }
     function applyWalkThumb(el, src) {
       if (!src) return;
@@ -3279,7 +3285,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       img.alt = "";
       img.loading = "lazy";
       // A photo link that cannot be loaded falls back to the placeholder instead of a broken-image icon
-      img.onerror = () => { el.replaceChildren(Object.assign(document.createElement("span"), { textContent: "No photo" })); };
+      img.onerror = () => { el.classList.add("walk-thumb-empty"); el.innerHTML = WALK_PHOTO_PLACEHOLDER; };
       img.src = src;
       el.replaceChildren(img);
     }
@@ -4962,7 +4968,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           ${quoteBlock}`;
 
       const photoKey = masterWalkKey(d.walkId || d.record?.walk_number || d.record?.walk_id || "");
-      const photoHtml = photoKey ? `<div class="walk-card-photo" data-photo-key="${escapeHtml(photoKey)}"><span>No photo</span></div>` : "";
+      const photoHtml = photoKey ? `<div class="walk-card-photo walk-thumb-empty" data-photo-key="${escapeHtml(photoKey)}">${WALK_PHOTO_PLACEHOLDER}</div>` : "";
       queueWalkThumbHydrate();
       return cancelBanner(d.record) + modifiedBanner(d.record) + photoHtml + body;
     }
