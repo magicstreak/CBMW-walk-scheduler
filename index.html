@@ -400,7 +400,7 @@
     }
     /* The DRAFT tag sits in the top-right corner so it does not push the walk name out of the slot */
     body[data-view="leader"] .slot.booked.draft:not(.cancelled),
-    body[data-view="admin"] .slot.booked.draft:not(.cancelled) { position: relative; padding-right: 50px; white-space: normal; overflow: hidden; text-overflow: clip; height: auto; min-height: 25px; line-height: 1.2; }
+    body[data-view="admin"] .slot.booked.draft:not(.cancelled) { position: relative; padding-right: 50px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     body[data-view="leader"] .slot.booked.draft:not(.cancelled)::before,
     body[data-view="admin"] .slot.booked.draft:not(.cancelled)::before {
       content: "DRAFT";
