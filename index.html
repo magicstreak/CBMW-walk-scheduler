@@ -5,11 +5,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Walk Schedule</title>
-  <!-- Google Sans -->
+  <!-- Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&display=swap"
-    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <!-- PDF export: jsPDF and the AutoTable plugin -->
@@ -43,7 +42,7 @@
 
     body {
       font-family:
-        "Google Sans",
+        "Inter",
         system-ui,
         -apple-system,
         sans-serif;
@@ -378,6 +377,60 @@
     body[data-view="admin"] .slot.booked.grade-S:not(.cancelled) { background: var(--color-S); border-left-color: var(--color-S); }
     body[data-view="leader"] .slot.booked.grade-VS:not(.cancelled),
     body[data-view="admin"] .slot.booked.grade-VS:not(.cancelled) { background: var(--color-VS); border-left-color: var(--color-VS); }
+
+    /* Leader and Admin views: booked walks stand out more. Grade colours stay as they are. */
+    body[data-view="leader"] .slot.booked:not(.cancelled),
+    body[data-view="admin"] .slot.booked:not(.cancelled) {
+      font-weight: 700;
+      font-size: 0.8rem;
+      border: 1px solid rgba(15, 23, 42, 0.35);
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.25);
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
+    }
+
+    /* Leader and Admin views: drafts are white with a dashed outline and a DRAFT label; live walks keep the solid grade colour. */
+    body[data-view="leader"] .slot.booked.draft:not(.cancelled),
+    body[data-view="admin"] .slot.booked.draft:not(.cancelled) {
+      background: #ffffff !important;
+      color: #1e293b;
+      border: 2px dashed #64748b;
+      border-left-width: 6px;
+      text-shadow: none;
+      box-shadow: none;
+    }
+    /* The DRAFT tag sits in the top-right corner so it does not push the walk name out of the slot */
+    body[data-view="leader"] .slot.booked.draft:not(.cancelled),
+    body[data-view="admin"] .slot.booked.draft:not(.cancelled) { position: relative; padding-right: 50px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    body[data-view="leader"] .slot.booked.draft:not(.cancelled)::before,
+    body[data-view="admin"] .slot.booked.draft:not(.cancelled)::before {
+      content: "DRAFT";
+      position: absolute;
+      top: 0;
+      right: 0;
+      padding: 1px 5px;
+      border-radius: 0 6px 0 6px;
+      background: #475569;
+      color: #ffffff;
+      font-size: 0.55rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      line-height: 1.3;
+    }
+    body[data-view="leader"] .slot.booked.draft.grade-E:not(.cancelled) { border-color: var(--color-E); border-left-width: 6px; }
+    body[data-view="leader"] .slot.booked.draft.grade-E:not(.cancelled),
+    body[data-view="admin"] .slot.booked.draft.grade-E:not(.cancelled) { border-color: var(--color-E); border-left-width: 6px; }
+    body[data-view="leader"] .slot.booked.draft.grade-M:not(.cancelled) { border-color: var(--color-M); border-left-width: 6px; }
+    body[data-view="leader"] .slot.booked.draft.grade-M:not(.cancelled),
+    body[data-view="admin"] .slot.booked.draft.grade-M:not(.cancelled) { border-color: var(--color-M); border-left-width: 6px; }
+    body[data-view="leader"] .slot.booked.draft.grade-MS:not(.cancelled) { border-color: var(--color-MS); border-left-width: 6px; }
+    body[data-view="leader"] .slot.booked.draft.grade-MS:not(.cancelled),
+    body[data-view="admin"] .slot.booked.draft.grade-MS:not(.cancelled) { border-color: var(--color-MS); border-left-width: 6px; }
+    body[data-view="leader"] .slot.booked.draft.grade-S:not(.cancelled) { border-color: var(--color-S); border-left-width: 6px; }
+    body[data-view="leader"] .slot.booked.draft.grade-S:not(.cancelled),
+    body[data-view="admin"] .slot.booked.draft.grade-S:not(.cancelled) { border-color: var(--color-S); border-left-width: 6px; }
+    body[data-view="leader"] .slot.booked.draft.grade-VS:not(.cancelled) { border-color: var(--color-VS); border-left-width: 6px; }
+    body[data-view="leader"] .slot.booked.draft.grade-VS:not(.cancelled),
+    body[data-view="admin"] .slot.booked.draft.grade-VS:not(.cancelled) { border-color: var(--color-VS); border-left-width: 6px; }
 
     /* ========================================================= BUTTONS ========================================================= */
     .btn {
@@ -1841,7 +1894,7 @@
     body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="day"] .calendar-container,
     body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="map"] .calendar-container { display: none; }
     /* Walker View, Map mode: the map replaces the walk list */
-    .walker-map { display: none; }
+    .walker-map { display: none; width: 100%; align-self: stretch; box-sizing: border-box; }
     body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="map"] .walker-map { display: block; }
     body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="map"] .walk-offers-body { display: none; }
     .walker-map-note { margin: 0 0 8px; font-size: 0.9rem; color: var(--text-muted, #64748b); }
@@ -1910,6 +1963,8 @@
       vertical-align: middle;
     }
     .walker-desc { display: flex; flex-direction: column; gap: 4px; min-width: 220px; white-space: normal; }
+    /* Description shown under the walk name only in the wide walker table (set again in that layout below) */
+    .walker-desc-inline { display: none; }
     .walker-desc-comments { color: var(--text-muted); font-style: italic; }
     /* Draft: description clamped to two lines in the table; full text on hover and in the expanded row */
     .walker-desc-text {
@@ -1970,6 +2025,58 @@
     /* ========================================================= WALK OFFERS COLUMN WIDTHS =========================================================
        Sized by column name, not position, so hiding columns in Walker View does not shift the others. */
     .offers-table { table-layout: auto; width: 100%; }
+    /* Walker list always spans the full card width (set explicitly so no browser shrinks it to its content) */
+    body[data-view="walker"] .table-wrapper { width: 100%; }
+    body[data-view="walker"] .offers-table { width: 100% !important; min-width: 100%; }
+    /* Walk photo thumbnail column: walker view only */
+    .walk-thumb {
+      width: 100%; max-width: 152px; aspect-ratio: 3 / 2; border-radius: 10px; overflow: hidden;
+      background: #eef2f0; color: #6b7280; font-size: 0.8rem; display: flex; align-items: center; justify-content: center;
+    }
+    .walk-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .walk-card-photo {
+      width: 100%; aspect-ratio: 16 / 9; max-height: 260px; border-radius: 12px; overflow: hidden; margin-bottom: 14px;
+      background: #eef2f0; color: #6b7280; font-size: 0.9rem; display: flex; align-items: center; justify-content: center;
+    }
+    .walk-card-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    /* Placeholder: soft sky with a mountain line-drawing */
+    .walk-thumb-empty { background: linear-gradient(180deg, #dfeee6 0%, #f4f7f2 100%) !important; }
+    .walk-thumb-empty svg { width: 46%; max-width: 96px; height: auto; }
+    .walk-card-photo.walk-thumb-empty svg { width: 22%; max-width: 140px; }
+    body:not([data-view="walker"]) .offers-table .walker-image-col { display: none !important; }
+    @media (max-width: 640px) { .offers-table .walker-image-col { display: none !important; } }
+    /* Walker View on wider screens: fixed layout so the header always spans the full table.
+       Date and Grade keep fixed widths; Walk name and Description share the rest equally. */
+    @media (min-width: 641px) {
+      body[data-view="walker"] .offers-table { table-layout: fixed; }
+      body[data-view="walker"] .offers-table th[data-admin-sort="walk_grade"],
+      body[data-view="walker"] .offers-table td[data-label="Grade"] { width: 84px; }
+      body[data-view="walker"] .offers-table th.walker-only-col,
+      body[data-view="walker"] .offers-table td.walker-only-col { display: none !important; }
+      body[data-view="walker"] .offers-table .walker-desc-inline { display: block; margin-top: 4px; }
+      body[data-view="walker"] .offers-table thead .sort-indicator { display: none; }
+      body[data-view="walker"] .offers-table td[data-label="Date"] strong { display: block; font-size: 1.05rem; font-weight: 800; color: #111827; }
+      body[data-view="walker"] .offers-table td[data-label="Date"] .dt-line:not(:first-child) span { display: block; font-size: 1.4rem; font-weight: 800; color: #111827; line-height: 1.1; }
+      body[data-view="walker"] .offers-table td[data-label="Walk name"] { font-size: 1.05rem; }
+      body[data-view="walker"] .offers-table td[data-label="Walk name"] .walker-desc-inline { font-weight: 400; }
+      /* Walker list as a grid: each row shares the same four columns, so the list always fills the card width */
+      body[data-view="walker"] .offers-table { display: block; table-layout: auto; width: 100% !important; }
+      body[data-view="walker"] .offers-table thead,
+      body[data-view="walker"] .offers-table tbody { display: block; width: 100%; }
+      body[data-view="walker"] .offers-table thead tr,
+      body[data-view="walker"] .offers-table tbody tr { display: grid; grid-template-columns: 150px 84px minmax(0, 1fr) 176px; width: 100%; }
+      body[data-view="walker"] .offers-table thead th,
+      body[data-view="walker"] .offers-table tbody td { display: block; min-width: 0; }
+      body[data-view="walker"] .offers-table thead th[hidden],
+      body[data-view="walker"] .offers-table tbody td[hidden] { display: none !important; }
+      body[data-view="walker"] .offers-table tr.walker-date-group,
+      body[data-view="walker"] .offers-table tr.offer-details-row { grid-template-columns: minmax(0, 1fr); }
+      body[data-view="walker"] .offers-table tr.walker-date-group > th,
+      body[data-view="walker"] .offers-table tr.offer-details-row > td { grid-column: 1 / -1; }
+      body[data-view="walker"] .offers-table th.walker-image-col,
+      body[data-view="walker"] .offers-table td.walker-image-col { display: table-cell; width: 176px; padding-left: 12px; vertical-align: middle; }
+      body[data-view="walker"] .offers-table td.walker-image-col .walk-thumb { width: 152px; height: 104px; }
+    }
 
     /* Fixed-size columns: keep them compact */
     .offers-table th[data-admin-sort="date"],
@@ -2228,14 +2335,25 @@
     body.embed-week .offers-table tr.walker-date-group th { background: #f4f9f6; color: #2d5b3e; font-size: 0.95rem; font-weight: 700; padding: 10px 16px; border-top: 1px solid #e4e4e7; }
     body.embed-week .offers-table tr.walker-date-group:first-child th { border-top: none; }
     body.embed-week .offers-table tbody tr:not(.walker-date-group):hover td { background: #fafafa; }
-  </style>
+      .booking-request-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 12px 0 0; }
+    .booking-request-form label { display: grid; gap: 4px; margin-bottom: 10px; font-weight: 600; }
+    .booking-request-form input, .booking-request-form select, .booking-request-form textarea { font: inherit; font-weight: 400; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; }
+    .booking-request-item { padding: 10px 0; border-top: 1px solid #e2e8f0; }
+    .booking-request-item:first-of-type { border-top: none; }
+    .booking-request-actions { display: flex; gap: 8px; margin-top: 6px; }
+        .booking-request-pending { background: #fef3c7; color: #92400e; border-left: 4px solid #d97706; padding: 10px 12px; border-radius: 6px; font-size: 1rem; font-weight: 800; }
+    .pending-request-badge { display: inline-block; background: #fef3c7; color: #92400e; border-left: 4px solid #d97706; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-right: 4px; }
+        .list-request-btn { margin: 2px 0; }
+    td.action-cancel .btn[hidden], td.action-cancel span[hidden] { display: none !important; }
+    .list-request-pending { font-size: 0.8rem; font-weight: 700; color: #92400e; background: #fef3c7; border-left: 4px solid #d97706; padding: 2px 8px; border-radius: 4px; }
+    </style>
 </head>
 
 <body>
   <!-- ======================================================= HEADER ======================================================= -->
   <header class="page-header">
     <img class="page-logo" src="data:image/png;base64,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" alt="Costa Blanca Mountain Walkers logo" />
-    <h1>Walk Schedule</h1>
+    <h1 id="page-title">Walk Programme</h1>
     <p id="page-instruction">Click on a slot to schedule or edit a walk.</p>
   </header>
   <!-- ======================================================= VIEW TOGGLE ======================================================= -->
@@ -2332,8 +2450,13 @@
   <!-- ======================================================= ADMIN ======================================================= -->
   <div class="admin-container" id="admin-container">
     <div class="preview-banner" id="preview-banner" hidden>Preview: this is how the walks will look to walkers. Drafts are shown with their status and are not visible to walkers. Nothing can be changed here.</div>
+    <section id="booking-requests-panel" hidden style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:12px 16px; margin:0 0 16px">
+      <h3 style="margin:0 0 4px">Change requests from leaders <span class="muted" id="booking-requests-count"></span></h3>
+      <div id="booking-requests-list"></div>
+    </section>
     <div class="admin-header">
       <h3 id="walk-offers-title">Upcoming Walks</h3>
+      <span id="draft-count" hidden style="font-size:0.9rem; background:#fef3c7; color:#92400e; padding:2px 10px; border-radius:999px; font-weight:600; margin-left:8px; align-self:center"></span>
       <div style="display: flex; gap: 8px; flex-wrap: wrap">
 
         <div class="admin-header-right">
@@ -2417,6 +2540,7 @@
             <th class="admin-sortable-header walkid-col" data-admin-sort="walk_number" tabindex="0">Walk Number <span class="sort-indicator">↕</span></th>
             <th class="admin-sortable-header" data-admin-sort="walk_name" tabindex="0">Name of Walk <span class="sort-indicator">↕</span></th>
             <th class="walker-only-col" hidden>Description</th>
+            <th class="walker-image-col" data-label="Photo">Photo</th>
             <th class="admin-sortable-header hide-in-walker" data-admin-sort="leader_name" tabindex="0">Leader <span class="sort-indicator">↕</span></th>
             <th class="admin-sortable-header hide-in-walker" data-admin-sort="pueblo" tabindex="0">Pueblo <span class="sort-indicator">↕</span></th>
             <th class="admin-sortable-header hide-in-walker" data-admin-sort="comments" tabindex="0">Comments <span class="sort-indicator">↕</span></th>
@@ -2953,6 +3077,8 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       ["E", "M", "MS", "S", "VS"];
     let currentDate = new Date();
     let globalBookings = {};
+    let bookingRequests = {};   // booking_requests/{id}: leader requests for live walks
+    let bookingRequestMode = null; // null | "change" | "cancel" while a leader fills in a request
     let globalSocial = {};
     let editingSocialKey = null;
     let masterWalks = {};
@@ -3089,11 +3215,18 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
 
       // Booking database remains the source of scheduled dates and booking fields.
       if (isFirebaseActive) {
+        onValue(ref(db, "booking_requests"), (snapshot) => {
+          bookingRequests = snapshot.val() || {};
+          renderBookingRequestsPanel();
+          refreshOpenDetailCard();
+        }, (error) => console.error("Unable to load booking requests:", error));
+
         onValue(ref(db, "walk_bookings"), (snapshot) => {
           globalBookings = snapshot.val() || {};
           renderCalendar();
           refreshOpenDetailCard();
           renderAdminTable();
+          renderBookingRequestsPanel(); // requests may have arrived before the bookings
           updateStatistics();
         }, (error) => {
           console.error("Unable to load walk bookings:", error);
@@ -3126,6 +3259,64 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       }
     }
 
+    // Walk photo thumbnails (walker view): photo from walk_photos/{walk id}, else the walk's Image_URL, else a placeholder
+    const walkPhotoCache = new Map();
+    const walkPhotoPending = new Set();
+    let thumbHydrateQueued = false;
+    function masterWalkKey(walkId) {
+      const key = String(walkId ?? "").trim();
+      if (!key) return "";
+      if (Object.prototype.hasOwnProperty.call(masterWalks, key)) return key;
+      const hit = Object.entries(masterWalks).find(([id, walk]) =>
+        String(id).trim() === key ||
+        String(walk?.Walk_ID ?? walk?.walkid ?? walk?.Walk_Number ?? "").trim() === key);
+      return hit ? hit[0] : "";
+    }
+    // Shown when a walk has no photo: a simple mountain illustration instead of text
+    const WALK_PHOTO_PLACEHOLDER = '<svg viewBox="0 0 120 80" aria-hidden="true" focusable="false"><circle cx="92" cy="22" r="7" fill="#f4d58d"/><path d="M0 80 L34 30 L52 52 L70 26 L120 80 Z" fill="#9dbaa5"/><path d="M20 80 L50 40 L66 60 L84 38 L108 80 Z" fill="#5f8a6e"/><path d="M50 40 L56 48 L50 46 L44 50 Z" fill="#ffffff" opacity="0.85"/><path d="M70 26 L76 34 L70 32 L64 35 Z" fill="#ffffff" opacity="0.85"/></svg>';
+    function walkThumbHtml(record) {
+      const masterKey = masterWalkKey(record?.walk_number || record?.walk_id || "");
+      if (!masterKey) return `<div class="walk-thumb walk-thumb-empty">${WALK_PHOTO_PLACEHOLDER}</div>`;
+      return `<div class="walk-thumb walk-thumb-empty" data-photo-key="${escapeHtml(masterKey)}">${WALK_PHOTO_PLACEHOLDER}</div>`;
+    }
+    function applyWalkThumb(el, src) {
+      if (!src) return;
+      const img = document.createElement("img");
+      img.alt = "";
+      img.loading = "lazy";
+      // A photo link that cannot be loaded falls back to the placeholder instead of a broken-image icon
+      img.onerror = () => { el.classList.add("walk-thumb-empty"); el.innerHTML = WALK_PHOTO_PLACEHOLDER; };
+      img.src = src;
+      el.replaceChildren(img);
+    }
+    function hydrateWalkThumbs() {
+      thumbHydrateQueued = false;
+      if (!isWalksFirebaseActive) return;
+      document.querySelectorAll(".walk-thumb[data-photo-key], .walk-card-photo[data-photo-key]").forEach((el) => {
+        if (el.classList.contains("walk-thumb") && currentView !== "walker") return;
+        const k = el.dataset.photoKey;
+        if (walkPhotoCache.has(k)) { applyWalkThumb(el, walkPhotoCache.get(k)); return; }
+        if (walkPhotoPending.has(k)) return;
+        walkPhotoPending.add(k);
+        // Uploaded photo first; the walk's Image URL is only a fallback (some image hosts have certificate problems)
+        const linked = masterWalks[k]?.Image_URL ? String(masterWalks[k].Image_URL) : "";
+        const finish = (src) => {
+          walkPhotoCache.set(k, src);
+          document.querySelectorAll(".walk-thumb[data-photo-key], .walk-card-photo[data-photo-key]").forEach((node) => {
+            if (node.dataset.photoKey === k) applyWalkThumb(node, src);
+          });
+        };
+        get(ref(dbWalks, "walk_photos/" + k)).then((snap) => {
+          const v = snap.val();
+          finish(v && v.data ? String(v.data) : linked);
+        }).catch(() => finish(linked)).finally(() => walkPhotoPending.delete(k));
+      });
+    }
+    function queueWalkThumbHydrate() {
+      if (thumbHydrateQueued) return;
+      thumbHydrateQueued = true;
+      setTimeout(hydrateWalkThumbs, 0);
+    }
     function getMasterWalk(walkId) {
       if (walkId === undefined || walkId === null) return null;
       const key = String(walkId).trim();
@@ -3626,6 +3817,21 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
 
 
           // Add day to calendar
+          // Walker View: clicking a day (not a walk) filters the walk list to that day, and clicking it again clears the filter
+          if (currentView === "walker") {
+            const dayIso = modeIso(specificDate);
+            const fromNow = document.getElementById("admin-filter-from")?.value || "";
+            const toNow = document.getElementById("admin-filter-to")?.value || "";
+            dayCell.classList.add("selectable-day");
+            if (fromNow === dayIso && toNow === dayIso) dayCell.classList.add("selected-day");
+            dayCell.addEventListener("click", (e) => {
+              if (e.target.closest(".slot")) return; // walk clicks open the walk card instead
+              if (fromNow === dayIso && toNow === dayIso) syncWalkerRange();
+              else setWalkerRange(dayIso, dayIso);
+              renderCalendar();
+              renderAdminTable();
+            });
+          }
           daysGrid.appendChild(dayCell);
         }
       }
@@ -3688,8 +3894,10 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       const val = (id) => (document.getElementById(id) ? document.getElementById(id).value : "ALL");
       const search = (document.getElementById("admin-filter-search")?.value || "").trim().toLowerCase();
       const grade = val("admin-filter-grade");
-      const leader = currentView === "walker" ? "ALL" : val("admin-filter-leader");
-      const pueblo = currentView === "walker" ? "ALL" : val("admin-filter-pueblo");
+      // Preview shows the walker look but keeps the Leader and Pueblo filters the admin or leader chose
+      const walkerLook = currentView === "walker" && !previewReturnView;
+      const leader = walkerLook ? "ALL" : val("admin-filter-leader");
+      const pueblo = walkerLook ? "ALL" : val("admin-filter-pueblo");
       const status = val("admin-filter-status");
       // Date range (YYYY-MM-DD from the date inputs); booking dates are DD-MM-YYYY
       const rangeFrom = document.getElementById("admin-filter-from")?.value || "";
@@ -3992,8 +4200,9 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         `${escapeHtml(tableDate(rec.date))}<br><span class="summer-time">${escapeHtml(formatStartTime(rec.start_time))}</span>`,
         '<span class="badge summer-badge">Summer</span>',
         "",
-        `<strong>${escapeHtml(rec.title || "Summer walk")}</strong>`,
+        `<strong>${escapeHtml(rec.title || "Summer walk")}</strong>${currentView === "walker" ? `<div class="walker-desc-inline">${detailHtml}</div>` : ""}`,
         detailHtml,
+        "",
         escapeHtml(rec.leader || ""),
         "",
         "",
@@ -4015,8 +4224,10 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       adminTableBody.innerHTML = "";
 
       const currentMode = admin === true ? "adminView" : "view";
+      // The actions column is shown to admins, and to leaders (drafts: Edit; live walks: request buttons)
+      const showActions = currentMode === "adminView" || currentView === "leader";
       document.querySelectorAll(".action-cancel-head").forEach((th) => {
-        th.hidden = (currentMode === "view");
+        th.hidden = !showActions;
       });
 
       const walkerMode = currentView === "walker";
@@ -4024,6 +4235,10 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         el.hidden = walkerMode;
       });
       document.querySelectorAll(".status-col").forEach((el) => {
+        el.hidden = walkerMode && !previewReturnView;
+      });
+      // Leader and Pueblo filters stay visible in Preview, so the applied filter can be seen
+      document.querySelectorAll(".table-filters .hide-in-walker").forEach((el) => {
         el.hidden = walkerMode && !previewReturnView;
       });
       document.querySelectorAll(".walker-only-col").forEach((el) => {
@@ -4103,7 +4318,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         const groupRow = document.createElement("tr");
         groupRow.className = "walker-date-group";
         const groupCount = sortedKeys.filter((k) => dateOfKey(k) === dateStr).length;
-        groupRow.innerHTML = `<th colspan="${document.querySelectorAll(".offers-table thead th:not([hidden])").length}" scope="rowgroup">${escapeHtml(tableDate(dateStr))}<span class="walker-date-count">${groupCount} ${groupCount === 1 ? "walk" : "walks"}</span></th>`;
+        groupRow.innerHTML = `<th colspan="${[...document.querySelectorAll(".offers-table thead th")].filter((th) => !th.hidden && getComputedStyle(th).display !== "none").length}" scope="rowgroup">${escapeHtml(tableDate(dateStr))}<span class="walker-date-count">${groupCount} ${groupCount === 1 ? "walk" : "walks"}</span></th>`;
         adminTableBody.appendChild(groupRow);
       };
       sortedKeys.forEach((key) => {
@@ -4151,8 +4366,9 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           </td>
           <td data-label="Grade"><span class="badge ${currentView === "walker" ? "badge-mono" : ""} grade-${escapeHtml(record.walk_grade || "")}">${escapeHtml(record.walk_grade || "-")}</span></td>
           <td class="walkid-col" data-label="Walk No">${escapeHtml(record.walk_number || record.walk_id || "-")}</td>
-          <td data-label="Walk name">${cancelledBadge(record)}${modifiedBadge(record)}<strong>${escapeHtml(displayWalkName || "-")}</strong>${walkerStats}</td>
+          <td data-label="Walk name">${pendingRequestBadge(key)}${cancelledBadge(record)}${modifiedBadge(record)}<strong>${escapeHtml(displayWalkName || "-")}</strong>${walkerStats}${currentView === "walker" ? `<div class="walker-desc-inline">${walkerDescriptionCell(record)}</div>` : ""}</td>
           <td class="walker-only-col" data-label="Description">${walkerDescriptionCell(record)}</td>
+          <td class="walker-image-col" data-label="Photo">${walkThumbHtml(record)}</td>
           <td class="hide-in-walker" data-label="Leader">${escapeHtml(record.leader_name || "-")}</td>
           <td class="hide-in-walker" data-label="Pueblo">${escapeHtml(displayPueblo || "-")}</td>
           <td class="hide-in-walker" data-label="Comments">${escapeHtml(record.comments || "-")}</td>
@@ -4161,10 +4377,22 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
             <button class="btn btn-success edit-walk-btn" type="button">Edit</button>
             <button class="btn cancel-walk-btn ${isCancelled(record) ? "reinstate" : "cancel"}" type="button">${isCancelled(record) ? "Reinstate walk" : "Cancel walk"}</button>
             <button class="btn btn-danger" type="button">Delete</button>
+            <button class="btn btn-small list-request-btn" type="button" data-list-request="change">Request change</button>
+            <button class="btn btn-small btn-danger list-request-btn" type="button" data-list-request="cancel">Request cancellation</button>
+            <span class="list-request-pending muted">Change pending</span>
           </td>
         `;
 
         tr.querySelector(".edit-walk-btn").hidden = (currentMode === "view") || (currentView === "leader" && !isDraft(record));
+        // Leaders never cancel or delete directly. Live walks get request buttons instead.
+        const leaderLive = currentView === "leader" && !isDraft(record);
+        const pendingHere = !!pendingRequestFor(key);
+        tr.querySelector(".cancel-walk-btn").hidden = currentView === "leader";
+        tr.querySelector(".btn-danger:not(.list-request-btn)").hidden = currentView === "leader";
+        tr.querySelectorAll(".list-request-btn").forEach((btn) => {
+          btn.hidden = !leaderLive || pendingHere || (isCancelled(record) && btn.dataset.listRequest === "cancel") || isCancelled(record);
+        });
+        tr.querySelector(".list-request-pending").hidden = !(leaderLive && pendingHere);
         tr.querySelectorAll(".notes-col, .walkid-col, .hide-in-walker").forEach((el) => {
           el.hidden = walkerMode;
         });
@@ -4174,7 +4402,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         tr.querySelectorAll(".walker-only-col").forEach((el) => {
           el.hidden = !walkerMode;
         });
-        tr.querySelector(".action-cancel").hidden = (currentMode === "view");
+        tr.querySelector(".action-cancel").hidden = !showActions;
 
         const toggleExpanded = () => {
           // Walker View (and Preview, which shows the same view) opens the same card as a calendar click
@@ -4197,6 +4425,12 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         tr.querySelector(".edit-walk-btn")?.addEventListener("click", () =>
           openBookingModal(record.date, record.walk_grade, record, record.walk_number || record.walk_id)
         );
+        tr.querySelectorAll(".list-request-btn").forEach((btn) => btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          openDetailCard(key);
+          bookingRequestMode = btn.dataset.listRequest;
+          renderDetailCard();
+        }));
         tr.querySelector(".cancel-walk-btn")?.addEventListener("click", () => {
           const reinstating = isCancelled(record);
           const msg = reinstating
@@ -4214,6 +4448,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         });
 
         adminTableBody.appendChild(tr);
+        queueWalkThumbHydrate();
 
         if (expanded) {
           const detailsRow = document.createElement("tr");
@@ -4250,7 +4485,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           ] : [];
 
           if (walkerMode) {
-            const visibleColumns = document.querySelectorAll(".offers-table thead th:not([hidden])").length;
+            const visibleColumns = [...document.querySelectorAll(".offers-table thead th")].filter((th) => !th.hidden && getComputedStyle(th).display !== "none").length;
             detailsRow.innerHTML = `<td colspan="${visibleColumns}"><div class="walk-card-inline">${walkCardBodyHtml(key)}</div></td>`;
             adminTableBody.appendChild(detailsRow);
             return;
@@ -4293,7 +4528,27 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         adminTableBody.appendChild(empty);
       }
 
-      const total = Object.values(globalBookings).filter(Boolean).length;
+      // Total = every row the table could show with no filters: bookings and summer walks,
+      // using the same view and past-walk rules as the rows above.
+      const bookingTotal = Object.keys(globalBookings).filter((k) => {
+        const r = globalBookings[k];
+        if (!r) return false;
+        if (!previewReturnView && !isVisibleInView(r)) return false;
+        if (currentView !== "walker" && !showPastWalks && isPastDate(r.date)) return false;
+        return true;
+      }).length;
+      const summerTotal = Object.keys(globalSocial || {})
+        .filter((k) => globalSocial[k]?.type === "summer")
+        .filter((k) => currentView === "walker" || showPastWalks || !isPastDate(globalSocial[k].date))
+        .length;
+      const total = bookingTotal + summerTotal;
+      // Badge: how many bookings are still drafts, so the admin sees what is waiting
+      const draftEl = document.getElementById("draft-count");
+      if (draftEl) {
+        const drafts = Object.values(globalBookings).filter((r) => r && isDraft(r)).length;
+        draftEl.hidden = currentView !== "admin" || drafts === 0;
+        draftEl.textContent = `${drafts} draft${drafts === 1 ? "" : "s"} waiting`;
+      }
       const countEl = document.getElementById("admin-filter-count");
       if (countEl) {
         countEl.textContent = `Showing ${sortedKeys.length} of ${total}`;
@@ -4712,7 +4967,10 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
             : "This booking has no Walk Number linked to the master walks database."}</p>
           ${quoteBlock}`;
 
-      return cancelBanner(d.record) + modifiedBanner(d.record) + body;
+      const photoKey = masterWalkKey(d.walkId || d.record?.walk_number || d.record?.walk_id || "");
+      const photoHtml = photoKey ? `<div class="walk-card-photo walk-thumb-empty" data-photo-key="${escapeHtml(photoKey)}">${WALK_PHOTO_PLACEHOLDER}</div>` : "";
+      queueWalkThumbHydrate();
+      return cancelBanner(d.record) + modifiedBanner(d.record) + photoHtml + body;
     }
 
     function detailCardHtml(key) {
@@ -4726,6 +4984,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           </div>
           <button class="walk-card-close" type="button" data-action="close" aria-label="Close">×</button>
         </div>
+        ${bookingRequestActionsHtml(key)}
         <div class="walk-card-body">
           ${walkCardBodyHtml(key)}
         </div>`;
@@ -4738,7 +4997,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         return;
       }
       detailCard.classList.add("walk-card-wrap");
-      detailCard.innerHTML = detailCardHtml(openCardKey);
+      detailCard.innerHTML = bookingRequestMode ? bookingRequestFormHtml(openCardKey, bookingRequestMode) : detailCardHtml(openCardKey);
     }
 
     /* ---------- Click card for an open (unbooked) slot in walker view ---------- */
@@ -4767,6 +5026,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       if (!globalBookings[key]) return;
       hideHoverCard();
       openCardKey = key;
+      bookingRequestMode = null;
       renderDetailCard();
       detailOverlay.classList.add("active");
     }
@@ -4781,7 +5041,173 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
 
     function closeDetailCard() {
       openCardKey = null;
+      bookingRequestMode = null;
       detailOverlay.classList.remove("active");
+    }
+
+    /* ========================================================= BOOKING CHANGE REQUESTS =========================================================
+       Leaders ask for changes or cancellations to live walks. An admin approves or rejects each one.
+       Stored in booking_requests/{request_id}. The walk itself only changes on approval. */
+    const BR_LABELS = { start_time: "Start time", comments: "Programme comments", notes: "Notes for the team" };
+    const brLeaderName = (l) => `${l?.first_name || ""} ${l?.surname || ""}`.trim();
+    const pendingRequestFor = (key) => Object.values(bookingRequests).find((r) => r && r.status === "pending" && r.booking_key === key) || null;
+    function lastRejectedRequestFor(key) {
+      return Object.values(bookingRequests)
+        .filter((r) => r && r.status === "rejected" && r.booking_key === key)
+        .sort((a, b) => String(b.reviewed_at || "").localeCompare(String(a.reviewed_at || "")))[0] || null;
+    }
+    function saveBookingRequest(id, data) {
+      bookingRequests[id] = data;
+      if (isFirebaseActive) set(ref(db, "booking_requests/" + id), data);
+    }
+    // Leader view, live walks only: buttons to ask for a change or cancellation
+    function bookingRequestActionsHtml(key) {
+      const record = globalBookings[key];
+      if (currentView !== "leader" || !record || isDraft(record)) return "";
+      if (pendingRequestFor(key)) {
+        return `<div class="booking-request-bar booking-request-pending">Change pending: an admin will review your request.</div>`;
+      }
+      const rejected = lastRejectedRequestFor(key);
+      const note = rejected
+        ? `<div class="booking-request-bar muted">Your last request was not approved${rejected.reject_reason ? ": " + escapeHtml(rejected.reject_reason) : "."}</div>`
+        : "";
+      if (isCancelled(record)) return note;
+      return `${note}<div class="booking-request-bar">
+          <button type="button" class="btn btn-small" data-booking-request="change">Request change</button>
+          <button type="button" class="btn btn-small btn-danger" data-booking-request="cancel">Request cancellation</button>
+        </div>`;
+    }
+    // Small label on the walk's row in the admin list, so pending changes stand out (not shown to walkers)
+    function pendingRequestBadge(key) {
+      if (currentView === "walker") return "";
+      const r = pendingRequestFor(key);
+      if (!r) return "";
+      return `<span class="pending-request-badge">${r.type === "cancel" ? "Cancellation pending" : "Change pending"}</span>`;
+    }
+    function bookingRequestFormHtml(key, type) {
+      const d = getBookingCardData(key);
+      const record = globalBookings[key] || {};
+      const leaderOptions = LEADER_LOOKUP.map((l) => `<option value="${escapeHtml(l.leader_id)}">${escapeHtml(brLeaderName(l))}</option>`).join("");
+      const title = type === "cancel" ? "Request cancellation" : "Request a change";
+      const fields = type === "change" ? `
+          <label>Start time<input type="text" id="br-start" value="${escapeHtml(record.start_time || "")}" /></label>
+          <label>Programme comments<textarea id="br-comments" rows="2">${escapeHtml(record.comments || "")}</textarea></label>
+          <label>Notes for the team<textarea id="br-notes" rows="2">${escapeHtml(record.notes || "")}</textarea></label>` : "";
+      return `
+        <div class="walk-card-header">
+          <div>
+            <h3 id="detail-title">${escapeHtml(title)}</h3>
+            <div class="walk-card-date">${escapeHtml(d?.name || "Walk")}</div>
+          </div>
+          <button class="walk-card-close" type="button" data-action="close" aria-label="Close">×</button>
+        </div>
+        <form class="walk-card-body booking-request-form" id="booking-request-form" data-type="${type}">
+          <label>Your name<select id="br-leader" required><option value="">Choose your name</option>${leaderOptions}</select></label>
+          ${fields}
+          <label>Why? <textarea id="br-reason" rows="3" required></textarea></label>
+          <div class="detail-actions">
+            <button type="button" class="btn btn-secondary" data-booking-request="back">Back</button>
+            <button type="submit" class="btn btn-primary">Send request</button>
+          </div>
+        </form>`;
+    }
+    function submitBookingRequest(form) {
+      const key = openCardKey;
+      const record = globalBookings[key];
+      if (!record) return;
+      const type = form.dataset.type;
+      const leader = LEADER_LOOKUP.find((l) => l.leader_id === document.getElementById("br-leader").value);
+      const reason = document.getElementById("br-reason").value.trim();
+      if (!leader) return alert("Choose your name first.");
+      if (record.leader_name && record.leader_name !== brLeaderName(leader)) {
+        return alert("You can only ask for changes to walks you lead.");
+      }
+      if (!reason) return alert("Please say why.");
+      const changes = {};
+      if (type === "change") {
+        const next = {
+          start_time: document.getElementById("br-start").value.trim(),
+          comments: document.getElementById("br-comments").value.trim(),
+          notes: document.getElementById("br-notes").value.trim(),
+        };
+        for (const k of Object.keys(next)) {
+          if (next[k] !== String(record[k] ?? "").trim()) changes[k] = next[k];
+        }
+        if (!Object.keys(changes).length) return alert("Nothing has changed yet.");
+      }
+      const before = {};
+      Object.keys(changes).forEach((k) => { before[k] = record[k] ?? ""; });
+      const id = `${key}_${Date.now()}`;
+      saveBookingRequest(id, {
+        request_id: id,
+        booking_key: key,
+        type,
+        status: "pending",
+        requested_by: leader.leader_id,
+        requested_by_name: brLeaderName(leader),
+        requested_at: new Date().toISOString(),
+        reason,
+        changes,
+        before,
+      });
+      bookingRequestMode = null;
+      renderDetailCard();
+    }
+    // Admin: pending requests above the walk offers table
+    function renderBookingRequestsPanel() {
+      const panel = document.getElementById("booking-requests-panel");
+      if (!panel) return;
+      const pending = Object.values(bookingRequests)
+        .filter((r) => r && r.status === "pending")
+        .sort((a, b) => String(a.requested_at).localeCompare(String(b.requested_at)));
+      panel.hidden = currentView !== "admin" || pending.length === 0;
+      document.getElementById("booking-requests-count").textContent = pending.length ? `(${pending.length})` : "";
+      document.getElementById("booking-requests-list").innerHTML = pending.map((r) => {
+        const rec = globalBookings[r.booking_key];
+        const name = getBookingCardData(r.booking_key)?.name || rec?.walk_name || `Walk ${rec?.walk_number || ""}`;
+        const slot = rec ? [rec.walk_grade, rec.pueblo].filter(Boolean).join(" · ") : "";
+        const when = rec ? `${formatWalkDate(rec.date)} • ${formatStartTime(rec.start_time)}` : "Booking no longer exists";
+        const what = r.type === "cancel"
+          ? "<p><strong>Asks to cancel this walk.</strong></p>"
+          : `<ul class="change-list">${Object.entries(r.changes || {}).map(([k, v]) =>
+              `<li><strong>${escapeHtml(BR_LABELS[k] || k)}:</strong> ${escapeHtml(r.before?.[k] || "(blank)")} → ${escapeHtml(v || "(blank)")}</li>`).join("")}</ul>`;
+        return `<div class="booking-request-item">
+          <div><strong>${escapeHtml(name)}</strong> <span class="muted">${escapeHtml(when)}${slot ? " · " + escapeHtml(slot) : ""}</span></div>
+          <div class="muted">${r.type === "cancel" ? "Cancellation" : "Change"} requested by ${escapeHtml(r.requested_by_name || r.requested_by || "a leader")}</div>
+          ${what}
+          <div class="muted">Reason: ${escapeHtml(r.reason || "")}</div>
+          <div class="booking-request-actions">
+            ${rec
+              ? `<button type="button" class="btn btn-small btn-primary" data-br-approve="${escapeHtml(r.request_id)}">Approve</button>
+            <button type="button" class="btn btn-small btn-danger" data-br-reject="${escapeHtml(r.request_id)}">Reject</button>`
+              : `<button type="button" class="btn btn-small" data-br-dismiss="${escapeHtml(r.request_id)}">Dismiss (walk was removed)</button>`}
+          </div>
+        </div>`;
+      }).join("");
+    }
+    function approveBookingRequest(id) {
+      const r = bookingRequests[id];
+      if (!r || r.status !== "pending") return;
+      const rec = globalBookings[r.booking_key];
+      if (!rec) return alert("This booking no longer exists.");
+      if (r.type === "cancel") {
+        saveBookingRecord(r.booking_key, { ...rec, cancelled: true });
+      } else {
+        saveBookingRecord(r.booking_key, { ...rec, ...r.changes, modified: true, modified_note: r.reason });
+      }
+      saveBookingRequest(id, { ...r, status: "approved", reviewed_at: new Date().toISOString() });
+    }
+    function dismissBookingRequest(id) {
+      const r = bookingRequests[id];
+      if (!r || r.status !== "pending") return;
+      saveBookingRequest(id, { ...r, status: "dismissed", reviewed_at: new Date().toISOString() });
+    }
+    function rejectBookingRequest(id) {
+      const r = bookingRequests[id];
+      if (!r || r.status !== "pending") return;
+      const why = prompt("Reason for not approving (the leader will see this):", "");
+      if (why === null) return;
+      saveBookingRequest(id, { ...r, status: "rejected", reject_reason: why.trim(), reviewed_at: new Date().toISOString() });
     }
 
     function refreshOpenDetailCard() {
@@ -4916,8 +5342,30 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
 
     detailOverlay.addEventListener("click", (e) => {
       if (e.target === detailOverlay) return closeDetailCard();
+      const requestBtn = e.target.closest("[data-booking-request]");
+      if (requestBtn && openCardKey !== null) {
+        const action = requestBtn.dataset.bookingRequest;
+        bookingRequestMode = action === "back" ? null : action;
+        renderDetailCard();
+        return;
+      }
       const btn = e.target.closest("[data-action='close']");
       if (btn) closeDetailCard();
+    });
+
+    detailOverlay.addEventListener("submit", (e) => {
+      if (e.target.id !== "booking-request-form") return;
+      e.preventDefault();
+      submitBookingRequest(e.target);
+    });
+
+    document.getElementById("booking-requests-panel").addEventListener("click", (e) => {
+      const ok = e.target.closest("[data-br-approve]");
+      const no = e.target.closest("[data-br-reject]");
+      if (ok) approveBookingRequest(ok.dataset.brApprove);
+      if (no) rejectBookingRequest(no.dataset.brReject);
+      const gone = e.target.closest("[data-br-dismiss]");
+      if (gone) dismissBookingRequest(gone.dataset.brDismiss);
     });
 
     document.addEventListener("keydown", (e) => {
@@ -5864,6 +6312,8 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         document.querySelector(".calendar-container").classList.remove("calendar-collapsed");
         document.getElementById("calendar-collapse").textContent = "Hide calendar";
         document.body.dataset.view = view;
+        renderBookingRequestsPanel();
+        document.getElementById("page-title").textContent = view === "walker" ? "Walk Programme" : "Programme Planner";
         placeGradeFilter();
         if (view !== "walker") setWalkerRange("", "");
         const admin = view === "admin";
@@ -6012,9 +6462,10 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       placeGradeFilter();
       if (!isEmbedWeek() && !VIEW_FROM_HOST && currentView === "walker") setWalkerMode(walkerMode);
       if (isEmbedWeek()) startEmbedWeek();
-      if (VIEW_FROM_HOST) {
+      // No view in the address means Walker View; the host page can still choose another view
+      if (VIEW_FROM_HOST || !isEmbedWeek()) {
         try {
-          setView(VIEW_FROM_HOST);
+          setView(VIEW_FROM_HOST || "walker");
         } catch (err) {
           console.error("Could not apply the view set by the host page:", err);
         }
