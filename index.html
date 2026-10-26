@@ -2090,6 +2090,8 @@
     .offers-table td[data-label="Status"] { width: 84px; white-space: nowrap; }
     .offers-table th[data-admin-sort="leader_name"],
     .offers-table td[data-label="Leader"] { width: 120px; }
+    .optional-mark { font-weight: 400; color: #64748b; font-size: 0.8em; }
+    .co-leader-name { font-size: 0.85em; color: #475569; }
     .offers-table th[data-admin-sort="pueblo"],
     .offers-table td[data-label="Pueblo"] { width: 100px; }
 
@@ -3514,6 +3516,16 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       return ids.length ? ids : null;
     }
 
+    /* Optional co-leader: same permitted list as the leader, excluding the main leader */
+    function coLeaderOptionsHtml(selectedId, mainId, walkNo) {
+      const allowed = permittedLeaderIds(walkNo);
+      const options = LEADER_LOOKUP
+        .filter((l) => l.leader_id !== mainId && (!allowed || allowed.includes(l.leader_id)))
+        .map((l) => `<option value="${escapeHtml(l.leader_id)}" ${l.leader_id === selectedId ? "selected" : ""}>${escapeHtml(leaderFullName(l))}</option>`)
+        .join("");
+      return `<option value="">None</option>` + options;
+    }
+
     function leaderOptionsHtml(selectedId, allowedIds = null) {
       const placeholder = `<option value="" disabled ${selectedId ? "" : "selected"}>Choose a leader</option>`;
       const options = LEADER_LOOKUP.filter((l) => !allowedIds || allowedIds.includes(l.leader_id)).map((l) =>
@@ -4067,6 +4079,8 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
               <input type="text" name="walk_number" required list="inline-walk-options" autocomplete="off" value="${escapeHtml(record.walk_number || "")}" /></label>
             <label>Name of leader <span class="required-mark" aria-hidden="true">*</span>
               <select name="leader_id" required>${leaderOptionsHtml(selectedLeaderId(record), permittedLeaderIds(record.walk_number))}</select></label>
+            <label>Co-leader <span class="optional-mark">(optional)</span>
+              <select name="co_leader_id">${coLeaderOptionsHtml(record.linked_leader || "", selectedLeaderId(record), record.walk_number)}</select></label>
             <label class="wide">Programme comments
               <textarea name="comments" rows="2">${escapeHtml(record.comments || "")}</textarea></label>
             <label class="wide">Notes for programme team
@@ -4111,6 +4125,11 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       if (allowedLeaders && !allowedLeaders.includes(leaderRecord.leader_id)) {
         return fail(`That leader is not permitted to lead walk ${walkNo}. Choose the owner or a permitted leader.`);
       }
+      const coLeaderId = form.elements.co_leader_id?.value || "";
+      if (coLeaderId && coLeaderId === leaderRecord.leader_id) return fail("The co-leader must be a different leader.");
+      if (coLeaderId && allowedLeaders && !allowedLeaders.includes(coLeaderId)) {
+        return fail(`That co-leader is not permitted to lead walk ${walkNo}.`);
+      }
       const leader = leaderFullName(leaderRecord);
 
       const walkChanged = walkNo !== String(record.walk_number || "").trim();
@@ -4122,6 +4141,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         start_time: startTime,
         leader_id: leaderRecord.leader_id,
         leader_name: leader,
+        linked_leader: coLeaderId,
         comments: form.elements.comments.value.trim(),
         notes: form.elements.notes.value.trim(),
         updated_at: new Date().toISOString(),
@@ -4139,6 +4159,13 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       const allowed = permittedLeaderIds(e.target.value);
       const current = select.value && (!allowed || allowed.includes(select.value)) ? select.value : "";
       select.innerHTML = leaderOptionsHtml(current, allowed);
+      form.elements.co_leader_id.innerHTML = coLeaderOptionsHtml(form.elements.co_leader_id.value, current, e.target.value);
+    });
+    document.addEventListener("change", (e) => {
+      if (e.target?.name !== "leader_id") return;
+      const form = e.target.closest(".inline-edit-form");
+      if (!form || !form.elements.co_leader_id) return;
+      form.elements.co_leader_id.innerHTML = coLeaderOptionsHtml(form.elements.co_leader_id.value, e.target.value, form.elements.walk_number.value);
     });
 
     /* Booked slots keep the full name for desktop; phones show the grade and start time (see CSS) */
@@ -4395,7 +4422,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           <td data-label="Walk name">${pendingRequestBadge(key)}${cancelledBadge(record)}${modifiedBadge(record)}<strong>${escapeHtml(displayWalkName || "-")}</strong>${walkerStats}${currentView === "walker" ? `<div class="walker-desc-inline">${walkerDescriptionCell(record)}</div>` : ""}</td>
           <td class="walker-only-col" data-label="Description">${walkerDescriptionCell(record)}</td>
           <td class="walker-image-col" data-label="Photo">${walkThumbHtml(record)}</td>
-          <td class="hide-in-walker" data-label="Leader">${escapeHtml(record.leader_name || "-")}</td>
+          <td class="hide-in-walker" data-label="Leader">${escapeHtml(record.leader_name || "-")}${record.linked_leader && findLeader(record.linked_leader) ? `<br><span class="co-leader-name">+ ${escapeHtml(leaderFullName(findLeader(record.linked_leader)))}</span>` : ""}</td>
           <td class="hide-in-walker" data-label="Pueblo">${escapeHtml(displayPueblo || "-")}</td>
           <td class="hide-in-walker" data-label="Comments">${escapeHtml(record.comments || "-")}</td>
           <td class="notes-col" data-label="Notes">${escapeHtml(record.notes || "-")}</td>
@@ -4973,8 +5000,12 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           ].join("")
         : walkInfoRow("Leader:", escapeHtml(d.record.leader_name || "–"));
 
+      const coLeader = findLeader(d.record.linked_leader);
+      const coLeaderRow = coLeader ? walkInfoRow("Co-leader:", escapeHtml(leaderFullName(coLeader))) : "";
+
       const organiser = [
         leaderRows,
+        coLeaderRow,
         d.pueblo && currentView !== "walker" ? walkInfoRow("Pueblo:", escapeHtml(d.pueblo)) : "",
         wisUrl
           ? walkInfoRow("WiS link:", `<a href="${escapeHtml(wisUrl)}" target="_blank" rel="noopener noreferrer">Walks In Spain ↗</a>`)
