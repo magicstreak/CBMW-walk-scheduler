@@ -2047,6 +2047,8 @@
     @media (max-width: 640px) { .offers-table .walker-image-col { display: none !important; } }
     /* Walker View on wider screens: fixed layout so the header always spans the full table.
        Date and Grade keep fixed widths; Walk name and Description share the rest equally. */
+      /* All widths: date/time badge centred both ways, same 152x104 tile as the photo */
+      body[data-view="walker"] .offers-table td[data-label="Date"].date-time-cell { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; width: 152px; height: 104px; max-width: 152px; padding: 0 6px; box-sizing: border-box; margin: 8px 0; background: #eef2f0; border-radius: 10px; }
     @media (min-width: 641px) {
       body[data-view="walker"] .offers-table { table-layout: fixed; }
       body[data-view="walker"] .offers-table th[data-admin-sort="walk_grade"],
@@ -2055,8 +2057,11 @@
       body[data-view="walker"] .offers-table td.walker-only-col { display: none !important; }
       body[data-view="walker"] .offers-table .walker-desc-inline { display: block; margin-top: 4px; }
       body[data-view="walker"] .offers-table thead .sort-indicator { display: none; }
-      body[data-view="walker"] .offers-table td[data-label="Date"] strong { display: block; font-size: 1.05rem; font-weight: 800; color: #111827; }
-      body[data-view="walker"] .offers-table td[data-label="Date"] .dt-line:not(:first-child) span { display: block; font-size: 1.4rem; font-weight: 800; color: #111827; line-height: 1.1; }
+      body[data-view="walker"] .offers-table td[data-label="Date"].date-time-cell { width: 152px; height: 104px; align-self: center; padding: 0 6px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: #eef2f0; border-radius: 10px; white-space: normal; }
+      body[data-view="walker"] .offers-table td[data-label="Date"].date-time-cell .dt-line { width: 100%; margin: 0; text-align: center; }
+
+      body[data-view="walker"] .offers-table td[data-label="Date"] strong { display: block; font-size: 0.875rem; font-weight: 800; color: #111827; }
+      body[data-view="walker"] .offers-table td[data-label="Date"] .dt-line:not(:first-child) span { display: block; font-size: 0.875rem; font-weight: 800; color: #111827; line-height: 1.1; }
       body[data-view="walker"] .offers-table td[data-label="Walk name"] { font-size: 1.05rem; }
       body[data-view="walker"] .offers-table td[data-label="Walk name"] .walker-desc-inline { font-weight: 400; }
       /* Walker list as a grid: each row shares the same four columns, so the list always fills the card width */
@@ -2064,7 +2069,7 @@
       body[data-view="walker"] .offers-table thead,
       body[data-view="walker"] .offers-table tbody { display: block; width: 100%; }
       body[data-view="walker"] .offers-table thead tr,
-      body[data-view="walker"] .offers-table tbody tr { display: grid; grid-template-columns: 150px 84px minmax(0, 1fr) 176px; width: 100%; }
+      body[data-view="walker"] .offers-table tbody tr { display: grid; grid-template-columns: 152px 84px minmax(0, 1fr) 176px; width: 100%; }
       body[data-view="walker"] .offers-table thead th,
       body[data-view="walker"] .offers-table tbody td { display: block; min-width: 0; }
       body[data-view="walker"] .offers-table thead th[hidden],
@@ -2096,7 +2101,7 @@
     .offers-table th[data-admin-sort="walk_name"],
     .offers-table td[data-label="Walk name"] { min-width: 200px; font-weight: 700; }
     body[data-view="walker"] .offers-table th[data-admin-sort="date"],
-    body[data-view="walker"] .offers-table td[data-label="Date"] { width: 150px; }
+    body[data-view="walker"] .offers-table td[data-label="Date"] { width: 152px; }
     .offers-table th.walker-only-col,
     .offers-table td[data-label="Description"] { min-width: 240px; }
     .offers-table th[data-admin-sort="comments"],
@@ -4360,8 +4365,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
             <button type="button" class="expand-toggle" aria-expanded="${expanded}" aria-label="${expanded ? "Hide" : "Show"} details for walk ${escapeHtml(record.walk_number || "")}" title="${expanded ? "Hide details" : "Show all details"}"><svg class="chev-down" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg><svg class="chev-up" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 15 12 9 18 15"/></svg></button>
           </td>
           <td data-label="Date" class="date-time-cell">
-            <div class="dt-line"><strong>${escapeHtml(tableDate(record.date))}</strong></div>
-            <div class="dt-line"><span>${escapeHtml(formatStartTime(record.start_time) || "-")}</span></div>
+            ${currentView === "walker" ? (() => { const bd = walkerBadgeDate(record.date); return `<div class="dt-line"><strong>${escapeHtml(bd.wd)}</strong></div><div class="dt-line"><strong>${escapeHtml(bd.day)}</strong></div><div class="dt-line"><span>${escapeHtml(formatTime12(record.start_time) || "-")}</span></div>`; })() : `<div class="dt-line"><strong>${escapeHtml(tableDate(record.date))}</strong></div><div class="dt-line"><span>${escapeHtml(formatStartTime(record.start_time) || "-")}</span></div>`}
             ${currentView === "walker" && !previewReturnView ? "" : `<div class="dt-line dt-status status-col"><button type="button" class="status-toggle status-${bookingStatus(record)}" data-status-key="${escapeHtml(key)}" ${isAdminView() ? 'title="Click to switch between Draft and Live"' : 'title="Status is set by the admin" disabled'}>${bookingStatus(record) === "live" ? "Live" : "Draft"}</button></div>`}
           </td>
           <td data-label="Grade"><span class="badge ${currentView === "walker" ? "badge-mono" : ""} grade-${escapeHtml(record.walk_grade || "")}">${escapeHtml(record.walk_grade || "-")}</span></td>
@@ -4874,6 +4878,25 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
     }
 
     // "9:05" -> "09:05", "14:30" -> "14:30"
+    /* Walker list badge: 12-hour time with am/pm, e.g. "10:00 am" */
+    function formatTime12(t) {
+      const m = /^(\d{1,2}):(\d{2})/.exec(String(t || "").trim());
+      if (!m) return String(t || "");
+      const h = Number(m[1]);
+      const h12 = h % 12 === 0 ? 12 : h % 12;
+      return `${h12}:${m[2]} ${h < 12 ? "am" : "pm"}`;
+    }
+
+    /* Walker list badge: "Wed" / "28 Oct" */
+    function walkerBadgeDate(dateString) {
+      const d = convertDate(dateString);
+      if (!d) return { wd: "", day: dateString || "-" };
+      return {
+        wd: d.toLocaleDateString("en-GB", { weekday: "short" }),
+        day: d.toLocaleDateString("en-GB", { day: "numeric", month: "short" }),
+      };
+    }
+
     function formatStartTime(t) {
       const m = /^(\d{1,2}):(\d{2})/.exec(String(t || "").trim());
       if (!m) return String(t || "");
