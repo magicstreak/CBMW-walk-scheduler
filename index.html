@@ -3192,7 +3192,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           // Refresh the open booking modal's dropdown, keeping the current choice
           const select = document.getElementById("input-leader");
           if (select) {
-            select.innerHTML = leaderOptionsHtml(select.value);
+            select.innerHTML = leaderSelectOptions(select.value);
             refreshLeaderDetails();
           }
           // Do not re-render the table while someone is editing a row inline
@@ -3534,12 +3534,26 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       return placeholder + options;
     }
 
+    /* Leader choices for the walk typed in the booking modal: its owner and permitted leaders */
+    function leaderSelectOptions(selectedId) {
+      const walkNo = document.getElementById("input-walk-no")?.value || "";
+      const allowed = permittedLeaderIds(walkNo);
+      const current = selectedId && (!allowed || allowed.includes(selectedId)) ? selectedId : "";
+      return leaderOptionsHtml(current, allowed);
+    }
+
     function populateLeaderSelect(record) {
       const select = document.getElementById("input-leader");
       if (!select) return;
-      select.innerHTML = leaderOptionsHtml(selectedLeaderId(record));
+      select.innerHTML = leaderSelectOptions(selectedLeaderId(record));
       refreshLeaderDetails();
     }
+
+    // Narrow the booking modal's leader list as the walk number is typed or chosen
+    document.getElementById("input-walk-no")?.addEventListener("input", () => {
+      const select = document.getElementById("input-leader");
+      if (select) select.innerHTML = leaderSelectOptions(select.value);
+    });
 
     // Booking modal: only the leader's name is shown (chosen in the Name of Leader dropdown), so no details panel is filled in
     function refreshLeaderDetails() {
@@ -5611,6 +5625,12 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         const gradeValidation = validateBookingWalkGrade(true);
         if (gradeValidation.mismatch) {
           document.getElementById("input-walk-no").focus();
+          return;
+        }
+        const bookingLeaderId = document.getElementById("input-leader").value;
+        const allowedBookingLeaders = permittedLeaderIds(walkNumKey);
+        if (allowedBookingLeaders && !allowedBookingLeaders.includes(bookingLeaderId)) {
+          alert(`That leader is not permitted to lead walk ${walkNumKey}. Choose the owner or a permitted leader.`);
           return;
         }
         const walkNameInput = document.getElementById("input-walk-name");
