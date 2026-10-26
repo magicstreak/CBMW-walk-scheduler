@@ -2047,8 +2047,6 @@
     @media (max-width: 640px) { .offers-table .walker-image-col { display: none !important; } }
     /* Walker View on wider screens: fixed layout so the header always spans the full table.
        Date and Grade keep fixed widths; Walk name and Description share the rest equally. */
-      /* All widths: date/time badge centred both ways, same 152x104 tile as the photo */
-      body[data-view="walker"] .offers-table td[data-label="Date"].date-time-cell { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; width: 152px; height: 104px; max-width: 152px; padding: 0 6px; box-sizing: border-box; margin: 8px 0; background: #eef2f0; border-radius: 10px; }
     @media (min-width: 641px) {
       body[data-view="walker"] .offers-table { table-layout: fixed; }
       body[data-view="walker"] .offers-table th[data-admin-sort="walk_grade"],
@@ -2057,8 +2055,6 @@
       body[data-view="walker"] .offers-table td.walker-only-col { display: none !important; }
       body[data-view="walker"] .offers-table .walker-desc-inline { display: block; margin-top: 4px; }
       body[data-view="walker"] .offers-table thead .sort-indicator { display: none; }
-      body[data-view="walker"] .offers-table td[data-label="Date"].date-time-cell { width: 152px; height: 104px; align-self: center; padding: 0 6px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: #eef2f0; border-radius: 10px; white-space: normal; }
-      body[data-view="walker"] .offers-table td[data-label="Date"].date-time-cell .dt-line { width: 100%; margin: 0; text-align: center; }
 
       body[data-view="walker"] .offers-table td[data-label="Date"] strong { display: block; font-size: 0.875rem; font-weight: 800; color: #111827; }
       body[data-view="walker"] .offers-table td[data-label="Date"] .dt-line:not(:first-child) span { display: block; font-size: 0.875rem; font-weight: 800; color: #111827; line-height: 1.1; }
@@ -3507,9 +3503,20 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       return match ? match.leader_id : "";
     }
 
-    function leaderOptionsHtml(selectedId) {
+    /* Leader ids allowed to lead a walk: its owner plus the permitted leaders in the walk library.
+       Returns null (no restriction) when the walk is unknown or has no owner/permitted list. */
+    function permittedLeaderIds(walkNo) {
+      const walk = getMasterWalk(walkNo);
+      if (!walk) return null;
+      const names = new Set([walk.Leader, ...String(walk.Permitted_Leaders || "").split(",")]
+        .map((n) => String(n || "").trim()).filter(Boolean));
+      const ids = LEADER_LOOKUP.filter((l) => names.has(leaderFullName(l))).map((l) => l.leader_id);
+      return ids.length ? ids : null;
+    }
+
+    function leaderOptionsHtml(selectedId, allowedIds = null) {
       const placeholder = `<option value="" disabled ${selectedId ? "" : "selected"}>Choose a leader</option>`;
-      const options = LEADER_LOOKUP.map((l) =>
+      const options = LEADER_LOOKUP.filter((l) => !allowedIds || allowedIds.includes(l.leader_id)).map((l) =>
         `<option value="${escapeHtml(l.leader_id)}" ${l.leader_id === selectedId ? "selected" : ""}>${escapeHtml(leaderFullName(l))}</option>`
       ).join("");
       return placeholder + options;
@@ -4059,7 +4066,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
             <label>Walk number / ID <span class="required-mark" aria-hidden="true">*</span>
               <input type="text" name="walk_number" required list="inline-walk-options" autocomplete="off" value="${escapeHtml(record.walk_number || "")}" /></label>
             <label>Name of leader <span class="required-mark" aria-hidden="true">*</span>
-              <select name="leader_id" required>${leaderOptionsHtml(selectedLeaderId(record))}</select></label>
+              <select name="leader_id" required>${leaderOptionsHtml(selectedLeaderId(record), permittedLeaderIds(record.walk_number))}</select></label>
             <label class="wide">Programme comments
               <textarea name="comments" rows="2">${escapeHtml(record.comments || "")}</textarea></label>
             <label class="wide">Notes for programme team
@@ -4100,6 +4107,10 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       if (!startTime) return fail("Please enter a start time.");
       const leaderRecord = findLeader(form.elements.leader_id.value);
       if (!leaderRecord) return fail("Please choose a leader.");
+      const allowedLeaders = permittedLeaderIds(walkNo);
+      if (allowedLeaders && !allowedLeaders.includes(leaderRecord.leader_id)) {
+        return fail(`That leader is not permitted to lead walk ${walkNo}. Choose the owner or a permitted leader.`);
+      }
       const leader = leaderFullName(leaderRecord);
 
       const walkChanged = walkNo !== String(record.walk_number || "").trim();
@@ -4118,6 +4129,17 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       editingOfferKey = null;
       renderAdminTable();
     }
+
+    // When the walk number changes in an offer being edited, narrow the leader list to that walk's permitted leaders
+    document.addEventListener("change", (e) => {
+      if (e.target?.name !== "walk_number") return;
+      const form = e.target.closest(".inline-edit-form");
+      if (!form) return;
+      const select = form.elements.leader_id;
+      const allowed = permittedLeaderIds(e.target.value);
+      const current = select.value && (!allowed || allowed.includes(select.value)) ? select.value : "";
+      select.innerHTML = leaderOptionsHtml(current, allowed);
+    });
 
     /* Booked slots keep the full name for desktop; phones show the grade and start time (see CSS) */
     function setSlotLabel(el, longText, grade, startTime) {
