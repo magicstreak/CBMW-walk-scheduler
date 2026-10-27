@@ -1685,6 +1685,9 @@
     .walk-section-title:first-child { margin-top: 0; }
     .leader-line { display: block; }
     .leader-line + .leader-line { margin-top: 4px; }
+    /* Desktop: each leader on one line (name, phone numbers, WhatsApp badge); phones may wrap */
+    .leader-line { white-space: nowrap; }
+    @media (max-width: 640px) { .leader-line { white-space: normal; } }
     .whatsapp-pref {
       display: inline-block;
       padding: 1px 8px;
@@ -3495,6 +3498,17 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       return leader ? `${leader.first_name || ""} ${leader.surname || ""}`.trim() : "";
     }
 
+    // Name shown to walkers: the directory's display name when set, otherwise the full name
+    function leaderDisplayName(leader) {
+      return leader ? (String(leader.display_name || "").trim() || leaderFullName(leader)) : "";
+    }
+
+    // Walker-facing names for a booking's leaders (falls back to the stored name for old bookings)
+    function bookingLeaderDisplayNames(record) {
+      const names = bookingLeaderIds(record).map((id) => leaderDisplayName(findLeader(id))).filter(Boolean);
+      return names.length ? names : [record?.leader_name || ""].filter(Boolean);
+    }
+
     function findLeader(leaderId) {
       return LEADER_LOOKUP.find((l) => l.leader_id === leaderId) || null;
     }
@@ -4720,7 +4734,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         <div class="hover-card-row"><span>Start</span>${or(d.record.start_time)}</div>
         <div class="hover-card-row"><span>Total time</span>${or(r.Total_Time)}</div>
         ${description ? `<div class="hover-card-desc">${escapeHtml(description)}</div>` : ""}
-        <div class="hover-card-meta">Walk ${escapeHtml(d.walkId || "-")} · Leader ${escapeHtml(d.record.leader_name || "-")}</div>
+        <div class="hover-card-meta">Walk ${escapeHtml(d.walkId || "-")} · Leader ${escapeHtml(bookingLeaderDisplayNames(d.record).join(", ") || "-")}</div>
         <div class="hover-card-hint">${currentView === "leader" && isDraft(d.record) ? "Click to edit" : "Click for full details"}</div>`;
     }
 
@@ -5037,7 +5051,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         if (!leader) return "";
         const phones = [leader.phone_1, leader.phone_2].filter((p) => String(p || "").trim()).map(phoneLink);
         return [
-          `<span class="leader-line-name">${escapeHtml(leaderFullName(leader))}</span>`,
+          `<span class="leader-line-name">${escapeHtml(leaderDisplayName(leader))}</span>`,
           ...phones,
           leader.whats_app === "y" ? `<span class="whatsapp-pref">WhatsApp</span>` : "",
         ].filter(Boolean).join(" · ");
