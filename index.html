@@ -1652,6 +1652,26 @@
       cursor: pointer;
       padding: 0 4px;
     }
+    .walk-card-head-actions { display: flex; align-items: center; gap: 2px; }
+    .walk-card-expand {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.15rem;
+      line-height: 1;
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 6px;
+      opacity: 0.9;
+    }
+    .walk-card-expand:hover { opacity: 1; background: rgba(255, 255, 255, 0.12); }
+    /* Expanded card: wider and taller, for desktop screens only */
+    .detail-card.walk-card-wrap.expanded {
+      width: calc(100vw - 48px);
+      max-width: 1200px;
+      max-height: calc(100vh - 40px);
+    }
+    @media (max-width: 640px) { .walk-card-expand { display: none; } }
     .walk-card-body { padding: 20px 24px 24px; color: #1f2937; }
     .walk-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
     .walk-stat { background: #e8f1eb; border-radius: 12px; padding: 12px 14px; }
@@ -5117,7 +5137,10 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
             <h3 id="detail-title">${escapeHtml(d.name || "Untitled walk")}</h3>
             <div class="walk-card-date">📅 ${escapeHtml(formatWalkDate(d.record.date))} • ${escapeHtml(formatStartTime(d.record.start_time))}</div>
           </div>
-          <button class="walk-card-close" type="button" data-action="close" aria-label="Close">×</button>
+          <div class="walk-card-head-actions">
+            <button class="walk-card-expand" type="button" data-action="expand" aria-pressed="${detailCard.classList.contains("expanded")}" aria-label="${detailCard.classList.contains("expanded") ? "Shrink card" : "Expand card"}" title="${detailCard.classList.contains("expanded") ? "Shrink card" : "Expand card"}">${detailCard.classList.contains("expanded") ? "⤡" : "⤢"}</button>
+            <button class="walk-card-close" type="button" data-action="close" aria-label="Close">×</button>
+          </div>
         </div>
         ${bookingRequestActionsHtml(key)}
         <div class="walk-card-body">
@@ -5177,6 +5200,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
     function closeDetailCard() {
       openCardKey = null;
       bookingRequestMode = null;
+      detailCard.classList.remove("expanded");
       detailOverlay.classList.remove("active");
     }
 
@@ -5481,6 +5505,12 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       if (requestBtn && openCardKey !== null) {
         const action = requestBtn.dataset.bookingRequest;
         bookingRequestMode = action === "back" ? null : action;
+        renderDetailCard();
+        return;
+      }
+      const expandBtn = e.target.closest("[data-action='expand']");
+      if (expandBtn) {
+        detailCard.classList.toggle("expanded");
         renderDetailCard();
         return;
       }
