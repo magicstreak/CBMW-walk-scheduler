@@ -2390,6 +2390,7 @@
     <label for="leader-email">I am</label>
     <input id="leader-email" type="email" placeholder="Your email address" aria-label="Your email address" autocomplete="email" />
     <span id="leader-identify-msg" aria-live="polite" hidden></span>
+    <button type="button" id="leader-change" class="btn" hidden>Change</button>
   </div>
   <!-- ======================================================= VIEW TOGGLE ======================================================= -->
   <div class="view-toggle-container">
@@ -4164,13 +4165,6 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
     function leaderCanPickWalk(walkId) {
       return currentView !== "leader" || leaderMayLeadWalk(walkId);
     }
-    // How many walks in the walks list name this leader as owner (shown under the email box)
-    function countOwnedWalks() {
-      const me = myLeader();
-      if (!me || !masterWalks) return 0;
-      const name = normaliseName(leaderFullName(me));
-      return Object.values(masterWalks).filter((w) => normaliseName(w && w.Leader) === name).length;
-    }
     // A booking is theirs when they are listed as one of its leaders (walk ownership does not count)
     function leaderOwnsRecord(record) {
       if (!record || !myLeaderId) return false;
@@ -4337,17 +4331,17 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
     function identifyLeaderByEmail() {
       const typed = String(document.getElementById("leader-email").value || "").trim().toLowerCase();
       const msg = document.getElementById("leader-identify-msg");
-      if (!typed) { myLeaderId = ""; msg.hidden = true; refreshLeaderActions(); return; }
+      const input = document.getElementById("leader-email");
+      const changeBtn = document.getElementById("leader-change");
+      if (!typed) { myLeaderId = ""; msg.hidden = true; input.disabled = false; changeBtn.hidden = true; refreshLeaderActions(); return; }
       const match = LEADER_LOOKUP.find((l) => String(l.email_add || "").trim().toLowerCase() === typed);
       myLeaderId = match ? match.leader_id : "";
       if (match) rememberLeaderEmail(typed);
       msg.hidden = false;
-      if (!match) {
-        msg.textContent = "No leader found with that email address.";
-      } else {
-        const owned = countOwnedWalks();
-        msg.textContent = `Showing as ${leaderFullName(match)} (${match.leader_id}). You own ${owned} walk${owned === 1 ? "" : "s"}${owned ? "" : " (no walk in the walks list has this name as its Leader)"}.`;
-      }
+      // Once identified, the email is locked and the leader can use Change to switch
+      input.disabled = !!match;
+      changeBtn.hidden = !match;
+      msg.textContent = match ? `Logged in as ${typed}` : "No leader found with that email address.";
       refreshLeaderActions();
     }
     function refreshLeaderActions() {
@@ -4355,6 +4349,18 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       renderCalendar();
       renderBookingRequestsPanel();
     }
+    document.getElementById("leader-change").addEventListener("click", () => {
+      rememberLeaderEmail("");
+      hubEmail = "";
+      myLeaderId = "";
+      const input = document.getElementById("leader-email");
+      input.value = "";
+      input.disabled = false;
+      document.getElementById("leader-change").hidden = true;
+      document.getElementById("leader-identify-msg").hidden = true;
+      refreshLeaderActions();
+      input.focus();
+    });
     document.getElementById("leader-email").addEventListener("change", identifyLeaderByEmail);
     document.getElementById("leader-email").addEventListener("keydown", (e) => {
       if (e.key === "Enter") { e.preventDefault(); identifyLeaderByEmail(); }
