@@ -4170,10 +4170,9 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       const name = normaliseName(leaderFullName(me));
       return Object.values(masterWalks).filter((w) => normaliseName(w && w.Leader) === name).length;
     }
-    // A booking is theirs if they own the walk, or they are listed as one of its leaders
+    // A booking is theirs when they are listed as one of its leaders (walk ownership does not count)
     function leaderOwnsRecord(record) {
       if (!record || !myLeaderId) return false;
-      if (leaderOwnsWalk(record.walk_number || record.walk_id)) return true;
       return bookingLeaderIds(record).map(String).includes(String(myLeaderId));
     }
     // Leader View: drafts they own can be changed or deleted
