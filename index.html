@@ -1704,6 +1704,9 @@
     }
     .walk-section-title:first-child { margin-top: 0; }
     .leader-line { display: block; }
+    .leader-identify { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 8px 16px 0; color: #4b5563; font-size: 0.95rem; }
+    .leader-identify input { padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 6px; min-width: 240px; }
+    .leader-identify[hidden] { display: none; }
     .leader-line + .leader-line { margin-top: 4px; }
     /* Desktop: each leader on one line (name, phone numbers, WhatsApp badge); phones may wrap */
     .leader-line { white-space: nowrap; }
@@ -2382,6 +2385,12 @@
     <h1 id="page-title">Walk Programme</h1>
     <p id="page-instruction">Click on a slot to schedule or edit a walk.</p>
   </header>
+  <!-- Leader View: the leader enters their email. They can then act only on walks they own (temporary, until proper sign-in) -->
+  <div id="leader-identify" class="leader-identify" hidden>
+    <label for="leader-email">I am</label>
+    <input id="leader-email" type="email" placeholder="Your email address" aria-label="Your email address" autocomplete="email" />
+    <span id="leader-identify-msg" aria-live="polite" hidden></span>
+  </div>
   <!-- ======================================================= VIEW TOGGLE ======================================================= -->
   <div class="view-toggle-container">
     <div class="view-segment" role="radiogroup" aria-label="View mode">
@@ -3368,6 +3377,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       Object.entries(masterWalks || {}).sort(([a], [b]) => a.localeCompare(b, undefined, {numeric:true})).forEach(([id, walk]) => {
         const walkGrade = getMasterRouteGrade(walk);
         if (selectedGrade && walkGrade !== selectedGrade) return;
+        if (!leaderCanPickWalk(id)) return;
         const option = document.createElement("option");
         option.value = id;
         option.label = `${walkGrade || "?"} · ${walk?.Route_Name || `Walk ${id}`}`;
@@ -4124,9 +4134,60 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       return "";
     }
 
-    // Leaders can only change draft bookings; admins can change any booking
+    // Temporary leader identity: the leader enters their email. Leaders act only on walks they own
+    // (the master walk's Leader). This is a convenience until proper sign-in, not a security control.
+    let myLeaderId = "";
+    function myLeader() {
+      return myLeaderId ? findLeader(myLeaderId) : null;
+    }
+    // Compare names loosely: ignore case and extra spaces
+    function normaliseName(value) {
+      return String(value || "").trim().replace(/\s+/g, " ").toLowerCase();
+    }
+    function leaderOwnsWalk(walkNo) {
+      const me = myLeader();
+      const walk = getMasterWalk(walkNo);
+      if (!me || !walk) return false;
+      return normaliseName(walk.Leader) !== "" && normaliseName(walk.Leader) === normaliseName(leaderFullName(me));
+    }
+    // Leaders may book only walks they own or are a permitted leader on
+    function leaderMayLeadWalk(walkNo) {
+      const me = myLeader();
+      const walk = getMasterWalk(walkNo);
+      if (!me || !walk) return false;
+      const mine = normaliseName(leaderFullName(me));
+      const names = [walk.Leader, ...String(walk.Permitted_Leaders || "").split(",")];
+      return names.some((n) => normaliseName(n) !== "" && normaliseName(n) === mine);
+    }
+    // In Leader View the walk lists only show walks this leader may lead
+    function leaderCanPickWalk(walkId) {
+      return currentView !== "leader" || leaderMayLeadWalk(walkId);
+    }
+    // How many walks in the walks list name this leader as owner (shown under the email box)
+    function countOwnedWalks() {
+      const me = myLeader();
+      if (!me || !masterWalks) return 0;
+      const name = normaliseName(leaderFullName(me));
+      return Object.values(masterWalks).filter((w) => normaliseName(w && w.Leader) === name).length;
+    }
+    // A booking is theirs if they own the walk, or they are listed as one of its leaders
+    function leaderOwnsRecord(record) {
+      if (!record || !myLeaderId) return false;
+      if (leaderOwnsWalk(record.walk_number || record.walk_id)) return true;
+      return bookingLeaderIds(record).map(String).includes(String(myLeaderId));
+    }
+    // Leader View: drafts they own can be changed or deleted
+    function leaderCanEditDraft(record) {
+      return currentView === "leader" && !!record && isDraft(record) && leaderOwnsRecord(record);
+    }
+    // Leader View: published walks they own can be asked about
+    function leaderCanRequest(record) {
+      return currentView === "leader" && !!record && !isDraft(record) && leaderOwnsRecord(record);
+    }
+
+    // Leaders can only change drafts they own; admins can change any booking
     function canEditRecordInline(record) {
-      return canEditBookingInline() && (currentView !== "leader" || isDraft(record));
+      return canEditBookingInline() && (currentView !== "leader" || leaderCanEditDraft(record));
     }
 
     function canEditBookingInline() {
@@ -4139,7 +4200,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
 
     function inlineEditFormHtml(key, record, pueblo, walkName) {
       const sameGradeWalks = Object.entries(masterWalks || {})
-        .filter(([, w]) => getMasterRouteGrade(w) === record.walk_grade)
+        .filter(([id, w]) => getMasterRouteGrade(w) === record.walk_grade && leaderCanPickWalk(id))
         .sort(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }))
         .map(([id, w]) => `<option value="${escapeHtml(id)}" label="${escapeHtml(`${record.walk_grade} · ${w?.Route_Name || `Walk ${id}`}`)}"></option>`)
         .join("");
@@ -4183,7 +4244,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         errorEl.hidden = false;
       };
       if (!record) return fail("This booking no longer exists.");
-      if (currentView === "leader" && !isDraft(record)) return fail("Published walks can only be changed by an admin.");
+      if (currentView === "leader" && !leaderCanEditDraft(record)) return fail("You can only change draft walks for walks you own.");
 
       const walkNo = form.elements.walk_number.value.trim();
       const walk = walkNo && masterWalks ? masterWalks[walkNo] : null;
@@ -4272,12 +4333,38 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       return currentView === "admin";
     }
 
+    // Leader View: find the leader by email. The email is never shown back.
+    function identifyLeaderByEmail() {
+      const typed = String(document.getElementById("leader-email").value || "").trim().toLowerCase();
+      const msg = document.getElementById("leader-identify-msg");
+      if (!typed) { myLeaderId = ""; msg.hidden = true; refreshLeaderActions(); return; }
+      const match = LEADER_LOOKUP.find((l) => String(l.email_add || "").trim().toLowerCase() === typed);
+      myLeaderId = match ? match.leader_id : "";
+      msg.hidden = false;
+      if (!match) {
+        msg.textContent = "No leader found with that email address.";
+      } else {
+        const owned = countOwnedWalks();
+        msg.textContent = `Showing as ${leaderFullName(match)} (${match.leader_id}). You own ${owned} walk${owned === 1 ? "" : "s"}${owned ? "" : " (no walk in the walks list has this name as its Leader)"}.`;
+      }
+      refreshLeaderActions();
+    }
+    function refreshLeaderActions() {
+      renderAdminTable();
+      renderCalendar();
+      renderBookingRequestsPanel();
+    }
+    document.getElementById("leader-email").addEventListener("change", identifyLeaderByEmail);
+    document.getElementById("leader-email").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { e.preventDefault(); identifyLeaderByEmail(); }
+    });
+
     adminTableBody.addEventListener("click", (e) => {
       const deleteDraftBtn = e.target.closest('[data-action="delete-draft"]');
       if (deleteDraftBtn && currentView === "leader") {
         const key = deleteDraftBtn.dataset.key;
         const record = globalBookings[key];
-        if (!record || !isDraft(record)) return;
+        if (!leaderCanEditDraft(record)) return;
         if (confirm(`Delete this draft walk ${record.walk_number || record.walk_id || ""}? This removes it completely.`)) {
           expandedOfferRows.delete(key);
           editingOfferKey = null;
@@ -4286,7 +4373,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         return;
       }
       const editBtn = e.target.closest('[data-action="edit-offer"]');
-      if (editBtn && canEditBookingInline()) {
+      if (editBtn && canEditRecordInline(globalBookings[editBtn.dataset.key])) {
         editingOfferKey = editBtn.dataset.key;
         expandedOfferRows.add(editingOfferKey);
         renderAdminTable();
@@ -4511,9 +4598,9 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           </td>
         `;
 
-        tr.querySelector(".edit-walk-btn").hidden = (currentMode === "view") || (currentView === "leader" && !isDraft(record));
+        tr.querySelector(".edit-walk-btn").hidden = (currentMode === "view") || (currentView === "leader" && !leaderCanEditDraft(record));
         // Leaders never cancel or delete directly. Live walks get request buttons instead.
-        const leaderLive = currentView === "leader" && !isDraft(record);
+        const leaderLive = leaderCanRequest(record);
         const pendingHere = !!pendingRequestFor(key);
         tr.querySelector(".cancel-walk-btn").hidden = currentView === "leader";
         tr.querySelector(".btn-danger:not(.list-request-btn)").hidden = currentView === "leader";
@@ -4624,7 +4711,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
                 <section class="offer-detail-card">
                   <h4><span class="card-icon" aria-hidden="true">🗓️</span> Booked Walking Slot Details
                     ${canEditRecordInline(record) && editingOfferKey !== key ? `<button type="button" class="btn btn-secondary inline-edit-btn" data-action="edit-offer" data-key="${escapeHtml(key)}">Edit</button>` : ""}
-                    ${currentView === "leader" && isDraft(record) && editingOfferKey !== key ? `<button type="button" class="btn btn-danger inline-edit-btn" style="margin-left:0" data-action="delete-draft" data-key="${escapeHtml(key)}">Delete draft</button>` : ""}
+                    ${leaderCanEditDraft(record) && editingOfferKey !== key ? `<button type="button" class="btn btn-danger inline-edit-btn" style="margin-left:0" data-action="delete-draft" data-key="${escapeHtml(key)}">Delete draft</button>` : ""}
                   </h4>
                   ${canEditRecordInline(record) && editingOfferKey === key
                     ? inlineEditFormHtml(key, record, masterValues.pueblo, masterValues.name)
@@ -5222,7 +5309,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
     // Leader view, live walks only: buttons to ask for a change or cancellation
     function bookingRequestActionsHtml(key) {
       const record = globalBookings[key];
-      if (currentView !== "leader" || !record || isDraft(record)) return "";
+      if (!leaderCanRequest(record)) return "";
       if (pendingRequestFor(key)) {
         return `<div class="booking-request-bar booking-request-pending">Change pending: an admin will review your request.</div>`;
       }
@@ -5484,7 +5571,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       // Walker View opens the read-only card; Leader and Admin View open the booking modal
       const open = () => {
         hideHoverCard();
-        if (currentView === "walker" || (currentView === "leader" && !isDraft(globalBookings[key]))) openDetailCard(key);
+        if (currentView === "walker" || (currentView === "leader" && !leaderCanEditDraft(globalBookings[key]))) openDetailCard(key);
         else openModal();
       };
       el.addEventListener("mouseenter", (e) => showHoverCard(key, e, open));
@@ -5691,6 +5778,10 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         const walkNum = document.getElementById("input-walk-no").value;
         // Only a Walk Number that exists in the master database can be saved
         const walkNumKey = walkNum.trim();
+        if (currentView === "leader" && walkNumKey && !leaderMayLeadWalk(walkNumKey)) {
+          alert(myLeaderId ? `You can only book walks you own or are a permitted leader on. Walk ${walkNumKey} is not one of yours.` : "Enter your email address first, so we know which walks you can lead.");
+          return;
+        }
         if (!walkNumKey || !masterWalks || !Object.prototype.hasOwnProperty.call(masterWalks, walkNumKey)) {
           const walkNumEl = document.getElementById("input-walk-no");
           alert(
@@ -6477,6 +6568,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       function setView(view) {
         previewReturnView = null;
         currentView = view;
+        document.getElementById("leader-identify").hidden = view !== "leader";
         updatePreviewControls();
         document.getElementById("past-walks-label").hidden = view === "walker";
         editingOfferKey = null;
