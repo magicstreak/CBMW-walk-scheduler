@@ -2075,6 +2075,8 @@
     @media (max-width: 640px) { .offers-table .walker-image-col { display: none !important; } }
     /* Walker View on wider screens: fixed layout so the header always spans the full table.
        Date and Grade keep fixed widths; Walk name and Description share the rest equally. */
+      /* All widths: date/time badge centred both ways, same 152x104 tile as the photo */
+      body[data-view="walker"] .offers-table td[data-label="Date"].date-time-cell { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; width: 152px; height: 104px; max-width: 152px; padding: 0 6px; box-sizing: border-box; margin: 8px 0; background: #eef2f0; border-radius: 10px; }
     @media (min-width: 641px) {
       body[data-view="walker"] .offers-table { table-layout: fixed; }
       body[data-view="walker"] .offers-table th[data-admin-sort="walk_grade"],
@@ -2083,6 +2085,8 @@
       body[data-view="walker"] .offers-table td.walker-only-col { display: none !important; }
       body[data-view="walker"] .offers-table .walker-desc-inline { display: block; margin-top: 4px; }
       body[data-view="walker"] .offers-table thead .sort-indicator { display: none; }
+      body[data-view="walker"] .offers-table td[data-label="Date"].date-time-cell { width: 152px; height: 104px; align-self: center; padding: 0 6px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: #eef2f0; border-radius: 10px; white-space: normal; }
+      body[data-view="walker"] .offers-table td[data-label="Date"].date-time-cell .dt-line { width: 100%; margin: 0; text-align: center; }
 
       body[data-view="walker"] .offers-table td[data-label="Date"] strong { display: block; font-size: 0.875rem; font-weight: 800; color: #111827; }
       body[data-view="walker"] .offers-table td[data-label="Date"] .dt-line:not(:first-child) span { display: block; font-size: 0.875rem; font-weight: 800; color: #111827; line-height: 1.1; }
@@ -4576,7 +4580,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           </td>
           <td data-label="Date" class="date-time-cell">
             ${currentView === "walker" ? (() => { const bd = walkerBadgeDate(record.date); return `<div class="dt-line"><strong>${escapeHtml(bd.wd)}</strong></div><div class="dt-line"><strong>${escapeHtml(bd.day)}</strong></div><div class="dt-line"><span>${escapeHtml(formatTime12(record.start_time) || "-")}</span></div>`; })() : `<div class="dt-line"><strong>${escapeHtml(tableDate(record.date))}</strong></div><div class="dt-line"><span>${escapeHtml(formatStartTime(record.start_time) || "-")}</span></div>`}
-            ${currentView === "walker" && !previewReturnView ? "" : `<div class="dt-line dt-status status-col"><button type="button" class="status-toggle status-${bookingStatus(record)}" data-status-key="${escapeHtml(key)}" ${isAdminView() ? 'title="Click to switch between Draft and Live"' : 'title="Status is set by the admin" disabled'}>${bookingStatus(record) === "live" ? "Published" : "Draft"}</button></div>`}
+            ${currentView === "walker" && !previewReturnView ? "" : `<div class="dt-line dt-status status-col"><button type="button" class="status-toggle status-${bookingStatus(record)}" data-status-key="${escapeHtml(key)}" ${isAdminView() ? 'title="Click to switch between Draft and Live"' : 'title="Status is set by the admin" disabled'}>${bookingStatus(record) === "live" ? "Live" : "Draft"}</button></div>`}
           </td>
           <td data-label="Grade"><span class="badge ${currentView === "walker" ? "badge-mono" : ""} grade-${escapeHtml(record.walk_grade || "")}">${escapeHtml(record.walk_grade || "-")}</span></td>
           <td class="walkid-col" data-label="Walk No">${escapeHtml(record.walk_number || record.walk_id || "-")}</td>
