@@ -2514,7 +2514,7 @@
         <label for="admin-filter-status">Status</label>
         <select id="admin-filter-status">
           <option value="ALL">All statuses</option>
-          <option value="live">Live</option>
+          <option value="live">Published</option>
           <option value="draft">Draft</option>
         </select>
       </div>
@@ -2867,7 +2867,7 @@
             </div>
           </div>
           <section class="modified-panel" id="modified-panel" hidden>
-            <h4>Live walk changes</h4>
+            <h4>Published walk changes</h4>
             <label class="modified-check"><input type="checkbox" id="input-modified" /> Mark as modified (walkers see a notice)</label>
             <div class="form-group span-3"><label for="input-modified-note">What changed (shown to walkers)</label><textarea id="input-modified-note" rows="2" placeholder="e.g. Meeting time moved to 9:30"></textarea></div>
           </section>
@@ -4163,7 +4163,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         errorEl.hidden = false;
       };
       if (!record) return fail("This booking no longer exists.");
-      if (currentView === "leader" && !isDraft(record)) return fail("Live walks can only be changed by an admin.");
+      if (currentView === "leader" && !isDraft(record)) return fail("Published walks can only be changed by an admin.");
 
       const walkNo = form.elements.walk_number.value.trim();
       const walk = walkNo && masterWalks ? masterWalks[walkNo] : null;
@@ -4470,7 +4470,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           </td>
           <td data-label="Date" class="date-time-cell">
             ${currentView === "walker" ? (() => { const bd = walkerBadgeDate(record.date); return `<div class="dt-line"><strong>${escapeHtml(bd.wd)}</strong></div><div class="dt-line"><strong>${escapeHtml(bd.day)}</strong></div><div class="dt-line"><span>${escapeHtml(formatTime12(record.start_time) || "-")}</span></div>`; })() : `<div class="dt-line"><strong>${escapeHtml(tableDate(record.date))}</strong></div><div class="dt-line"><span>${escapeHtml(formatStartTime(record.start_time) || "-")}</span></div>`}
-            ${currentView === "walker" && !previewReturnView ? "" : `<div class="dt-line dt-status status-col"><button type="button" class="status-toggle status-${bookingStatus(record)}" data-status-key="${escapeHtml(key)}" ${isAdminView() ? 'title="Click to switch between Draft and Live"' : 'title="Status is set by the admin" disabled'}>${bookingStatus(record) === "live" ? "Live" : "Draft"}</button></div>`}
+            ${currentView === "walker" && !previewReturnView ? "" : `<div class="dt-line dt-status status-col"><button type="button" class="status-toggle status-${bookingStatus(record)}" data-status-key="${escapeHtml(key)}" ${isAdminView() ? 'title="Click to switch between Draft and Live"' : 'title="Status is set by the admin" disabled'}>${bookingStatus(record) === "live" ? "Published" : "Draft"}</button></div>`}
           </td>
           <td data-label="Grade"><span class="badge ${currentView === "walker" ? "badge-mono" : ""} grade-${escapeHtml(record.walk_grade || "")}">${escapeHtml(record.walk_grade || "-")}</span></td>
           <td class="walkid-col" data-label="Walk No">${escapeHtml(record.walk_number || record.walk_id || "-")}</td>
@@ -4891,7 +4891,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
 
     function statusChip(record) {
       const status = bookingStatus(record);
-      return `<span class="status-chip status-${status}">${status === "live" ? "Live" : "Draft"}</span>`;
+      return `<span class="status-chip status-${status}">${status === "live" ? "Published" : "Draft"}</span>`;
     }
 
     // Walker View: the day clicked on the calendar (DD-MM-YYYY), or null for all days
@@ -6020,11 +6020,11 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
 
       // Status badge colours: [background, text]
       const PDF_BADGE = {
-        Live: [[220, 252, 231], [22, 101, 52]],
+        Published: [[220, 252, 231], [22, 101, 52]],
         Draft: [[241, 245, 249], [71, 85, 105]],
         Cancelled: [[254, 226, 226], [185, 28, 28]],
       };
-      const pdfState = (r) => (r.cancelled === true ? "Cancelled" : bookingStatus(r) === "live" ? "Live" : "Draft");
+      const pdfState = (r) => (r.cancelled === true ? "Cancelled" : bookingStatus(r) === "live" ? "Published" : "Draft");
 
       // One table row per booked walk. Five columns:
       // 1 date, time and duration (status badge below) | 2 walk name, description, comments
@@ -6248,7 +6248,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
             r.pueblo || "",
             r.comments || "",
             r.notes || "",
-            bookingStatus(r) === "live" ? "Live" : "Draft",
+            bookingStatus(r) === "live" ? "Published" : "Draft",
             r.cancelled === true ? "Yes" : "No",
           ]
             .map((value) => `"${String(value).replace(/"/g, '""')}"`)
