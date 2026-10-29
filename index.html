@@ -5351,6 +5351,17 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       if (!r) return "";
       return `<span class="pending-request-badge">${r.type === "cancel" ? "Cancellation pending" : "Change pending"}</span>`;
     }
+    // Leader View: the request is made by the logged-in leader, so the name is filled in and locked
+    function requesterFieldHtml(leaderOptions) {
+      if (currentView !== "leader") {
+        return `<label>Your name<select id="br-leader" required><option value="">Choose your name</option>${leaderOptions}</select></label>`;
+      }
+      const me = myLeader();
+      if (!me) {
+        return `<p class="muted">Enter your email at the top of the page first, so we know who is asking.</p>`;
+      }
+      return `<label>Your name<select id="br-leader" disabled><option value="${escapeHtml(me.leader_id)}" selected>${escapeHtml(brLeaderName(me))}</option></select></label>`;
+    }
     function bookingRequestFormHtml(key, type) {
       const d = getBookingCardData(key);
       const record = globalBookings[key] || {};
@@ -5369,7 +5380,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           <button class="walk-card-close" type="button" data-action="close" aria-label="Close">×</button>
         </div>
         <form class="walk-card-body booking-request-form" id="booking-request-form" data-type="${type}">
-          <label>Your name<select id="br-leader" required><option value="">Choose your name</option>${leaderOptions}</select></label>
+          ${requesterFieldHtml(leaderOptions)}
           ${fields}
           <label>Why? <textarea id="br-reason" rows="3" required></textarea></label>
           <div class="detail-actions">
@@ -5385,8 +5396,11 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       const type = form.dataset.type;
       const leader = LEADER_LOOKUP.find((l) => l.leader_id === document.getElementById("br-leader").value);
       const reason = document.getElementById("br-reason").value.trim();
-      if (!leader) return alert("Choose your name first.");
-      if (record.leader_name && record.leader_name !== brLeaderName(leader)) {
+      if (!leader) return alert(currentView === "leader" ? "Enter your email at the top of the page first." : "Choose your name first.");
+      // Leader View: the requester must be listed on the booking. Other views keep the name check.
+      if (currentView === "leader") {
+        if (!leaderOwnsRecord(record)) return alert("You can only ask for changes to bookings you lead.");
+      } else if (record.leader_name && record.leader_name !== brLeaderName(leader)) {
         return alert("You can only ask for changes to walks you lead.");
       }
       if (!reason) return alert("Please say why.");
