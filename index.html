@@ -5315,7 +5315,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
     /* ========================================================= BOOKING CHANGE REQUESTS =========================================================
        Leaders ask for changes or cancellations to live walks. An admin approves or rejects each one.
        Stored in booking_requests/{request_id}. The walk itself only changes on approval. */
-    const BR_LABELS = { start_time: "Start time", comments: "Programme comments", notes: "Notes for the team" };
+    const BR_LABELS = { start_time: "Start time", comments: "Programme comments", notes: "Notes for the team", leader_name: "Leaders" };
     const brLeaderName = (l) => `${l?.first_name || ""} ${l?.surname || ""}`.trim();
     const pendingRequestFor = (key) => Object.values(bookingRequests).find((r) => r && r.status === "pending" && r.booking_key === key) || null;
     function lastRejectedRequestFor(key) {
@@ -5367,7 +5367,13 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       const record = globalBookings[key] || {};
       const leaderOptions = LEADER_LOOKUP.map((l) => `<option value="${escapeHtml(l.leader_id)}">${escapeHtml(brLeaderName(l))}</option>`).join("");
       const title = type === "cancel" ? "Request cancellation" : "Request a change";
-      const fields = type === "change" ? `
+      // Leaders on the booking can be changed only to the walk's owner or permitted leaders (same rule as the booking form)
+      const allowedLeaders = permittedLeaderIds(record.walk_number) || [];
+      const currentLeaders = bookingLeaderIds(record);
+      const leaderFields = `
+          <label>Leader 1<select id="br-lead-1" required>${leaderOptionsHtml(currentLeaders[0] || "", allowedLeaders)}</select></label>
+          <label>Leader 2<select id="br-lead-2">${leaderOptionsOptionalHtml(currentLeaders[1] || "", allowedLeaders)}</select></label>`;
+      const fields = type === "change" ? `${leaderFields}
           <label>Start time<input type="text" id="br-start" value="${escapeHtml(record.start_time || "")}" /></label>
           <label>Programme comments<textarea id="br-comments" rows="2">${escapeHtml(record.comments || "")}</textarea></label>
           <label>Notes for the team<textarea id="br-notes" rows="2">${escapeHtml(record.notes || "")}</textarea></label>` : "";
@@ -5414,6 +5420,18 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         for (const k of Object.keys(next)) {
           if (next[k] !== String(record[k] ?? "").trim()) changes[k] = next[k];
         }
+        // Leaders: only owner or permitted leaders, no one twice
+        const firstId = document.getElementById("br-lead-1").value;
+        const secondId = document.getElementById("br-lead-2").value;
+        const ids = [firstId, secondId].filter(Boolean);
+        const allowedForWalk = permittedLeaderIds(record.walk_number) || [];
+        if (!firstId) return alert("Choose Leader 1.");
+        if (ids.length === 2 && ids[0] === ids[1]) return alert("Leader 2 must be different from Leader 1.");
+        if (ids.some((id) => !allowedForWalk.includes(id))) return alert("Leaders must be the walk's owner or a permitted leader.");
+        if (ids.join(",") !== bookingLeaderIds(record).map(String).join(",")) {
+          changes.leader_ids = ids;
+          changes.leader_name = ids.map((id) => leaderFullName(findLeader(id))).join(", ");
+        }
         if (!Object.keys(changes).length) return alert("Nothing has changed yet.");
       }
       const before = {};
@@ -5450,7 +5468,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         const when = rec ? `${formatWalkDate(rec.date)} • ${formatStartTime(rec.start_time)}` : "Booking no longer exists";
         const what = r.type === "cancel"
           ? "<p><strong>Asks to cancel this walk.</strong></p>"
-          : `<ul class="change-list">${Object.entries(r.changes || {}).map(([k, v]) =>
+          : `<ul class="change-list">${Object.entries(r.changes || {}).filter(([k]) => k !== "leader_ids").map(([k, v]) =>
               `<li><strong>${escapeHtml(BR_LABELS[k] || k)}:</strong> ${escapeHtml(r.before?.[k] || "(blank)")} → ${escapeHtml(v || "(blank)")}</li>`).join("")}</ul>`;
         return `<div class="booking-request-item">
           <div><strong>${escapeHtml(name)}</strong> <span class="muted">${escapeHtml(when)}${slot ? " · " + escapeHtml(slot) : ""}</span></div>
