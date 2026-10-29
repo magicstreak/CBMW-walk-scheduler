@@ -4706,6 +4706,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           const routeFields = route ? [
             ["Route name", route.Route_Name],
             ["Route grade", route.Grade],
+            ["Permitted leaders", String(route.Permitted_Leaders || "").split(",").map((n) => n.trim()).filter(Boolean).join(", ")],
             [adjLabel(record, ["Distance"], "Distance"), route.Distance],
             [adjLabel(record, ["Ascent"], "Ascent"), route.Ascent],
             [adjLabel(record, ["Terrain"], "Terrain"), route.Terrain],
