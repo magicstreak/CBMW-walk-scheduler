@@ -5388,7 +5388,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         <form class="walk-card-body booking-request-form" id="booking-request-form" data-type="${type}">
           ${requesterFieldHtml(leaderOptions)}
           ${fields}
-          <label>Why? <textarea id="br-reason" rows="3" required></textarea></label>
+          <label>Description of required changes <textarea id="br-reason" rows="3" required placeholder="Say what should change and why, e.g. Meet at the car park by the church instead."></textarea></label>
           <div class="detail-actions">
             <button type="button" class="btn btn-secondary" data-booking-request="back">Back</button>
             <button type="submit" class="btn btn-primary">Send request</button>
@@ -5409,7 +5409,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       } else if (record.leader_name && record.leader_name !== brLeaderName(leader)) {
         return alert("You can only ask for changes to walks you lead.");
       }
-      if (!reason) return alert("Please say why.");
+      if (!reason) return alert("Please give a description of the required changes.");
       const changes = {};
       if (type === "change") {
         const next = {
@@ -5432,7 +5432,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           changes.leader_ids = ids;
           changes.leader_name = ids.map((id) => leaderFullName(findLeader(id))).join(", ");
         }
-        if (!Object.keys(changes).length) return alert("Nothing has changed yet.");
+        // The instructions box is enough on its own: the other fields may stay as they are
       }
       const before = {};
       Object.keys(changes).forEach((k) => { before[k] = record[k] ?? ""; });
@@ -5468,8 +5468,10 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         const when = rec ? `${formatWalkDate(rec.date)} • ${formatStartTime(rec.start_time)}` : "Booking no longer exists";
         const what = r.type === "cancel"
           ? "<p><strong>Asks to cancel this walk.</strong></p>"
-          : `<ul class="change-list">${Object.entries(r.changes || {}).filter(([k]) => k !== "leader_ids").map(([k, v]) =>
-              `<li><strong>${escapeHtml(BR_LABELS[k] || k)}:</strong> ${escapeHtml(r.before?.[k] || "(blank)")} → ${escapeHtml(v || "(blank)")}</li>`).join("")}</ul>`;
+          : !Object.keys(r.changes || {}).length ? `<p class="muted">Description only. No fields are changed.</p>`
+          : `<ul class="change-list">${Object.entries(r.changes || {}).filter(([k]) => k !== "leader_ids").map(([k, v]) => {
+              return `<li><strong>${escapeHtml(BR_LABELS[k] || k)}:</strong> ${escapeHtml(r.before?.[k] || "(blank)")} → ${escapeHtml(v || "(blank)")}</li>`;
+            }).join("")}</ul>`;
         return `<div class="booking-request-item">
           <div><strong>${escapeHtml(name)}</strong> <span class="muted">${escapeHtml(when)}${slot ? " · " + escapeHtml(slot) : ""}</span></div>
           <div class="muted">${r.type === "cancel" ? "Cancellation" : "Change"} requested by ${escapeHtml(r.requested_by_name || r.requested_by || "a leader")}</div>
