@@ -69,6 +69,8 @@
     }
     /* Walker view: centre the title and view buttons on the full width (the logo sits to the left, not in the way) */
     body:not([data-view="leader"]):not([data-view="admin"]) .page-header { padding-left: 0; min-height: 0; margin-bottom: 12px; }
+    /* Leader and admin views: no fixed header height, so less empty space above the identify row and the lists */
+    body[data-view="leader"] .page-header, body[data-view="admin"] .page-header { min-height: 0; margin-bottom: 8px; }
 
     .page-header h1 {
       font-size: 2rem;
@@ -111,13 +113,21 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 24px;
+      margin-bottom: 8px;
     }
 
     .calendar-header h2 {
       margin: 0;
       font-size: 1.5rem;
       font-weight: 700;
+    }
+    /* Heading centred; the Hide calendar and month controls sit on the same row, on the right */
+    .calendar-header { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
+    .calendar-header h2 { grid-column: 2; text-align: center; }
+    .calendar-header .walker-calendar-tools { grid-column: 3; justify-self: end; margin: 0; }
+    @media (max-width: 640px) {
+      .calendar-header { grid-template-columns: 1fr; gap: 8px; }
+      .calendar-header h2, .calendar-header .walker-calendar-tools { grid-column: 1; justify-self: center; }
     }
 
     .nav-btn {
@@ -141,7 +151,7 @@
       position: relative;
       display: flex;
       justify-content: flex-end;
-      margin-bottom: 14px;
+      margin-bottom: 8px;
     }
     .legend-link {
       background: #fff;
@@ -1239,6 +1249,9 @@
       color: var(--text);
     }
 
+    /* "Showing n of n" sits above the Clear filters button, at the right end of the filter row */
+    .filter-clear-group { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+    .table-filters .filter-clear-group .filter-count { margin-left: 0; }
     .table-filters .filter-count {
       margin-left: auto;
       font-size: 0.85rem;
@@ -1877,7 +1890,7 @@
       align-items: center;
       gap: 10px;
       flex-wrap: wrap;
-      margin-bottom: 14px;
+      margin-bottom: 8px;
       font-size: 0.85rem;
       font-weight: 600;
       color: var(--text-muted);
@@ -2426,11 +2439,11 @@
   <div class="calendar-container">
     <div class="calendar-header">
       <h2 id="calendar-title">Month Year</h2>
-    </div>
-    <div class="walker-calendar-tools">
-      <label for="walker-goto-month" class="walker-only">Go to month</label>
-      <input type="month" id="walker-goto-month" class="walker-only" />
-      <button type="button" class="nav-btn" id="calendar-collapse" aria-expanded="true">Hide calendar</button>
+      <div class="walker-calendar-tools">
+        <label for="walker-goto-month" class="walker-only">Go to month</label>
+        <input type="month" id="walker-goto-month" class="walker-only" />
+        <button type="button" class="nav-btn" id="calendar-collapse" aria-expanded="true">Hide calendar</button>
+      </div>
     </div>
 
     <div class="legend-wrap">
@@ -2564,8 +2577,10 @@
         <label for="admin-filter-to">To</label>
         <input type="date" id="admin-filter-to" />
       </div>
-      <button type="button" class="nav-btn" id="admin-filter-clear">Clear filters</button>
-      <span class="filter-count" id="admin-filter-count"></span>
+      <div class="filter-clear-group">
+        <span class="filter-count" id="admin-filter-count"></span>
+        <button type="button" class="nav-btn" id="admin-filter-clear">Clear filters</button>
+      </div>
     </div>
     <div class="table-wrapper">
       <table class="offers-table">
