@@ -2627,6 +2627,193 @@
   .admin-header-actions .picker-legend-wrap { margin: 0; align-items: center; }
   .picker-legend-wrap .legend-container { right: 0; left: auto; min-width: 240px; top: calc(100% + 6px); }
   /* ===================== end picker legend ===================== */
+
+    /* ===== Walk Offers header and filter refresh ===== */
+    /* Primary actions stay solid; secondary actions are outlined; destructive action is quiet text */
+    #export-pdf.btn-success, #export-csv.btn-success {
+      background: #ffffff; color: #2d5b3e; border: 1px solid #2d5b3e; box-shadow: none;
+    }
+    #export-pdf.btn-success:hover, #export-csv.btn-success:hover { background: #eef6f0; }
+    #clear-all.btn-danger {
+      background: transparent; color: #b91c1c; border: 1px solid transparent; box-shadow: none;
+      padding-left: 10px; padding-right: 10px;
+    }
+    #clear-all.btn-danger:hover { background: #fef2f2; border-color: #fecaca; }
+    /* Preview: a single toggle pill, filled while Preview is on */
+    #preview-walker-btn {
+      background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 999px; font-weight: 600;
+    }
+    #preview-walker-btn[aria-pressed="true"] { background: #2d5b3e; color: #ffffff; border-color: #2d5b3e; }
+    /* Show past walks: a compact switch */
+    .past-walks-toggle {
+      display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid #cbd5e1;
+      border-radius: 999px; background: #ffffff; font-weight: 600; font-size: 0.85rem; color: #334155; cursor: pointer;
+      user-select: none;
+    }
+    .past-walks-toggle input { appearance: none; -webkit-appearance: none; width: 30px; height: 18px; border-radius: 999px;
+      background: #cbd5e1; position: relative; margin: 0; cursor: pointer; transition: background 0.15s; flex: 0 0 auto; }
+    .past-walks-toggle input::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px;
+      border-radius: 50%; background: #ffffff; transition: transform 0.15s; }
+    .past-walks-toggle input:checked { background: #2d5b3e; }
+    .past-walks-toggle input:checked::after { transform: translateX(12px); }
+    /* Filters: one tidy row with fixed proportions */
+    .table-filters {
+      display: grid;
+      grid-template-columns: minmax(180px, 2fr) repeat(4, minmax(110px, 1fr)) repeat(2, minmax(130px, 1fr));
+      gap: 10px 12px; align-items: end;
+    }
+    .table-filters .filter-field { min-width: 0; }
+    .table-filters .filter-field.grow { flex: none; }
+    .table-filters .filter-field input, .table-filters .filter-field select { width: 100%; min-width: 0; box-sizing: border-box; }
+    .table-filters .filter-clear-group { align-items: flex-end; }
+    @media (max-width: 1000px) {
+      .table-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .table-filters .filter-clear-group { grid-column: 1 / -1; align-items: flex-start; }
+    }
+
+    /* ===== Walk Offers: second refresh ===== */
+    /* Filters open from a button in Leader and Admin view, with an active-count badge */
+    body:is([data-view="leader"], [data-view="admin"]) .filters-toggle {
+      display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px;
+      border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; color: #1e293b;
+      font: inherit; font-weight: 600; font-size: 0.9rem; cursor: pointer;
+    }
+    body:is([data-view="leader"], [data-view="admin"]) .filters-toggle::after { content: "▾"; font-size: 0.8rem; }
+    body:is([data-view="leader"], [data-view="admin"]).filters-open .filters-toggle::after { content: "▴"; }
+    body:is([data-view="leader"], [data-view="admin"]) .filters-toggle .filters-badge {
+      background: #2d5b3e; color: #fff; border-radius: 999px; font-size: 0.72rem; padding: 1px 7px; min-width: 18px; text-align: center;
+    }
+    .filters-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+    .filters-bar .filter-clear-group { margin-left: auto; flex-direction: row; align-items: center; gap: 12px; }
+    .filters-bar .filter-count { margin-left: 0; font-size: 0.85rem; color: var(--text-muted); white-space: nowrap; }
+    /* Search: magnifier icon inside the field */
+    #admin-filter-search { padding-left: 34px !important; background-repeat: no-repeat !important; background-position: 11px center !important;
+      background-size: 16px 16px !important;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M21 21l-4.3-4.3'/%3E%3C/svg%3E") !important; }
+    /* Dates match the selects */
+    .table-filters input[type="date"] { height: 40px; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 8px;
+      padding: 0 10px; background: #fff; font: inherit; font-size: 0.9rem; color: #1e293b; }
+    /* Collapse: labelled text button */
+    .collapse-button { width: auto; height: 40px; padding: 0 12px; gap: 6px; font-weight: 600; font-size: 0.85rem; color: #1e293b; }
+    .collapse-button .collapse-icon { display: inline-block; transition: transform 0.15s; }
+    .collapse-button[aria-expanded="false"] .collapse-icon { transform: rotate(180deg); }
+    .collapse-button::after { content: "Hide"; }
+    .collapse-button[aria-expanded="false"]::after { content: "Show"; }
+    /* Title row: one baseline, badge aligned to it */
+    .admin-header { align-items: center; }
+    .admin-header h3 { margin: 0; line-height: 1.2; }
+    #draft-count { margin: 0 0 0 8px; }
+
+    /* Action ribbon (retired): kept only so older markup does not break */
+    .actions-toggle { display: none; }
+    body:is([data-view="leader"], [data-view="admin"]) .actions-toggle {
+      display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px;
+      border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; color: #1e293b;
+      font: inherit; font-weight: 600; font-size: 0.9rem; cursor: pointer;
+    }
+    body:is([data-view="leader"], [data-view="admin"]) .actions-toggle::after { content: "▴"; font-size: 0.8rem; }
+    body:is([data-view="leader"], [data-view="admin"]) .actions-toggle[aria-expanded="false"]::after { content: "▾"; }
+    .admin-actions-ribbon.collapsed > :not(.actions-toggle) { display: none !important; }
+
+    /* ===== Walk Offers: three zones ===== */
+    .admin-header { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .admin-header .collapse-button { margin-left: auto; }
+    /* The whole button must stay upright; only its arrow turns when the section is collapsed */
+    #walk-offers-collapse { transform: none !important; }
+    .wo-zone { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .wo-zone-primary { margin-bottom: 12px; }
+    .wo-zone-data { margin-bottom: 12px; }
+    .wo-zone-data #clear-all.btn-danger { margin-left: auto; }
+    .wo-zone-filters {
+      display: block; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 16px; margin-bottom: 4px;
+    }
+    .wo-zone-filters .filters-toggle { margin-bottom: 10px; }
+    .filters-footer { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 12px; padding-top: 12px; border-top: 1px dashed #cbd5e1; }
+    .filters-footer .past-walks-toggle { margin-right: auto; }
+    .filters-footer .filter-clear-group { display: flex; align-items: center; gap: 12px; margin-left: 0; }
+    .filters-footer .filter-count { margin-left: 0; font-size: 0.85rem; color: var(--text-muted); white-space: nowrap; }
+    /* Phone, Walker View: the filter panel opens from its button */
+    @media (max-width: 640px) {
+      body:not([data-view="leader"]):not([data-view="admin"]) .wo-zone-filters { background: transparent; border: 0; padding: 0; }
+
+    }
+    .filters-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+    .filters-head .filter-clear-group { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+    .filters-head .filters-toggle { display: inline-flex; }
+    .wo-zone-filters .filters-toggle { display: inline-flex; }
+
+    /* ===== Walk Offers: icons, button hierarchy and even field heights ===== */
+    #admin-filter-grade { padding-left: 34px !important; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 20l6-10 4 6 3-4 5 8z'/%3E%3C/svg%3E") no-repeat 11px center / 16px 16px, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center / 14px 14px, #fff !important; }
+    #admin-filter-leader { padding-left: 34px !important; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='8' r='3.5'/%3E%3Cpath d='M2.5 20c.6-3.4 3.2-5.5 6.5-5.5s5.9 2.1 6.5 5.5'/%3E%3Ccircle cx='17' cy='9' r='2.5'/%3E%3Cpath d='M16 14.6c2.6.2 4.6 1.9 5.2 4.4'/%3E%3C/svg%3E") no-repeat 11px center / 16px 16px, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center / 14px 14px, #fff !important; }
+    #admin-filter-pueblo { padding-left: 34px !important; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 21s-6-5.3-6-10a6 6 0 0 1 12 0c0 4.7-6 10-6 10z'/%3E%3Ccircle cx='12' cy='11' r='2.2'/%3E%3C/svg%3E") no-repeat 11px center / 16px 16px, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center / 14px 14px, #fff !important; }
+    #admin-filter-status { padding-left: 34px !important; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='8'/%3E%3Cpath d='M12 8v4l2.5 2'/%3E%3C/svg%3E") no-repeat 11px center / 16px 16px, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center / 14px 14px, #fff !important; }
+    .table-filters select, .table-filters input[type="date"], .table-filters input[type="search"] { height: 40px; box-sizing: border-box; }
+    .table-filters select { appearance: none; -webkit-appearance: none; padding-right: 32px; border: 1px solid #cbd5e1; border-radius: 8px; background-color: #fff; font: inherit; font-size: 0.9rem; color: #1e293b; }
+    /* Buttons: Add is the main action; Download is a tinted secondary; Export and Clear All step down */
+    #export-pdf.btn-success { background: #eef6f0; color: #2d5b3e; border: 1px solid #cfe5d6; box-shadow: none; }
+    #export-pdf.btn-success:hover { background: #dcebe2; }
+    #export-csv.btn-success { background: #ffffff; color: #2d5b3e; border: 1px solid #cbd5e1; }
+    .wo-zone-primary #add-walk-to-schedule, .wo-zone-primary #add-social-event { height: 40px; }
+
+    /* ===== Walk Offers: icons on actions and title ===== */
+    #add-walk-to-schedule::before { content: ""; display: inline-block; width: 16px; height: 16px; margin-right: 6px; vertical-align: -3px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d=%22M12 5v14M5 12h14%22/%3E%3C/svg%3E") center / contain no-repeat; }
+    #add-social-event::before { content: ""; display: inline-block; width: 16px; height: 16px; margin-right: 6px; vertical-align: -3px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x=%223%22 y=%224%22 width=%2218%22 height=%2218%22 rx=%222%22/%3E%3Cpath d=%22M16 2v4M8 2v4M3 10h18M12 14v4M10 16h4%22/%3E%3C/svg%3E") center / contain no-repeat; }
+    #preview-walker-btn::before { content: ""; display: inline-block; width: 16px; height: 16px; margin-right: 6px; vertical-align: -3px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%231e293b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d=%22M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z%22/%3E%3Ccircle cx=%2212%22 cy=%2212%22 r=%223%22/%3E%3C/svg%3E") center / contain no-repeat; }
+    #export-pdf::before { content: ""; display: inline-block; width: 16px; height: 16px; margin-right: 6px; vertical-align: -3px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%232d5b3e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d=%22M12 3v12M7 10l5 5 5-5M5 21h14%22/%3E%3C/svg%3E") center / contain no-repeat; }
+    #export-csv::before { content: ""; display: inline-block; width: 16px; height: 16px; margin-right: 6px; vertical-align: -3px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%232d5b3e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x=%223%22 y=%223%22 width=%2218%22 height=%2218%22 rx=%222%22/%3E%3Cpath d=%22M3 9h18M3 15h18M9 3v18%22/%3E%3C/svg%3E") center / contain no-repeat; }
+    #clear-all::before { content: ""; display: inline-block; width: 16px; height: 16px; margin-right: 6px; vertical-align: -3px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23b91c1c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d=%22M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14%22/%3E%3C/svg%3E") center / contain no-repeat; }
+    #admin-filter-clear::before { content: ""; display: inline-block; width: 16px; height: 16px; margin-right: 6px; vertical-align: -3px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d=%22M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5%22/%3E%3C/svg%3E") center / contain no-repeat; }
+    #filters-toggle::before { content: ""; display: inline-block; width: 16px; height: 16px; margin-right: 6px; vertical-align: -3px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%231e293b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d=%22M4 6h16M4 12h16M4 18h16%22/%3E%3Ccircle cx=%228%22 cy=%226%22 r=%222%22 fill=%22%23fff%22/%3E%3Ccircle cx=%2216%22 cy=%2212%22 r=%222%22 fill=%22%23fff%22/%3E%3Ccircle cx=%2210%22 cy=%2218%22 r=%222%22 fill=%22%23fff%22/%3E%3C/svg%3E") center / contain no-repeat; }
+    #walk-offers-title::before { content: ""; display: inline-block; width: 20px; height: 20px; margin-right: 6px; vertical-align: -3px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%232d5b3e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x=%223%22 y=%224%22 width=%2218%22 height=%2217%22 rx=%222%22/%3E%3Cpath d=%22M16 2v4M8 2v4M3 10h18%22/%3E%3C/svg%3E") center / contain no-repeat; }
+    #walk-offers-title::before { margin-right: 8px; }
+    #walk-offers-title { display: inline-flex; align-items: center; }
+
+    /* ===== Walk Offers: single title row, pill controls, one filter row ===== */
+    .admin-header { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; }
+    .admin-header > h3 { padding-right: 14px; border-right: 1px solid #e2e8f0; }
+    .wo-zone-primary, .wo-zone-data { margin: 0; gap: 8px; }
+    .wo-zone-data { padding-left: 14px; border-left: 1px solid #e2e8f0; }
+    .admin-header .collapse-button { margin-left: auto; }
+    .wo-zone-primary .btn, .wo-zone-data .btn, #preview-walker-btn { height: 36px; border-radius: 999px !important; padding: 0 14px; font-size: 0.85rem; font-weight: 600; box-shadow: none; }
+    #add-social-event.btn-success { background: #fff; color: #2d5b3e; border: 1px solid #2d5b3e; }
+    #preview-walker-btn { background: #fff; color: #1e293b; border: 1px solid #cbd5e1 !important; }
+    #preview-walker-btn[aria-pressed="true"] { background: #2d5b3e; color: #fff; border-color: #2d5b3e !important; }
+    #export-pdf.btn-success, #export-csv.btn-success { background: #fff; color: #1e293b; border: 1px solid #cbd5e1; }
+    #export-pdf.btn-success:hover, #export-csv.btn-success:hover { background: #f8fafc; }
+    #clear-all.btn-danger { background: #fef2f2 !important; color: #b91c1c !important; border: 1px solid #fecaca !important; }
+    #clear-all.btn-danger:hover { background: #fee2e2 !important; }
+    #draft-count { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px !important; margin: 0 0 0 auto !important; }
+    #draft-count::before { content: ""; width: 14px; height: 14px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2392400e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx=%2212%22 cy=%2212%22 r=%229%22/%3E%3Cpath d=%22M12 7v5l3 2%22/%3E%3C/svg%3E") center / contain no-repeat; }
+    .wo-zone-filters { background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 14px; padding: 8px 10px; }
+    .filters-head { margin-bottom: 8px; }
+    .table-filters { gap: 8px !important; align-items: center !important; }
+    .table-filters input[type="search"], .table-filters select, .table-filters input[type="date"] { border-radius: 999px !important; background-color: #fff !important; height: 36px !important; }
+    .table-filters .filter-field label { display: none; }
+    #admin-filter-clear { display: inline-flex; align-items: center; height: 36px; padding: 0 14px; border-radius: 999px; background: #2d5b3e; color: #fff; border: 0; font-weight: 600; font-size: 0.85rem; white-space: nowrap; }
+    #admin-filter-clear::before { content: ""; display: inline-block; width: 14px; height: 14px; margin-right: 6px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d=%22M3 4h18l-7 9v6l-4-2v-4z%22/%3E%3C/svg%3E") center / contain no-repeat; }
+    #admin-filter-clear:hover { background: #244a32; }
+
+
+    /* ===== Walk Offers: filter strip on one line, with small labels above the fields ===== */
+    .wo-zone-filters .filters-bar { display: flex; align-items: center; gap: 12px; flex-wrap: nowrap; margin: 0; }
+    .wo-zone-filters .table-filters { flex: 1 1 auto; min-width: 0; margin: 0; padding: 0; align-self: center; }
+    .wo-zone-filters .table-filters {
+      display: grid;
+      grid-template-columns: minmax(160px, 2fr) repeat(4, minmax(100px, 1fr)) repeat(2, minmax(110px, 1fr)) !important;
+      align-items: end !important;
+      gap: 10px !important;
+    }
+    .table-filters .filter-field label { display: none !important; font-size: 0.72rem; font-weight: 600; color: #64748b; margin: 0 0 4px 2px; }
+    .table-filters .walker-search-field label { display: none !important; }
+    .wo-zone-filters .filter-clear-group { display: flex; align-items: center; gap: 10px; margin-left: auto; flex: none; }
+    .wo-zone-filters .filter-count { margin: 0; font-size: 0.85rem; color: var(--text-muted); white-space: nowrap; }
+    #admin-filter-clear { height: 36px; }
+    @media (max-width: 1100px) {
+      .wo-zone-filters .table-filters { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+      .table-filters .filter-field.grow, #admin-filter-clear { grid-column: auto; }
+    }
+    /* Filters are always shown in every view */
+    #walker-filters, body #walker-filters { display: grid !important; }
 </style>
 </head>
 
@@ -2766,15 +2953,15 @@
     </section>
     <div class="admin-header">
       <h3 id="walk-offers-title">Upcoming Walks</h3>
-      <span id="draft-count" hidden style="font-size:0.9rem; background:#fef3c7; color:#92400e; padding:2px 10px; border-radius:999px; font-weight:600; margin-left:8px; align-self:center"></span>
-      <div style="display: flex; gap: 8px; flex-wrap: wrap">
-
-        <div class="admin-header-right">
-      <div class="admin-header-actions" style="display: flex; gap: 8px; flex-wrap: wrap">
+      <!-- Zone 1: primary actions -->
+      <div class="wo-zone wo-zone-primary">
         <button class="btn btn-success" id="add-walk-to-schedule" hidden>Add Walk</button>
         <button class="btn btn-success" id="add-social-event" hidden>Add Event</button>
         <button class="btn" id="preview-walker-btn" aria-pressed="false" hidden>Preview</button>
-        <label class="past-walks-toggle" id="past-walks-label" hidden><input type="checkbox" id="past-walks-check" /> Show past walks</label>
+      </div>
+
+      <!-- Zone 2: data management -->
+      <div class="wo-zone wo-zone-data">
         <div class="legend-wrap picker-legend-wrap">
       <button type="button" class="legend-link" aria-label="Grade legend" aria-describedby="picker-grade-legend">
         <span class="legend-swatches" aria-hidden="true">
@@ -2796,20 +2983,17 @@
     </div>
         <button class="btn btn-success" id="export-pdf">Download</button>
         <button class="btn btn-success" id="export-csv" hidden>Export to CSV</button>
-        <button class="btn btn-danger" id="clear-all" hidden>
-          Clear All Bookings
-        </button>
-        </div>
+        <label class="past-walks-toggle" id="past-walks-label" hidden><input type="checkbox" id="past-walks-check" /> Show past walks</label>
+        <button class="btn btn-danger" id="clear-all" hidden>Clear All Bookings</button>
       </div>
-      <button type="button" class="collapse-button" id="walk-offers-collapse" aria-expanded="true" aria-label="Collapse walk offers">
-        <span class="collapse-icon">⌃</span>
-      </button>
-      </div>
+
+      <span id="draft-count" hidden style="font-size:0.9rem; background:#fef3c7; color:#92400e; padding:2px 10px; border-radius:999px; font-weight:600; margin-left:8px; align-self:center"></span>
     </div>
     <div class="walk-offers-body">
-    <!-- ======================================================= WALK OFFERS FILTERS ======================================================= -->
-    <button type="button" class="filters-toggle" id="filters-toggle" aria-expanded="false" aria-controls="walker-filters">Filters</button>
-    <div class="table-filters" id="walker-filters">
+      <!-- Zone 3: filters (collapsible; the count stays visible when closed) -->
+      <div class="wo-zone wo-zone-filters" id="filters-zone">
+        <div class="filters-bar">
+          <div class="table-filters" id="walker-filters">
       <div class="filter-field grow walker-search-field">
         <label for="admin-filter-search">Search</label>
         <input type="search" id="admin-filter-search" placeholder="Search all columns" />
@@ -2856,9 +3040,12 @@
         <label for="admin-filter-to">To</label>
         <input type="date" id="admin-filter-to" />
       </div>
-      <div class="filter-clear-group">
-        <span class="filter-count" id="admin-filter-count"></span>
-        <button type="button" class="nav-btn" id="admin-filter-clear">Clear filters</button>
+          </div>
+          <div class="filter-clear-group">
+            <span class="filter-count" id="admin-filter-count"></span>
+            <button type="button" class="nav-btn" id="admin-filter-clear">Clear filters</button>
+          </div>
+        </div>
       </div>
     </div>
     <div class="table-wrapper">
@@ -7073,10 +7260,8 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       });
     document.getElementById("preview-walker-btn").addEventListener("click", togglePreviewAsWalker);
     document.getElementById("past-walks-check").addEventListener("change", (e) => togglePastWalks(e.target.checked));
-    document.getElementById("filters-toggle").addEventListener("click", (e) => {
-      const open = document.body.classList.toggle("filters-open");
-      e.currentTarget.setAttribute("aria-expanded", String(open));
-    });
+
+
     document.querySelectorAll("[data-walker-mode-btn]").forEach((btn) => {
       btn.addEventListener("click", () => setWalkerMode(btn.dataset.walkerModeBtn));
     });
@@ -7138,14 +7323,14 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
     /* Walk Offers: collapse / expand in every view (button or title) */
     (function () {
       const container = document.getElementById("admin-container");
-      const btn = document.getElementById("walk-offers-collapse");
+      const btn = document.getElementById("walk-offers-collapse"); // retired button; collapse still works from the title
       const title = container.querySelector(".admin-header h3");
       const toggle = () => {
         const collapsed = container.classList.toggle("collapsed");
-        btn.setAttribute("aria-expanded", String(!collapsed));
-        btn.setAttribute("aria-label", collapsed ? "Expand walk offers" : "Collapse walk offers");
+        btn?.setAttribute("aria-expanded", String(!collapsed));
+        btn?.setAttribute("aria-label", collapsed ? "Expand walk offers" : "Collapse walk offers");
       };
-      btn.addEventListener("click", toggle);
+      btn?.addEventListener("click", toggle);
       title.addEventListener("click", toggle);
       title.style.cursor = "pointer";
     })();
