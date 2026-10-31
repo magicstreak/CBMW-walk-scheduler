@@ -408,9 +408,8 @@
     /* Leader and Admin views: drafts are white with a dashed outline and a DRAFT label; live walks keep the solid grade colour. */
     body[data-view="leader"] .slot.booked.draft:not(.cancelled),
     body[data-view="admin"] .slot.booked.draft:not(.cancelled) {
-      background: #ffffff !important;
-      color: #1e293b;
-      border: 2px dashed #64748b;
+      color: #ffffff;
+      border: 2px solid #f59e0b;
       border-left-width: 6px;
       text-shadow: none;
       box-shadow: none;
@@ -426,28 +425,39 @@
       right: 0;
       padding: 1px 5px;
       border-radius: 0 6px 0 6px;
-      background: #475569;
-      color: #ffffff;
+      background: #f59e0b;
+      color: #451a03;
       font-size: 0.55rem;
       font-weight: 800;
       letter-spacing: 0.06em;
       line-height: 1.3;
     }
-    body[data-view="leader"] .slot.booked.draft.grade-E:not(.cancelled) { border-color: var(--color-E); border-left-width: 6px; }
+    body[data-view="leader"] .slot.booked.draft.grade-E:not(.cancelled) { border-color: #f59e0b #f59e0b #f59e0b var(--color-E); border-left-width: 6px; }
     body[data-view="leader"] .slot.booked.draft.grade-E:not(.cancelled),
-    body[data-view="admin"] .slot.booked.draft.grade-E:not(.cancelled) { border-color: var(--color-E); border-left-width: 6px; }
-    body[data-view="leader"] .slot.booked.draft.grade-M:not(.cancelled) { border-color: var(--color-M); border-left-width: 6px; }
+    body[data-view="admin"] .slot.booked.draft.grade-E:not(.cancelled) { border-color: #f59e0b #f59e0b #f59e0b var(--color-E); border-left-width: 6px; }
+    body[data-view="leader"] .slot.booked.draft.grade-M:not(.cancelled) { border-color: #f59e0b #f59e0b #f59e0b var(--color-M); border-left-width: 6px; }
     body[data-view="leader"] .slot.booked.draft.grade-M:not(.cancelled),
-    body[data-view="admin"] .slot.booked.draft.grade-M:not(.cancelled) { border-color: var(--color-M); border-left-width: 6px; }
-    body[data-view="leader"] .slot.booked.draft.grade-MS:not(.cancelled) { border-color: var(--color-MS); border-left-width: 6px; }
+    body[data-view="admin"] .slot.booked.draft.grade-M:not(.cancelled) { border-color: #f59e0b #f59e0b #f59e0b var(--color-M); border-left-width: 6px; }
+    body[data-view="leader"] .slot.booked.draft.grade-MS:not(.cancelled) { border-color: #f59e0b #f59e0b #f59e0b var(--color-MS); border-left-width: 6px; }
     body[data-view="leader"] .slot.booked.draft.grade-MS:not(.cancelled),
-    body[data-view="admin"] .slot.booked.draft.grade-MS:not(.cancelled) { border-color: var(--color-MS); border-left-width: 6px; }
-    body[data-view="leader"] .slot.booked.draft.grade-S:not(.cancelled) { border-color: var(--color-S); border-left-width: 6px; }
+    body[data-view="admin"] .slot.booked.draft.grade-MS:not(.cancelled) { border-color: #f59e0b #f59e0b #f59e0b var(--color-MS); border-left-width: 6px; }
+    body[data-view="leader"] .slot.booked.draft.grade-S:not(.cancelled) { border-color: #f59e0b #f59e0b #f59e0b var(--color-S); border-left-width: 6px; }
     body[data-view="leader"] .slot.booked.draft.grade-S:not(.cancelled),
-    body[data-view="admin"] .slot.booked.draft.grade-S:not(.cancelled) { border-color: var(--color-S); border-left-width: 6px; }
-    body[data-view="leader"] .slot.booked.draft.grade-VS:not(.cancelled) { border-color: var(--color-VS); border-left-width: 6px; }
+    body[data-view="admin"] .slot.booked.draft.grade-S:not(.cancelled) { border-color: #f59e0b #f59e0b #f59e0b var(--color-S); border-left-width: 6px; }
+    body[data-view="leader"] .slot.booked.draft.grade-VS:not(.cancelled) { border-color: #f59e0b #f59e0b #f59e0b var(--color-VS); border-left-width: 6px; }
     body[data-view="leader"] .slot.booked.draft.grade-VS:not(.cancelled),
-    body[data-view="admin"] .slot.booked.draft.grade-VS:not(.cancelled) { border-color: var(--color-VS); border-left-width: 6px; }
+    body[data-view="admin"] .slot.booked.draft.grade-VS:not(.cancelled) { border-color: #f59e0b #f59e0b #f59e0b var(--color-VS); border-left-width: 6px; }
+    /* Drafts are filled with the grade colour like live walks; the amber outline and DRAFT tag mark them */
+    body[data-view="leader"] .slot.booked.draft.grade-E:not(.cancelled),
+    body[data-view="admin"] .slot.booked.draft.grade-E:not(.cancelled) { background: var(--color-E); }
+    body[data-view="leader"] .slot.booked.draft.grade-M:not(.cancelled),
+    body[data-view="admin"] .slot.booked.draft.grade-M:not(.cancelled) { background: var(--color-M); }
+    body[data-view="leader"] .slot.booked.draft.grade-MS:not(.cancelled),
+    body[data-view="admin"] .slot.booked.draft.grade-MS:not(.cancelled) { background: var(--color-MS); }
+    body[data-view="leader"] .slot.booked.draft.grade-S:not(.cancelled),
+    body[data-view="admin"] .slot.booked.draft.grade-S:not(.cancelled) { background: var(--color-S); }
+    body[data-view="leader"] .slot.booked.draft.grade-VS:not(.cancelled),
+    body[data-view="admin"] .slot.booked.draft.grade-VS:not(.cancelled) { background: var(--color-VS); }
 
     /* ========================================================= BUTTONS ========================================================= */
     .btn {
@@ -2559,41 +2569,41 @@
   body[data-view="leader"] .legend-wrap, body[data-view="admin"] .legend-wrap { display: none !important; }
   #page-instruction { display: none !important; }
   /* ===================== LEADER: clearer available slots and day summaries ===================== */
-  body[data-view="leader"] .slot.available {
+  body:is([data-view="leader"], [data-view="admin"]) .slot.available {
     background: #fff; border: 1px dashed #94a3b8; color: #1f3b2c !important; font-weight: 600;
     display: flex; justify-content: space-between; align-items: center; gap: 6px;
   }
-  body[data-view="leader"] .slot.available.grade-E { border-left: 3px solid var(--color-E); }
-  body[data-view="leader"] .slot.available.grade-M { border-left: 3px solid var(--color-M); }
-  body[data-view="leader"] .slot.available.grade-MS { border-left: 3px solid var(--color-MS); }
-  body[data-view="leader"] .slot.available.grade-S { border-left: 3px solid var(--color-S); }
-  body[data-view="leader"] .slot.available.grade-VS { border-left: 3px solid var(--color-VS); }
-  body[data-view="leader"] .slot.available:hover { background: #eaf3ee; border-style: solid; }
-  body[data-view="leader"] .slot-label { overflow: hidden; text-overflow: ellipsis; flex: 1 1 auto; font-weight: 600; font-size: 0.74rem; color: #334155; }
-  body[data-view="leader"] .slot-grade {
+  body:is([data-view="leader"], [data-view="admin"]) .slot.available.grade-E { border-left: 3px solid var(--color-E); }
+  body:is([data-view="leader"], [data-view="admin"]) .slot.available.grade-M { border-left: 3px solid var(--color-M); }
+  body:is([data-view="leader"], [data-view="admin"]) .slot.available.grade-MS { border-left: 3px solid var(--color-MS); }
+  body:is([data-view="leader"], [data-view="admin"]) .slot.available.grade-S { border-left: 3px solid var(--color-S); }
+  body:is([data-view="leader"], [data-view="admin"]) .slot.available.grade-VS { border-left: 3px solid var(--color-VS); }
+  body:is([data-view="leader"], [data-view="admin"]) .slot.available:hover { background: #eaf3ee; border-style: solid; }
+  body:is([data-view="leader"], [data-view="admin"]) .slot-label { overflow: hidden; text-overflow: ellipsis; flex: 1 1 auto; font-weight: 600; font-size: 0.74rem; color: #334155; }
+  body:is([data-view="leader"], [data-view="admin"]) .slot-grade {
     display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 18px; padding: 0 5px; border-radius: 5px;
     background: #64748b; color: #fff; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.02em; flex-shrink: 0;
   }
-  body[data-view="leader"] .slot.available.grade-E .slot-grade { background: var(--color-E); }
-  body[data-view="leader"] .slot.available.grade-M .slot-grade { background: var(--color-M); }
-  body[data-view="leader"] .slot.available.grade-MS .slot-grade { background: var(--color-MS); }
-  body[data-view="leader"] .slot.available.grade-S .slot-grade { background: var(--color-S); }
-  body[data-view="leader"] .slot.available.grade-VS .slot-grade { background: var(--color-VS); }
-  body[data-view="leader"] .slot-add { display: none; font-weight: 700; color: #2d5b3e; flex-shrink: 0; }
-  body[data-view="leader"] .slot.available:hover .slot-add { display: inline; }
+  body:is([data-view="leader"], [data-view="admin"]) .slot.available.grade-E .slot-grade { background: var(--color-E); }
+  body:is([data-view="leader"], [data-view="admin"]) .slot.available.grade-M .slot-grade { background: var(--color-M); }
+  body:is([data-view="leader"], [data-view="admin"]) .slot.available.grade-MS .slot-grade { background: var(--color-MS); }
+  body:is([data-view="leader"], [data-view="admin"]) .slot.available.grade-S .slot-grade { background: var(--color-S); }
+  body:is([data-view="leader"], [data-view="admin"]) .slot.available.grade-VS .slot-grade { background: var(--color-VS); }
+  body:is([data-view="leader"], [data-view="admin"]) .slot-add { display: none; font-weight: 700; color: #2d5b3e; flex-shrink: 0; }
+  body:is([data-view="leader"], [data-view="admin"]) .slot.available:hover .slot-add { display: inline; }
   /* ===================== end leader slot changes ===================== */
   /* ===================== LEADER: month side bars on the calendar ===================== */
   .month-side { display: none; }
-  body[data-view="leader"] .month-side {
+  body:is([data-view="leader"], [data-view="admin"]) .month-side {
     display: flex; align-items: center; justify-content: center; flex: 0 0 40px; border: none; border-radius: 12px;
     background: #eef4f0; color: #1f3b2c; font-size: 1.3rem; font-weight: 700; cursor: pointer; padding: 0;
   }
-  body[data-view="leader"] .month-side:hover { background: #dcebe2; }
-  body[data-view="leader"] .calendar-sandwich { display: flex; align-items: stretch; gap: 10px; }
-  body[data-view="leader"] .calendar-grid-wrap { flex: 1 1 auto; min-width: 0; }
-  body[data-view="leader"] .calendar-title-row .month-arrow { display: none; }
+  body:is([data-view="leader"], [data-view="admin"]) .month-side:hover { background: #dcebe2; }
+  body:is([data-view="leader"], [data-view="admin"]) .calendar-sandwich { display: flex; align-items: stretch; gap: 10px; }
+  body:is([data-view="leader"], [data-view="admin"]) .calendar-grid-wrap { flex: 1 1 auto; min-width: 0; }
+  body:is([data-view="leader"], [data-view="admin"]) .calendar-title-row .month-arrow { display: none; }
   @media (max-width: 650px) {
-    body[data-view="leader"] .month-side { flex-basis: 30px; }
+    body:is([data-view="leader"], [data-view="admin"]) .month-side { flex-basis: 30px; }
   }
   /* Walker View, Month mode: the same side bars as the Leader calendar */
   body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="month"] .month-side {
