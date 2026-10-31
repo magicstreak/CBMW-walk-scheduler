@@ -4427,7 +4427,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         if (pueblo !== "ALL" && r.pueblo !== pueblo) return false;
         if (status !== "ALL" && bookingStatus(r) !== status) return false;
         if (!previewReturnView && !isVisibleInView(r)) return false;
-        if (currentView !== "walker" && !showPastWalks && isPastDate(r.date)) return false;
+        if ((currentView !== "walker" || previewReturnView) && !showPastWalks && isPastDate(r.date)) return false;
         if (search) {
           const haystack = [r.date, r.start_time, r.walk_grade, r.walk_number, r.walk_name,
             r.leader_name, r.notes, r.pueblo, r.comments].join(" ").toLowerCase();
@@ -4898,7 +4898,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         const isoOfDmy = (d) => { const p = String(d || "").split("-"); return p.length === 3 ? `${p[2]}-${p[1]}-${p[0]}` : ""; };
         const summerKeys = gradeNow !== "ALL" ? [] : Object.keys(globalSocial || {})
           .filter((k) => globalSocial[k]?.type === "summer")
-          .filter((k) => currentView === "walker" || showPastWalks || !isPastDate(globalSocial[k].date))
+          .filter((k) => (currentView === "walker" && !previewReturnView) || showPastWalks || !isPastDate(globalSocial[k].date))
           .filter((k) => {
             const iso = isoOfDmy(globalSocial[k].date);
             return iso && (!fromNow || iso >= fromNow) && (!toNow || iso <= toNow);
@@ -5167,12 +5167,12 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         const r = globalBookings[k];
         if (!r) return false;
         if (!previewReturnView && !isVisibleInView(r)) return false;
-        if (currentView !== "walker" && !showPastWalks && isPastDate(r.date)) return false;
+        if ((currentView !== "walker" || previewReturnView) && !showPastWalks && isPastDate(r.date)) return false;
         return true;
       }).length;
       const summerTotal = Object.keys(globalSocial || {})
         .filter((k) => globalSocial[k]?.type === "summer")
-        .filter((k) => currentView === "walker" || showPastWalks || !isPastDate(globalSocial[k].date))
+        .filter((k) => (currentView === "walker" && !previewReturnView) || showPastWalks || !isPastDate(globalSocial[k].date))
         .length;
       const total = bookingTotal + summerTotal;
       // Badge: how many bookings are still drafts, so the admin sees what is waiting
@@ -7022,6 +7022,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         const from = currentView;
         setView("walker");
         previewReturnView = from;
+        document.getElementById("past-walks-label").hidden = false; // keep the Show past walks tick box in preview
         syncViewRadio(from);
         updatePreviewControls();
         renderCalendar();
