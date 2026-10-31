@@ -2541,6 +2541,65 @@
     body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-column { position: static; max-height: none; }
   }
   /* ===================== end picker layout ===================== */
+  /* ===================== LEADER PICKER LAYOUT (Leader View) ===================== */
+  .leader-layout-header { display: none; }
+  body[data-view="leader"] .leader-layout-header { display: flex; justify-content: center; margin: 0 0 16px; }
+  body[data-view="leader"][data-leader-layout="picker"] .calendar-container { display: none; }
+  body[data-view="leader"][data-leader-layout="picker"] .split-layout {
+    display: grid; grid-template-columns: minmax(0, 290px) minmax(0, 1fr); gap: 20px; align-items: start;
+  }
+  body[data-view="leader"][data-leader-layout="picker"] .picker-column {
+    display: block; background: #fff; border-radius: 16px; padding: 16px 14px; position: sticky; top: 16px;
+    max-height: calc(100vh - 32px); overflow-y: auto; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  }
+  @media (max-width: 1100px) {
+    body[data-view="leader"][data-leader-layout="picker"] .split-layout { grid-template-columns: 1fr; }
+    body[data-view="leader"][data-leader-layout="picker"] .picker-column { position: static; max-height: none; }
+  }
+  /* ===================== end leader picker layout ===================== */
+  /* Leader View: instruction line removed */
+  /* Leader and Admin views: no "Hide calendar" button and no grade legend */
+  body[data-view="leader"] #calendar-collapse, body[data-view="admin"] #calendar-collapse,
+  body[data-view="leader"] .legend-wrap, body[data-view="admin"] .legend-wrap { display: none !important; }
+  #page-instruction { display: none !important; }
+  /* ===================== LEADER: clearer available slots and day summaries ===================== */
+  body[data-view="leader"] .slot.available {
+    background: #fff; border: 1px dashed #94a3b8; color: #1f3b2c !important; font-weight: 600;
+    display: flex; justify-content: space-between; align-items: center; gap: 6px;
+  }
+  body[data-view="leader"] .slot.available.grade-E { border-left: 3px solid var(--color-E); }
+  body[data-view="leader"] .slot.available.grade-M { border-left: 3px solid var(--color-M); }
+  body[data-view="leader"] .slot.available.grade-MS { border-left: 3px solid var(--color-MS); }
+  body[data-view="leader"] .slot.available.grade-S { border-left: 3px solid var(--color-S); }
+  body[data-view="leader"] .slot.available.grade-VS { border-left: 3px solid var(--color-VS); }
+  body[data-view="leader"] .slot.available:hover { background: #eaf3ee; border-style: solid; }
+  body[data-view="leader"] .slot-label { overflow: hidden; text-overflow: ellipsis; flex: 1 1 auto; font-weight: 600; font-size: 0.74rem; color: #334155; }
+  body[data-view="leader"] .slot-grade {
+    display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 18px; padding: 0 5px; border-radius: 5px;
+    background: #64748b; color: #fff; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.02em; flex-shrink: 0;
+  }
+  body[data-view="leader"] .slot.available.grade-E .slot-grade { background: var(--color-E); }
+  body[data-view="leader"] .slot.available.grade-M .slot-grade { background: var(--color-M); }
+  body[data-view="leader"] .slot.available.grade-MS .slot-grade { background: var(--color-MS); }
+  body[data-view="leader"] .slot.available.grade-S .slot-grade { background: var(--color-S); }
+  body[data-view="leader"] .slot.available.grade-VS .slot-grade { background: var(--color-VS); }
+  body[data-view="leader"] .slot-add { display: none; font-weight: 700; color: #2d5b3e; flex-shrink: 0; }
+  body[data-view="leader"] .slot.available:hover .slot-add { display: inline; }
+  /* ===================== end leader slot changes ===================== */
+  /* ===================== LEADER: month side bars on the calendar ===================== */
+  .month-side { display: none; }
+  body[data-view="leader"] .month-side {
+    display: flex; align-items: center; justify-content: center; flex: 0 0 40px; border: none; border-radius: 12px;
+    background: #eef4f0; color: #1f3b2c; font-size: 1.3rem; font-weight: 700; cursor: pointer; padding: 0;
+  }
+  body[data-view="leader"] .month-side:hover { background: #dcebe2; }
+  body[data-view="leader"] .calendar-sandwich { display: flex; align-items: stretch; gap: 10px; }
+  body[data-view="leader"] .calendar-grid-wrap { flex: 1 1 auto; min-width: 0; }
+  body[data-view="leader"] .calendar-title-row .month-arrow { display: none; }
+  @media (max-width: 650px) {
+    body[data-view="leader"] .month-side { flex-basis: 30px; }
+  }
+  /* ===================== end leader month side bars ===================== */
 </style>
 </head>
 
@@ -2587,6 +2646,13 @@
     <div id="walker-map-canvas" role="region" aria-label="Map of walk meeting points"></div>
   </div>
   <!-- ======================================================= CALENDAR ======================================================= -->
+  <!-- ======================================================= LEADER LAYOUT TOGGLE (Leader View only) ======================================================= -->
+  <div class="leader-layout-header" id="leader-layout-header">
+    <div class="walker-mode-switch" role="group" aria-label="Leader layout">
+      <button type="button" class="walker-mode-btn" data-leader-layout="stacked" aria-pressed="true">Calendar</button>
+      <button type="button" class="walker-mode-btn" data-leader-layout="picker" aria-pressed="false">List</button>
+    </div>
+  </div>
   <div class="split-layout">
   <!-- ======================================================= PICKER COLUMN (Walker View, Picker mode) ======================================================= -->
   <aside class="picker-column" id="picker-column" aria-label="Pick a date">
@@ -2648,6 +2714,7 @@
     </div>
 
     <div class="calendar-sandwich">
+      <button type="button" class="month-side month-side-prev" aria-label="Previous month">&larr;</button>
       <div class="calendar-grid-wrap">
       <div class="weekdays">
         <div>Sun</div>
@@ -2660,6 +2727,7 @@
       </div>
       <div class="days-grid" id="days-grid"></div>
       </div>
+      <button type="button" class="month-side month-side-next" aria-label="Next month">&rarr;</button>
     </div>
   </div>
   <!-- ======================================================= ADMIN ======================================================= -->
@@ -3922,7 +3990,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
             btn.setAttribute("aria-pressed", String(pickerDay === iso));
             btn.addEventListener("click", () => {
               pickerDay = pickerDay === iso ? "" : iso;
-              syncWalkerRange();
+              applyPickerRange();
               updateWalkOffersTitle();
               renderPicker();
               renderAdminTable();
@@ -3934,9 +4002,38 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           host.appendChild(block);
         }
       }
+      function applyPickerRange() {
+        if (pickerDay) {
+          setWalkerRange(pickerDay, pickerDay);
+        } else {
+          const t = new Date();
+          t.setHours(0, 0, 0, 0);
+          setWalkerRange(modeIso(t), "");
+        }
+      }
+      // Leader View: "Calendar" = calendar stacked above the list; "Picker" = picker and list side by side
+      function setLeaderLayout(layout) {
+        document.body.dataset.leaderLayout = layout;
+        document.querySelectorAll("[data-leader-layout]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.leaderLayout === layout)));
+        if (layout === "picker") {
+          applyPickerRange();
+          renderPicker();
+        } else {
+          pickerDay = "";
+          setWalkerRange("", "");
+        }
+        updateWalkOffersTitle();
+        renderAdminTable();
+      }
+      document.querySelectorAll("[data-leader-layout]").forEach((btn) => {
+        btn.addEventListener("click", () => setLeaderLayout(btn.dataset.leaderLayout));
+      });
+      // Leader View: side bars for previous / next month; they drive the month buttons in the title row
+      document.querySelector(".month-side-prev")?.addEventListener("click", () => document.getElementById("prev-month")?.click());
+      document.querySelector(".month-side-next")?.addEventListener("click", () => document.getElementById("next-month")?.click());
       document.getElementById("picker-clear")?.addEventListener("click", () => {
         pickerDay = "";
-        syncWalkerRange();
+        applyPickerRange();
         updateWalkOffersTitle();
         renderPicker();
         renderAdminTable();
@@ -4108,7 +4205,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
                 } else {
 
                   slotEl.classList.add("available");
-                  slotEl.innerText = `${grade} Available`;
+                  slotEl.innerHTML = `<span class="slot-grade">${grade}</span><span class="slot-label">Available</span><span class="slot-add" aria-hidden="true">+ Add</span>`;
 
                   slotEl.addEventListener("click", () =>
                     handleAvailableClick(dateISO, grade)
