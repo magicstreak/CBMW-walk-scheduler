@@ -2511,31 +2511,27 @@
   .picker-column { display: none; }
   body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .calendar-container { display: none; }
   body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .split-layout {
-    display: grid; grid-template-columns: minmax(0, 290px) minmax(0, 1fr); gap: 20px; align-items: start;
+    display: grid; grid-template-columns: minmax(0, 230px) minmax(0, 1fr); gap: 20px; align-items: start;
   }
   body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-column {
-    display: block; background: #fff; border-radius: 16px; padding: 16px 14px; position: sticky; top: 16px;
+    display: block; background: #fff; border-radius: 14px; padding: 12px 10px; position: sticky; top: 16px;
     max-height: calc(100vh - 32px); overflow-y: auto; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   }
   .picker-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
   .picker-heading { font-weight: 700; color: #1f3b2c; font-size: 0.95rem; }
-  .picker-weekdays, .picker-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
-  .picker-weekdays span { font-size: 0.7rem; font-weight: 700; color: #94a3b8; padding: 2px 0; }
-  .picker-month { margin-top: 12px; }
-  .picker-month-title { font-weight: 700; font-size: 0.88rem; color: #1f2937; margin-bottom: 4px; }
+  .picker-weekdays, .picker-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; text-align: center; }
+  .picker-weekdays span { font-size: 0.64rem; font-weight: 700; color: #94a3b8; padding: 0; }
+  .picker-month { margin-top: 8px; }
+  .picker-month-title { font-weight: 700; font-size: 0.8rem; color: #1f2937; margin-bottom: 2px; }
   .picker-day {
-    aspect-ratio: 1 / 1; border: none; background: transparent; border-radius: 8px; font: inherit; font-size: 0.8rem;
+    height: 24px; border: none; background: transparent; border-radius: 6px; font: inherit; font-size: 0.74rem;
     color: #334155; cursor: pointer; padding: 0; position: relative;
   }
   .picker-day:hover { background: #f1f5f9; }
   .picker-day.past { color: #cbd5e1; }
   .picker-day.today { box-shadow: inset 0 0 0 1px #94a3b8; }
-  .picker-day.has-walk { background: #dcf0e3; color: #1f3b2c; font-weight: 700; }
-  .picker-day.has-walk::after {
-    content: ""; position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 50%; background: #2d5b3e;
-  }
+  .picker-day.has-walk { background: #dcf0e3; color: #1f3b2c; font-weight: 700; box-shadow: inset 0 0 0 1px #b7dcc4; }
   .picker-day.selected { background: #1f3b2c; color: #fff; }
-  .picker-day.selected::after { background: #fff; }
   @media (max-width: 1100px) {
     body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .split-layout { grid-template-columns: 1fr; }
     body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-column { position: static; max-height: none; }
@@ -2546,10 +2542,10 @@
   body:is([data-view="leader"],[data-view="admin"]) .leader-layout-header { display: flex; justify-content: center; margin: 0 0 16px; }
   body:is([data-view="leader"],[data-view="admin"])[data-leader-layout="picker"] .calendar-container { display: none; }
   body:is([data-view="leader"],[data-view="admin"])[data-leader-layout="picker"] .split-layout {
-    display: grid; grid-template-columns: minmax(0, 290px) minmax(0, 1fr); gap: 20px; align-items: start;
+    display: grid; grid-template-columns: minmax(0, 230px) minmax(0, 1fr); gap: 20px; align-items: start;
   }
   body:is([data-view="leader"],[data-view="admin"])[data-leader-layout="picker"] .picker-column {
-    display: block; background: #fff; border-radius: 16px; padding: 16px 14px; position: sticky; top: 16px;
+    display: block; background: #fff; border-radius: 14px; padding: 12px 10px; position: sticky; top: 16px;
     max-height: calc(100vh - 32px); overflow-y: auto; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   }
   @media (max-width: 1100px) {
