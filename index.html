@@ -2497,7 +2497,7 @@
   .calendar-title-row { justify-content: center; }
   /* ===================== end modern layout ===================== */
   /* ===================== SPLIT LAYOUT: calendar and list side by side (Walker, List mode) ===================== */
-  .split-layout { display: block; }
+  .split-layout { display: block; width: 100%; box-sizing: border-box; }
   body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="list"] .split-layout {
     display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); gap: 20px; align-items: start;
   }
@@ -2599,7 +2599,25 @@
   @media (max-width: 650px) {
     body[data-view="leader"] .month-side { flex-basis: 30px; }
   }
+  /* Walker View, Month mode: the same side bars as the Leader calendar */
+  body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="month"] .month-side {
+    display: flex; align-items: center; justify-content: center; flex: 0 0 40px; border: none; border-radius: 12px;
+    background: #eef4f0; color: #1f3b2c; font-size: 1.3rem; font-weight: 700; cursor: pointer; padding: 0;
+  }
+  body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="month"] .month-side:hover { background: #dcebe2; }
+  body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="month"] .calendar-sandwich { display: flex; flex-wrap: nowrap; align-items: stretch; gap: 10px; }
+  body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="month"] .calendar-grid-wrap { flex: 1 1 auto; min-width: 0; }
+  body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="month"] .calendar-title-row .month-arrow { display: none; }
+  @media (max-width: 650px) {
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="month"] .month-side { flex-basis: 30px; }
+  }
   /* ===================== end leader month side bars ===================== */
+  /* Walker View: grade legend above the date picker. Same popup as the calendar legend. */
+  .picker-legend-wrap { display: none; justify-content: flex-start; margin: 0 0 10px; }
+  body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-legend-wrap { display: flex; }
+  .admin-header-actions .picker-legend-wrap { margin: 0; align-items: center; }
+  .picker-legend-wrap .legend-container { right: 0; left: auto; min-width: 240px; top: calc(100% + 6px); }
+  /* ===================== end picker legend ===================== */
 </style>
 </head>
 
@@ -2748,6 +2766,25 @@
         <button class="btn btn-success" id="add-social-event" hidden>Add Event</button>
         <button class="btn" id="preview-walker-btn" aria-pressed="false" hidden>Preview</button>
         <label class="past-walks-toggle" id="past-walks-label" hidden><input type="checkbox" id="past-walks-check" /> Show past walks</label>
+        <div class="legend-wrap picker-legend-wrap">
+      <button type="button" class="legend-link" aria-label="Grade legend" aria-describedby="picker-grade-legend">
+        <span class="legend-swatches" aria-hidden="true">
+          <span style="background: var(--color-E)"></span>
+          <span style="background: var(--color-M)"></span>
+          <span style="background: var(--color-MS)"></span>
+          <span style="background: var(--color-S)"></span>
+          <span style="background: var(--color-VS)"></span>
+        </span>
+      </button>
+      <div class="legend-container" id="picker-grade-legend" role="tooltip">
+        <div class="legend-item"><div class="legend-dot" style="background: var(--color-E)"></div>E · Easy</div>
+        <div class="legend-item"><div class="legend-dot" style="background: var(--color-M)"></div>M · Moderate</div>
+        <div class="legend-item"><div class="legend-dot" style="background: var(--color-MS)"></div>MS · Moderately Strenuous</div>
+        <div class="legend-item"><div class="legend-dot" style="background: var(--color-S)"></div>S · Strenuous</div>
+        <div class="legend-item"><div class="legend-dot" style="background: var(--color-VS)"></div>VS · Very Strenuous</div>
+        <button type="button" class="walk-levels-link" data-open-levels>Full walk levels, scrambling and terrain</button>
+      </div>
+    </div>
         <button class="btn btn-success" id="export-pdf">Download</button>
         <button class="btn btn-success" id="export-csv" hidden>Export to CSV</button>
         <button class="btn btn-danger" id="clear-all" hidden>
@@ -5427,12 +5464,13 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       }
     });
     // Legend: tap to open on touch screens, tap outside to close
-    const legendWrap = document.querySelector(".legend-wrap");
-    if (legendWrap) {
+    document.querySelectorAll(".legend-wrap").forEach((legendWrap) => {
       legendWrap.querySelector(".legend-link").addEventListener("click", () => legendWrap.classList.toggle("open"));
       document.addEventListener("click", (e) => {
         if (!legendWrap.contains(e.target)) legendWrap.classList.remove("open");
       });
+    });
+    if (false) {
     }
 
     /* ---------- Click card: full booking + walk details (read-only) ---------- */
