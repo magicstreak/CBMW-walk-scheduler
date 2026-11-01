@@ -2651,6 +2651,18 @@
     .msg-form-actions .btn { flex: 1; }
   }
   /* ===================== end requests pane ===================== */
+  /* Leader and Admin on phones and tablets: days with nothing on them are narrower, so the busy days have room */
+  .week-row { display: contents; }
+  @media (max-width: 1100px) {
+    body:is([data-view="leader"], [data-view="admin"]) .weekdays { display: none; }
+    body:is([data-view="leader"], [data-view="admin"]) .days-grid { display: flex; flex-direction: column; gap: 6px; }
+    body:is([data-view="leader"], [data-view="admin"]) .week-row { display: flex; gap: 6px; align-items: stretch; }
+    body:is([data-view="leader"], [data-view="admin"]) .week-row > .day-cell { flex: 3 1 0; min-width: 0; }
+    body:is([data-view="leader"], [data-view="admin"]) .week-row > .day-cell.quiet-day,
+    body:is([data-view="leader"], [data-view="admin"]) .week-row > .day-cell.empty { flex: 1 1 0; min-width: 0; padding: 6px 4px; }
+    body:is([data-view="leader"], [data-view="admin"]) .day-cell:not(.quiet-day) .day-number::before { content: attr(data-dow) " "; font-weight: 700; color: #2d5b3e; }
+  }
+
 
   /* ===================== LEADER PICKER LAYOUT (Leader and Admin Views) ===================== */
   .leader-layout-header { display: none; }
@@ -4512,6 +4524,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           specificDate.setHours(0, 0, 0, 0);
 
           const dayOfWeek = specificDate.getDay();
+          dayNoDiv.dataset.dow = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][dayOfWeek];
 
           // Firebase date format: DD-MM-YYYY
           const dateISO =
@@ -4727,7 +4740,18 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
               renderAdminTable();
             });
           }
+          // Days with no walks, slots or social events: narrower on phones and tablets (Leader and Admin)
+          if (!slotsContainer.children.length) dayCell.classList.add("quiet-day");
           daysGrid.appendChild(dayCell);
+        }
+        // Group the days into week rows so the empty days can be narrowed on phones and tablets
+        const allCells = Array.from(daysGrid.children);
+        daysGrid.innerHTML = "";
+        for (let i = 0; i < allCells.length; i += 7) {
+          const row = document.createElement("div");
+          row.className = "week-row";
+          allCells.slice(i, i + 7).forEach((c) => row.appendChild(c));
+          daysGrid.appendChild(row);
         }
       }
       /* ========================================================= ADMIN TABLE ========================================================= */ 
