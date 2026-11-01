@@ -2625,6 +2625,15 @@
   .filters-state-chev { display: inline-block; transition: transform 0.15s ease; }
   .filters-state[aria-expanded="false"] .filters-state-chev { transform: rotate(-90deg); }
   body .filters-bar.filters-collapsed #walker-filters { display: none !important; }
+  /* Filter strip: every control lines up on one baseline. Labels keep their space (hidden on the other fields), so the From / To labels do not push the row out of line */
+  body .wo-zone-filters .filters-bar { align-items: flex-end !important; }
+  body .wo-zone-filters .filter-clear-group { margin-left: 12px; }
+  body #walker-filters .filter-field > label { display: block !important; visibility: hidden; font-size: 0.72rem; line-height: 1.1; margin: 0 0 4px 2px; }
+  body #walker-filters .walker-date-range > label { visibility: visible; }
+  @media (max-width: 700px) {
+    body:not([data-view="leader"]):not([data-view="admin"]) #walker-filters .filter-field:not(.walker-date-range) > label,
+    body:is([data-view="leader"], [data-view="admin"]) #walker-filters .filter-field:not(.walker-date-range) > label { display: none !important; }
+  }
   /* Date range: visible From / To labels */
   body #walker-filters .walker-date-range > label { display: block !important; font-size: 0.72rem; font-weight: 600; color: #64748b; margin: 0 0 4px 2px; }
   @media (max-width: 1100px) {
@@ -3011,7 +3020,7 @@
     .wo-zone-filters .table-filters { flex: 1 1 auto; min-width: 0; margin: 0; padding: 0; align-self: center; }
     .wo-zone-filters .table-filters {
       display: grid;
-      grid-template-columns: minmax(160px, 2fr) repeat(4, minmax(100px, 1fr)) repeat(2, minmax(110px, 1fr)) !important;
+      grid-template-columns: minmax(120px, 2fr) repeat(4, minmax(86px, 1fr)) repeat(2, minmax(100px, 1fr)) !important;
       align-items: end !important;
       gap: 10px !important;
     }
