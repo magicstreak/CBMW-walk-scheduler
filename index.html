@@ -2574,6 +2574,11 @@
   /* Walker View: admin-only actions and the draft count stay hidden; Download and the filters remain */
   body:not([data-view="leader"]):not([data-view="admin"]) .wo-zone-primary,
   body:not([data-view="leader"]):not([data-view="admin"]) #draft-count { display: none !important; }
+  /* While previewing as walker, keep the "Back to Leader/Admin View" button reachable */
+  body.previewing:not([data-view="leader"]):not([data-view="admin"]) .wo-zone-primary { display: flex !important; }
+  body.previewing:not([data-view="leader"]):not([data-view="admin"]) #add-walk-to-schedule,
+  body.previewing:not([data-view="leader"]):not([data-view="admin"]) #add-social-event { display: none !important; }
+  body.previewing:not([data-view="leader"]):not([data-view="admin"]) #preview-walker-btn { display: inline-flex !important; }
   @media (max-width: 700px) {
     body:not([data-view="leader"]):not([data-view="admin"]) #walker-filters, body:not([data-view="leader"]):not([data-view="admin"]) #walker-filters.table-filters { grid-template-columns: 1fr !important; }
     body:not([data-view="leader"]):not([data-view="admin"]) .wo-zone { min-width: 0; }
