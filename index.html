@@ -1940,7 +1940,7 @@
     .offers-table tr.walker-date-group:first-child th { border-top: none; }
     /* Summer programme walks in the walker list: yellow edge, like the calendar */
     tr.summer-row td:first-child { box-shadow: inset 5px 0 0 #eab308; }
-    .summer-badge { background: #fde68a; color: #713f12; }
+    .summer-badge { background: #fde68a; color: #713f12; white-space: nowrap; }
     tr.summer-row .summer-edit-btn { padding: 6px 12px; font-size: 0.85rem; }
     .summer-details { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 2px; }
     .summer-time { font-weight: 600; color: var(--text-muted); font-size: 0.85rem; }
@@ -5393,22 +5393,31 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       ].map((v) => String(v ?? "").trim()).filter(Boolean);
       const detailHtml = `${details.length ? `<div class="summer-details">${escapeHtml(details.join(" · "))}</div>` : ""}${rec.description ? `<div>${escapeHtml(rec.description)}</div>` : ""}`;
       const actionHtml = isAdminView() ? '<button type="button" class="btn btn-secondary summer-edit-btn">Edit</button>' : "";
-      // Column order follows the table header: expand, date, grade, walk number, name, description (walker), leader, pueblo, comments, notes (admin/leader), actions
-      const values = [
-        "",
-        `${escapeHtml(tableDate(rec.date))}<br><span class="summer-time">${escapeHtml(formatStartTime(rec.start_time))}</span>`,
-        '<span class="badge summer-badge">Summer</span>',
-        "",
-        `<strong>${escapeHtml(rec.title || "Summer walk")}</strong>${currentView === "walker" ? `<div class="walker-desc-inline">${detailHtml}</div>` : ""}`,
-        detailHtml,
-        "",
-        escapeHtml(rec.leader || ""),
-        "",
-        "",
-        detailHtml,
-        actionHtml,
-      ];
-      tr.innerHTML = headCells.map((th, i) => `<td${th.hidden ? " hidden" : ""} data-label="${escapeHtml(th.textContent.trim())}">${values[i] ?? ""}</td>`).join("");
+      // Each cell is chosen by the column's own class, so the summer row lines up with the header in every view
+      const isWalkerView = currentView === "walker";
+      const cellFor = (th) => {
+        const c = th.classList;
+        if (c.contains("expand-column")) return "";
+        if (th.dataset.adminSort === "date") return `${escapeHtml(tableDate(rec.date))}<br><span class="summer-time">${escapeHtml(formatStartTime(rec.start_time))}</span>`;
+        if (th.dataset.adminSort === "walk_grade") return '<span class="badge summer-badge">Summer</span>';
+        if (th.dataset.adminSort === "walk_number") return "";
+        if (th.dataset.adminSort === "walk_name") return `<strong>${escapeHtml(rec.title || "Summer walk")}</strong>${isWalkerView ? `<div class="walker-desc-inline">${detailHtml}</div>` : ""}`;
+        if (c.contains("walker-only-col")) return isWalkerView ? detailHtml : "";
+        if (c.contains("walker-image-col")) return "";
+        if (th.dataset.adminSort === "leader_name") return escapeHtml(rec.leader || "");
+        if (th.dataset.adminSort === "pueblo" || th.dataset.adminSort === "comments") return "";
+        if (c.contains("notes-col")) return isWalkerView ? "" : detailHtml;
+        if (c.contains("action-cancel-head")) return actionHtml;
+        return "";
+      };
+      // Cells carry the same layout classes as their header, so the CSS that hides or places columns applies to them too
+      const layoutClasses = ["expand-column", "walkid-col", "walker-only-col", "walker-image-col", "notes-col", "hide-in-walker", "status-col"];
+      const cellClassFor = (th) => {
+        const list = layoutClasses.filter((cls) => th.classList.contains(cls));
+        if (th.classList.contains("action-cancel-head")) list.push("action-cancel");
+        return list.join(" ");
+      };
+      tr.innerHTML = headCells.map((th) => `<td class="${cellClassFor(th)}"${th.hidden ? " hidden" : ""} data-label="${escapeHtml(th.textContent.trim())}">${cellFor(th)}</td>`).join("");
       tr.addEventListener("click", () => openSocialCard(skey));
       tr.querySelector(".summer-edit-btn")?.addEventListener("click", (e) => {
         e.stopPropagation();
