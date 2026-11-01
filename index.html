@@ -1800,7 +1800,8 @@
     .preview-banner { margin: 0 0 12px; padding: 10px 14px; border-radius: 8px; background: #fff7e0; border: 1px solid #f0c36d; color: #6b4b00; font-size: 0.92rem; }
     /* Preview: drafts on the calendar are hatched and labelled so they are not mistaken for live walks */
     body.previewing .slot.booked.draft { background: repeating-linear-gradient(45deg, #f1f5f9 0 6px, #e2e8f0 6px 12px); border: 2px dashed #64748b; }
-    body.previewing .slot.booked.draft::before { content: "DRAFT · "; font-weight: 700; font-size: 0.7rem; letter-spacing: 0.04em; color: #475569; }
+    /* Walker preview: no DRAFT label on the calendar, as walkers do not see draft labels */
+    body.previewing .slot.booked.draft::before { content: none; display: none; }
     .walk-card-inline { padding: 16px 20px 20px; color: #1f2937; background: #fff; }
     .walk-card-inline .walk-quote { margin-bottom: 14px; }
     .day-cell.selectable-day { cursor: pointer; }
@@ -2580,6 +2581,29 @@
     body:not([data-view="leader"]):not([data-view="admin"]) .filters-bar .table-filters { width: 100% !important; }
     body:not([data-view="leader"]):not([data-view="admin"]) .filter-clear-group { width: 100% !important; justify-content: space-between !important; }
   }
+  /* Walker List view on phones and tablets: the date picker opens as a popup calendar from a button */
+  .picker-open-btn, .picker-close { display: none; }
+  @media (max-width: 700px) {
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-open-btn {
+      display: inline-flex; align-items: center; gap: 6px; margin: 0 0 10px; padding: 9px 14px; border-radius: 999px;
+      border: 1px solid #cbd5e1; background: #fff; font: inherit; font-size: 0.92rem; font-weight: 600; color: #1f3b2c; cursor: pointer;
+    }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-open-btn[aria-expanded="true"] { border-color: #2d5b3e; box-shadow: 0 0 0 2px #dcf0e3; }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-close {
+      display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border: none; border-radius: 50%;
+      background: #f1f5f9; font-size: 1.3rem; line-height: 1; color: #334155; cursor: pointer; margin-left: 6px;
+    }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-column { display: none !important; }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"].picker-open .picker-column {
+      display: block !important; position: fixed !important; left: 50%; top: 50%; transform: translate(-50%, -50%);
+      width: min(94vw, 440px); max-height: 88vh; overflow-y: auto; z-index: 1000; box-sizing: border-box;
+      border-radius: 16px; padding: 14px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+    }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"].picker-open::before {
+      content: ""; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); z-index: 999;
+    }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"].picker-open .picker-months { gap: 14px; }
+  }
   /* ===================== end picker layout ===================== */
   /* ===================== REQUESTS AND MESSAGES PANE (Leader and Admin Views) ===================== */
   .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
@@ -2928,6 +2952,9 @@
       <button type="button" class="walker-mode-btn" data-walker-mode-btn="picker" aria-pressed="true">List</button>
       <button type="button" class="walker-mode-btn" data-walker-mode-btn="map" aria-pressed="false">Map</button>
     </div>
+    <button type="button" class="picker-open-btn" id="picker-open-btn" aria-expanded="false" aria-controls="picker-column">
+      <span>Date:</span> <span id="picker-open-label">All upcoming</span> <span aria-hidden="true">&#9662;</span>
+    </button>
     <div class="walker-day-picker" id="walker-day-picker" hidden>
       <label for="walker-day-input">Date</label>
       <input type="date" id="walker-day-input" />
@@ -2952,6 +2979,7 @@
     <div class="picker-head">
       <span class="picker-heading">Pick a date</span>
       <button type="button" class="nav-btn" id="picker-clear">All upcoming</button>
+      <button type="button" class="picker-close" id="picker-close" aria-label="Close date picker">&times;</button>
     </div>
     <div class="picker-weekdays" aria-hidden="true"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>
     <div class="picker-months" id="picker-months"></div>
@@ -4325,6 +4353,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       function renderPicker() {
         const host = document.getElementById("picker-months");
         if (!host) return;
+        updatePickerOpenLabel();
         host.innerHTML = "";
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -4372,6 +4401,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
               updateWalkOffersTitle();
               renderPicker();
               renderAdminTable();
+              if (isPickerPopupView()) setPickerPopup(false);
             });
             grid.appendChild(btn);
           }
@@ -4410,6 +4440,29 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       // Leader View: side bars for previous / next month; they drive the month buttons in the title row
       document.querySelector(".month-side-prev")?.addEventListener("click", () => document.getElementById("prev-month")?.click());
       document.querySelector(".month-side-next")?.addEventListener("click", () => document.getElementById("next-month")?.click());
+      // Phones and tablets: the date picker is a popup opened from the date button
+      const isPickerPopupView = () => currentView === "walker" && document.body.dataset.walkerMode === "picker" && window.matchMedia("(max-width: 700px)").matches;
+      function setPickerPopup(open) {
+        document.body.classList.toggle("picker-open", open && isPickerPopupView());
+        document.getElementById("picker-open-btn")?.setAttribute("aria-expanded", String(document.body.classList.contains("picker-open")));
+        if (document.body.classList.contains("picker-open")) renderPicker();
+      }
+      function updatePickerOpenLabel() {
+        const el = document.getElementById("picker-open-label");
+        if (el) el.textContent = pickerDay ? msgDateText(pickerDay) : "All upcoming";
+      }
+      document.getElementById("picker-open-btn")?.addEventListener("click", () => {
+        setPickerPopup(!document.body.classList.contains("picker-open"));
+      });
+      document.getElementById("picker-close")?.addEventListener("click", () => setPickerPopup(false));
+      document.addEventListener("click", (e) => {
+        if (!document.body.classList.contains("picker-open")) return;
+        if (e.target.closest("#picker-column") || e.target.closest("#picker-open-btn")) return;
+        setPickerPopup(false);
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && document.body.classList.contains("picker-open")) setPickerPopup(false);
+      });
       document.getElementById("picker-clear")?.addEventListener("click", () => {
         pickerDay = "";
         applyPickerRange();
