@@ -2581,6 +2581,53 @@
     body:not([data-view="leader"]):not([data-view="admin"]) .filter-clear-group { width: 100% !important; justify-content: space-between !important; }
   }
   /* ===================== end picker layout ===================== */
+  /* ===================== REQUESTS AND MESSAGES PANE (Leader and Admin Views) ===================== */
+  .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  #walk-messages-pane[hidden], #walk-messages-pane [hidden] { display: none !important; }
+  body[data-view="walker"] #walk-messages-pane { display: none !important; }
+  .msg-pane { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; margin: 0 0 16px; overflow: hidden; }
+  .msg-pane-toggle { all: unset; box-sizing: border-box; width: 100%; display: flex; align-items: center; gap: 10px; padding: 12px 16px; cursor: pointer; font-family: inherit; }
+  .msg-pane-toggle:focus-visible { outline: 2px solid #2d5b3e; outline-offset: -2px; }
+  .msg-pane-title { font-weight: 700; color: #1f3b2c; font-size: 0.98rem; }
+  .msg-pane-count { font-size: 0.8rem; font-weight: 600; background: #fef3c7; color: #92400e; border-radius: 999px; padding: 2px 10px; }
+  .msg-pane-count:empty { display: none; }
+  .msg-pane-chev { margin-left: auto; color: #64748b; transition: transform 0.2s ease; }
+  .msg-pane-toggle[aria-expanded="true"] .msg-pane-chev { transform: rotate(180deg); }
+  .msg-pane-body { padding: 0 16px 16px; border-top: 1px solid #eef2f6; }
+  .msg-pane-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding-top: 12px; }
+  .msg-chips { display: inline-flex; background: #f1f5f2; border-radius: 999px; padding: 3px; }
+  .msg-chip { border: none; background: transparent; border-radius: 999px; padding: 5px 12px; font: inherit; font-size: 0.85rem; font-weight: 600; color: #475569; cursor: pointer; }
+  .msg-chip[aria-pressed="true"] { background: #2d5b3e; color: #fff; }
+  .msg-type-wrap select, #msg-form select, #msg-form input, #msg-form textarea { font: inherit; font-size: 0.9rem; padding: 7px 10px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; }
+  .msg-pane-bar .btn { margin-left: auto; }
+  .msg-form { margin-top: 12px; padding: 12px; background: #f8faf9; border: 1px solid #e2e8f0; border-radius: 10px; }
+  .msg-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+  .msg-form label { display: flex; flex-direction: column; gap: 4px; font-size: 0.82rem; font-weight: 600; color: #334155; }
+  .msg-form select, .msg-form input { width: 100%; box-sizing: border-box; }
+  .msg-full { margin-top: 10px; }
+  .msg-full textarea { width: 100%; box-sizing: border-box; resize: vertical; }
+  .msg-form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+  .msg-list { display: grid; gap: 10px; margin-top: 12px; }
+  .msg-item { border: 1px solid #e2e8f0; border-left: 4px solid #2d5b3e; border-radius: 10px; padding: 10px 12px; background: #fff; }
+  .msg-item.is-done { border-left-color: #cbd5e1; background: #fafafa; }
+  .msg-item.is-done .msg-text, .msg-item.is-done .msg-walk { color: #64748b; }
+  .msg-item-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .msg-type { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #2d5b3e; background: #e6f0ea; border-radius: 6px; padding: 2px 7px; }
+  .msg-walk { font-size: 0.92rem; color: #1f2937; }
+  .msg-status { margin-left: auto; font-size: 0.75rem; font-weight: 700; border-radius: 999px; padding: 2px 9px; }
+  .msg-status.open { background: #fef3c7; color: #92400e; }
+  .msg-status.done { background: #e2e8f0; color: #475569; }
+  .msg-text { margin: 8px 0 4px; font-size: 0.92rem; color: #1f2937; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .msg-meta { font-size: 0.8rem; }
+  .msg-actions { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+  .msg-empty { margin: 12px 0 0; }
+  @media (max-width: 700px) {
+    .msg-pane-bar .btn { margin-left: 0; width: 100%; }
+    .msg-type-wrap select { width: 100%; }
+    .msg-form-actions .btn { flex: 1; }
+  }
+  /* ===================== end requests pane ===================== */
+
   /* ===================== LEADER PICKER LAYOUT (Leader and Admin Views) ===================== */
   .leader-layout-header { display: none; }
   body:is([data-view="leader"],[data-view="admin"]) .leader-layout-header { display: flex; justify-content: center; margin: 0 0 16px; }
@@ -2979,6 +3026,63 @@
   <!-- ======================================================= ADMIN ======================================================= -->
   <div class="admin-container" id="admin-container">
     <div class="preview-banner" id="preview-banner" hidden>Preview: this is how the walks will look to walkers. Drafts are shown with their status and are not visible to walkers. Nothing can be changed here.</div>
+    <section id="walk-messages-pane" class="msg-pane" aria-label="Requests and messages">
+      <button type="button" class="msg-pane-toggle" id="msg-pane-toggle" aria-expanded="false" aria-controls="msg-pane-body">
+        <span class="msg-pane-title">Requests and messages</span>
+        <span class="msg-pane-count" id="msg-pane-count"></span>
+        <span class="msg-pane-chev" aria-hidden="true">&#9662;</span>
+      </button>
+      <div class="msg-pane-body" id="msg-pane-body" hidden>
+        <div class="msg-pane-bar">
+          <div class="msg-chips" role="group" aria-label="Filter by status">
+            <button type="button" class="msg-chip" data-msg-status="open" aria-pressed="true">Open</button>
+            <button type="button" class="msg-chip" data-msg-status="done" aria-pressed="false">Done</button>
+            <button type="button" class="msg-chip" data-msg-status="all" aria-pressed="false">All</button>
+          </div>
+          <label class="msg-type-wrap"><span class="visually-hidden">Filter by type</span>
+            <select id="msg-type-filter">
+              <option value="">All types</option>
+              <option value="date">Change date</option>
+              <option value="time">Change time</option>
+              <option value="leader">Change leader</option>
+              <option value="walk">Change walk</option>
+              <option value="other">Other</option>
+            </select>
+          </label>
+          <button type="button" class="btn btn-small btn-primary" id="msg-new-btn">New request</button>
+        </div>
+        <form id="msg-form" class="msg-form" hidden>
+          <div class="msg-form-grid">
+            <label>Type
+              <select id="msg-type" required>
+                <option value="date">Change date</option>
+                <option value="time">Change time</option>
+                <option value="leader">Change leader</option>
+                <option value="walk">Change walk</option>
+                <option value="other">Other</option>
+              </select>
+            </label>
+            <label>Walk
+              <select id="msg-walk" required></select>
+            </label>
+            <label>Proposed date (optional)
+              <input type="date" id="msg-date" />
+            </label>
+            <label>Proposed time (optional)
+              <input type="time" id="msg-time" />
+            </label>
+          </div>
+          <label class="msg-full">Request
+            <textarea id="msg-text" rows="3" required maxlength="600" placeholder="e.g. Please move this walk to Sunday 15 Nov because of the fiesta"></textarea>
+          </label>
+          <div class="msg-form-actions">
+            <button type="button" class="btn btn-small" id="msg-cancel">Cancel</button>
+            <button type="submit" class="btn btn-small btn-primary">Send request</button>
+          </div>
+        </form>
+        <div id="msg-list" class="msg-list"></div>
+      </div>
+    </section>
     <section id="booking-requests-panel" hidden style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:12px 16px; margin:0 0 16px">
       <h3 style="margin:0 0 4px">Change requests from leaders <span class="muted" id="booking-requests-count"></span></h3>
       <div id="booking-requests-list"></div>
@@ -3775,6 +3879,11 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           renderBookingRequestsPanel();
           refreshOpenDetailCard();
         }, (error) => console.error("Unable to load booking requests:", error));
+
+        onValue(ref(db, "walk_messages"), (snapshot) => {
+          walkMessages = snapshot.val() || {};
+          renderMessagesPane();
+        }, (error) => console.error("Unable to load requests:", error));
 
         onValue(ref(db, "walk_bookings"), (snapshot) => {
           globalBookings = snapshot.val() || {};
@@ -6327,6 +6436,154 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       submitBookingRequest(e.target);
     });
 
+    /* ========================================================= REQUESTS AND MESSAGES =========================================================
+       Admins and leaders post requests to change a walk (date, time, leader, walk or other).
+       Stored in walk_messages/{id}. Anyone in Leader or Admin View can mark one done or reopen it; only admins can delete. */
+    let walkMessages = {};
+    let msgStatusFilter = "open";
+    let msgTypeFilter = "";
+    const MSG_TYPES = { date: "Change date", time: "Change time", leader: "Change leader", walk: "Change walk", other: "Other" };
+    function msgAuthorName() {
+      if (currentView === "admin") return "Admin";
+      const me = LEADER_LOOKUP.find((l) => String(l?.leader_id) === String(myLeaderId));
+      return brLeaderName(me) || "A leader";
+    }
+    function msgWalkOptions() {
+      return Object.entries(globalBookings)
+        .filter(([, b]) => b && b.status === "live" && b.cancelled !== true && !isPastDate(b.date))
+        .sort(([, a], [, b]) => (convertDate(a.date)?.getTime() || 0) - (convertDate(b.date)?.getTime() || 0) || String(a.start_time || "").localeCompare(String(b.start_time || "")))
+        .map(([key, b]) => {
+          const name = getBookingCardData(key)?.name || b.walk_name || `Walk ${b.walk_number || ""}`;
+          return { key, label: `${formatWalkDate(b.date)} · ${name}${b.walk_grade ? " · " + b.walk_grade : ""}` };
+        });
+    }
+    function msgDateText(iso) {
+      if (!iso) return "";
+      const d = new Date(`${iso}T00:00`);
+      return isNaN(d) ? iso : d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
+    }
+    function msgTimeText(iso) {
+      const d = new Date(iso);
+      return isNaN(d) ? "" : d.toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+    }
+    function msgItemHtml(m) {
+      const done = m.status === "done";
+      const proposal = [m.proposed_date ? `Proposed date: ${msgDateText(m.proposed_date)}` : "", m.proposed_time ? `Proposed time: ${m.proposed_time}` : ""].filter(Boolean).join(" · ");
+      const id = escapeHtml(m.id);
+      return `<article class="msg-item${done ? " is-done" : ""}">
+        <div class="msg-item-head">
+          <span class="msg-type">${escapeHtml(MSG_TYPES[m.type] || "Other")}</span>
+          <strong class="msg-walk">${escapeHtml(m.walk_label || "Walk")}</strong>
+          <span class="msg-status ${done ? "done" : "open"}">${done ? "Done" : "Open"}</span>
+        </div>
+        <p class="msg-text">${escapeHtml(m.text || "")}</p>
+        ${proposal ? `<div class="msg-meta"><strong>${escapeHtml(proposal)}</strong></div>` : ""}
+        <div class="muted msg-meta">${escapeHtml(m.from_name || "Someone")} · ${escapeHtml(msgTimeText(m.created_at))}${done && m.done_by ? " · Done by " + escapeHtml(m.done_by) : ""}</div>
+        <div class="msg-actions">
+          ${done
+            ? `<button type="button" class="btn btn-small" data-msg-reopen="${id}">Reopen</button>`
+            : `<button type="button" class="btn btn-small btn-primary" data-msg-done="${id}">Mark done</button>`}
+          ${currentView === "admin" ? `<button type="button" class="btn btn-small btn-danger" data-msg-delete="${id}">Delete</button>` : ""}
+        </div>
+      </article>`;
+    }
+    function renderMessagesPane() {
+      const countEl = document.getElementById("msg-pane-count");
+      if (!countEl) return;
+      const all = Object.values(walkMessages).filter((m) => m && m.id)
+        .sort((a, b) => String(b.created_at || "").localeCompare(String(a.created_at || "")));
+      const openCount = all.filter((m) => m.status !== "done").length;
+      countEl.textContent = openCount ? `${openCount} open` : "";
+      document.querySelectorAll("[data-msg-status]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.msgStatus === msgStatusFilter)));
+      const list = all.filter((m) =>
+        (msgStatusFilter === "all" || (msgStatusFilter === "done" ? m.status === "done" : m.status !== "done")) &&
+        (!msgTypeFilter || m.type === msgTypeFilter));
+      document.getElementById("msg-list").innerHTML = list.length
+        ? list.map(msgItemHtml).join("")
+        : `<p class="muted msg-empty">No ${msgStatusFilter === "all" ? "" : msgStatusFilter + " "}requests${msgTypeFilter ? " of this type" : ""}.</p>`;
+    }
+    function setMsgStatus(id, status) {
+      const m = walkMessages[id];
+      if (!m) return;
+      const next = { ...m, status, updated_at: new Date().toISOString(), done_by: status === "done" ? msgAuthorName() : null };
+      walkMessages[id] = next;
+      renderMessagesPane();
+      if (isFirebaseActive) set(ref(db, "walk_messages/" + id), next);
+    }
+    function deleteMessage(id) {
+      if (currentView !== "admin" || !walkMessages[id]) return;
+      if (!confirm("Delete this request? This cannot be undone.")) return;
+      delete walkMessages[id];
+      renderMessagesPane();
+      if (isFirebaseActive) remove(ref(db, "walk_messages/" + id));
+    }
+    function openMsgForm(show) {
+      const form = document.getElementById("msg-form");
+      form.hidden = !show;
+      if (!show) return;
+      const walkSel = document.getElementById("msg-walk");
+      const opts = msgWalkOptions();
+      walkSel.innerHTML = opts.length
+        ? `<option value="">Choose a walk</option>` + opts.map((o) => `<option value="${escapeHtml(o.key)}">${escapeHtml(o.label)}</option>`).join("")
+        : `<option value="">No upcoming walks</option>`;
+      document.getElementById("msg-text").focus();
+    }
+
+    document.getElementById("msg-pane-toggle").addEventListener("click", (e) => {
+      const btn = e.currentTarget;
+      const body = document.getElementById("msg-pane-body");
+      body.hidden = !body.hidden;
+      btn.setAttribute("aria-expanded", String(!body.hidden));
+    });
+    document.querySelectorAll("[data-msg-status]").forEach((b) => b.addEventListener("click", () => {
+      msgStatusFilter = b.dataset.msgStatus;
+      renderMessagesPane();
+    }));
+    document.getElementById("msg-type-filter").addEventListener("change", (e) => {
+      msgTypeFilter = e.target.value;
+      renderMessagesPane();
+    });
+    document.getElementById("msg-new-btn").addEventListener("click", () => {
+      openMsgForm(document.getElementById("msg-form").hidden);
+    });
+    document.getElementById("msg-cancel").addEventListener("click", () => openMsgForm(false));
+    document.getElementById("msg-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const walkKey = document.getElementById("msg-walk").value;
+      const text = document.getElementById("msg-text").value.trim();
+      if (!walkKey) return alert("Please choose a walk.");
+      if (!text) return alert("Please describe the request.");
+      const opt = msgWalkOptions().find((o) => o.key === walkKey);
+      const id = `msg_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+      const data = {
+        id,
+        type: document.getElementById("msg-type").value,
+        booking_key: walkKey,
+        walk_label: opt ? opt.label : walkKey,
+        proposed_date: document.getElementById("msg-date").value || null,
+        proposed_time: document.getElementById("msg-time").value || null,
+        text,
+        status: "open",
+        from_name: msgAuthorName(),
+        from_role: currentView,
+        created_at: new Date().toISOString(),
+      };
+      walkMessages[id] = data;
+      if (isFirebaseActive) set(ref(db, "walk_messages/" + id), data);
+      e.target.reset();
+      openMsgForm(false);
+      msgStatusFilter = "open";
+      renderMessagesPane();
+    });
+    document.getElementById("msg-list").addEventListener("click", (e) => {
+      const done = e.target.closest("[data-msg-done]");
+      const reopen = e.target.closest("[data-msg-reopen]");
+      const del = e.target.closest("[data-msg-delete]");
+      if (done) setMsgStatus(done.dataset.msgDone, "done");
+      if (reopen) setMsgStatus(reopen.dataset.msgReopen, "open");
+      if (del) deleteMessage(del.dataset.msgDelete);
+    });
+
     document.getElementById("booking-requests-panel").addEventListener("click", (e) => {
       const ok = e.target.closest("[data-br-approve]");
       const rv = e.target.closest("[data-br-review]");
@@ -7326,6 +7583,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         document.getElementById("calendar-collapse").textContent = "Hide calendar";
         document.body.dataset.view = view;
         renderBookingRequestsPanel();
+        renderMessagesPane();
         document.getElementById("page-title").textContent = view === "walker" ? "Walk Programme" : "Programme Planner";
         placeGradeFilter();
         if (view !== "walker") setWalkerRange("", "");
