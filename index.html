@@ -6419,9 +6419,22 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
 
       const button = document.getElementById("submit-booking");
       refreshLeaderOptions();
+      syncLeaderInputsEnabled();
       refreshWalkDetailsPanel();
       modal.classList.add("active");
     }
+    // Leaders can be entered only once the Walk Number matches a walk in the master list
+    function syncLeaderInputsEnabled() {
+      const key = (document.getElementById("input-walk-no")?.value || "").trim();
+      const valid = !!key && !!masterWalks && Object.prototype.hasOwnProperty.call(masterWalks, key);
+      ["input-leader", "input-leader-2"].forEach((id) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.disabled = !valid;
+        el.title = valid ? "" : "Choose a valid Walk Number first";
+      });
+    }
+
     function closeModal() {
       brReviewId = null;
       modal.classList.remove("active");
@@ -6434,6 +6447,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       document.getElementById("input-walk-no").addEventListener("input", () => {
         const nameInput = document.getElementById("input-walk-name");
         refreshLeaderOptions();
+        syncLeaderInputsEnabled();
         nameInput.dataset.autofilled = "true";
         validateBookingWalkGrade(false);
         refreshWalkDetailsPanel();
