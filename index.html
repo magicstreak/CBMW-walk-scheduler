@@ -2604,6 +2604,50 @@
     }
     body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"].picker-open .picker-months { gap: 14px; }
   }
+  /* Walker View on phones and tablets: the date button sits first, level with the Month / List / Map pills.
+     Scheduled walks in the month calendar show a dot in the grade colour and the walk name, truncated. */
+  @media (max-width: 1100px) {
+    body:not([data-view="leader"]):not([data-view="admin"]) .walker-mode-header { align-items: center; flex-wrap: nowrap; }
+    body:not([data-view="leader"]):not([data-view="admin"]) .picker-open-btn { order: -1; height: 40px; box-sizing: border-box; margin: 0 8px 0 0 !important; padding: 0 14px; flex: 0 0 auto; }
+    body:not([data-view="leader"]):not([data-view="admin"]) .walker-mode-header .walker-mode-switch { height: 40px; box-sizing: border-box; align-items: center; flex: 0 0 auto; }
+    body:not([data-view="leader"]):not([data-view="admin"]) .walker-mode-header .walker-mode-btn { height: 30px; padding: 0 12px; }
+    body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked {
+      background: transparent !important; border: none !important; box-shadow: none !important; text-shadow: none !important;
+      min-height: 0 !important; height: auto !important; padding: 2px 1px !important; width: 100%; min-width: 0; box-sizing: border-box;
+      display: flex !important; align-items: center; gap: 3px; font-size: 0.66rem !important; color: #1f2937 !important; overflow: hidden;
+    }
+    body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked::before {
+      content: ""; display: block !important; flex: 0 0 7px; width: 7px; height: 7px; border-radius: 50%; background: #94a3b8;
+    }
+    body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked.grade-E::before { background: var(--color-E); }
+    body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked.grade-M::before { background: var(--color-M); }
+    body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked.grade-MS::before { background: var(--color-MS); }
+    body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked.grade-S::before { background: var(--color-S); }
+    body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked.grade-VS::before { background: var(--color-VS); }
+    body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked .slot-long {
+      display: block !important; flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; color: #1f2937;
+    }
+    body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked .slot-short { display: none !important; }
+    body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked.cancelled .slot-long { text-decoration: line-through; color: #64748b; }
+  }
+  /* Filter bar: a toggle shows whether the filters are open or closed, and how many are applied */
+  .filters-state {
+    display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; flex: none; white-space: nowrap;
+    border: 1px solid #cbd5e1; border-radius: 999px; background: #fff; color: #1e293b; font: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer;
+  }
+  .filters-state:focus-visible { outline: 2px solid #2d5b3e; outline-offset: 2px; }
+  .filters-state[aria-expanded="false"] { background: #f8fafc; color: #475569; }
+  /* Header: shows how many filters are applied, whatever the filter bar's state */
+  .header-filter-badge { display: inline-flex; align-items: center; font-size: 0.78rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: #2d5b3e; color: #fff; white-space: nowrap; }
+  .header-filter-badge[hidden] { display: none !important; }
+  .filters-state-chev { display: inline-block; transition: transform 0.15s ease; }
+  .filters-state[aria-expanded="false"] .filters-state-chev { transform: rotate(-90deg); }
+  body .filters-bar.filters-collapsed #walker-filters { display: none !important; }
+  /* Date range: visible From / To labels */
+  body #walker-filters .walker-date-range > label { display: block !important; font-size: 0.72rem; font-weight: 600; color: #64748b; margin: 0 0 4px 2px; }
+  @media (max-width: 1100px) {
+    body:not([data-view="leader"]):not([data-view="admin"]) .filters-bar .filters-state { order: -1; align-self: flex-start; }
+  }
   /* ===================== end picker layout ===================== */
   /* ===================== REQUESTS AND MESSAGES PANE (Leader and Admin Views) ===================== */
   .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
@@ -3129,6 +3173,7 @@
     </section>
     <div class="admin-header">
       <h3 id="walk-offers-title">Upcoming Walks</h3>
+      <span class="header-filter-badge" id="header-filter-badge" hidden></span>
       <!-- Zone 1: primary actions -->
       <div class="wo-zone wo-zone-primary">
         <button class="btn btn-success" id="add-walk-to-schedule" hidden>Add Walk</button>
@@ -3169,6 +3214,10 @@
       <!-- Zone 3: filters (collapsible; the count stays visible when closed) -->
       <div class="wo-zone wo-zone-filters" id="filters-zone">
         <div class="filters-bar">
+          <button type="button" class="filters-state" id="filters-state" aria-expanded="true" aria-controls="walker-filters" data-active="false">
+            <span class="filters-state-label">Filters</span>
+            <span class="filters-state-chev" aria-hidden="true">&#9662;</span>
+          </button>
           <div class="table-filters" id="walker-filters">
       <div class="filter-field grow walker-search-field">
         <label for="admin-filter-search">Search</label>
@@ -3210,11 +3259,11 @@
       </div>
       <div class="filter-field walker-date-range">
         <label for="admin-filter-from">From</label>
-        <input type="date" id="admin-filter-from" />
+        <input type="date" id="admin-filter-from" title="Show walks on or after this date" />
       </div>
       <div class="filter-field walker-date-range">
         <label for="admin-filter-to">To</label>
-        <input type="date" id="admin-filter-to" />
+        <input type="date" id="admin-filter-to" title="Show walks on or before this date" />
       </div>
           </div>
           <div class="filter-clear-group">
@@ -5603,7 +5652,34 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       if (countEl) {
         countEl.textContent = `Showing ${sortedKeys.length} of ${total}`;
       }
+      updateFilterState();
     }
+
+    // How many filters are applied, shown on the Filters toggle
+    function activeFilterCount() {
+      const val = (id, def) => document.getElementById(id)?.value ?? def;
+      let n = 0;
+      if (String(val("admin-filter-search", "")).trim()) n++;
+      if (val("admin-filter-grade", "ALL") !== "ALL") n++;
+      if (val("admin-filter-leader", "ALL") !== "ALL") n++;
+      if (val("admin-filter-pueblo", "ALL") !== "ALL") n++;
+      if (val("admin-filter-status", "ALL") !== "ALL") n++;
+      if (val("admin-filter-from", "")) n++;
+      if (val("admin-filter-to", "")) n++;
+      return n;
+    }
+    function updateFilterState() {
+      const badge = document.getElementById("header-filter-badge");
+      if (!badge) return;
+      const n = activeFilterCount();
+      badge.hidden = n === 0;
+      badge.textContent = `${n} filter${n === 1 ? "" : "s"} applied`;
+    }
+    document.getElementById("filters-state")?.addEventListener("click", (e) => {
+      const bar = e.currentTarget.closest(".filters-bar");
+      const collapsed = bar.classList.toggle("filters-collapsed");
+      e.currentTarget.setAttribute("aria-expanded", String(!collapsed));
+    });
 
     // Wait for the window to load, then attach the listener
     /* ========================================================= WALKER CARDS (hover + click) ========================================================= */
