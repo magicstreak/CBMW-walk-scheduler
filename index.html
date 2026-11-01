@@ -2694,6 +2694,12 @@
     body:is([data-view="leader"], [data-view="admin"]) #leader-layout-header { flex-wrap: wrap; gap: 10px; align-items: center; }
     body:is([data-view="leader"], [data-view="admin"]) #leader-layout-header .legend-wrap { margin: 0; display: flex !important; }
   }
+  /* Map: several walks at one meeting point share a pin with a count */
+  .walk-pin-count { background: #2d5b3e; color: #fff; border: 2px solid #fff; border-radius: 50%; box-shadow: 0 1px 4px rgba(0,0,0,0.35); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; }
+  .walk-pin-count span { line-height: 1; }
+  .map-pop { min-width: 180px; font-size: 0.9rem; }
+  .map-pop-walk { display: block; width: 100%; margin-top: 6px; text-align: left; padding: 6px 8px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; font: inherit; cursor: pointer; }
+  .map-pop-walk:hover { background: #f1f5f9; }
   /* ===================== end picker layout ===================== */
   /* ===================== REQUESTS AND MESSAGES PANE (Leader and Admin Views) ===================== */
   .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
@@ -3947,6 +3953,8 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       walkMapLayer.clearLayers();
       const points = [];
       let missing = 0;
+      // Walks that share a meeting point become one pin with a count, so they do not hide each other
+      const spots = new Map();
       document.querySelectorAll("#admin-table-body tr[data-walk-key]").forEach((tr) => {
         const key = tr.dataset.walkKey;
         const record = globalBookings[key];
@@ -3957,13 +3965,35 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         const lat = Number(coords.latitude);
         const lon = Number(coords.longitude);
         const name = route.Route_Name || route.Walk_Name || record.walk_name || `Walk ${record.walk_number || ""}`;
-        const marker = L.marker([lat, lon]).bindTooltip(
-          `<strong>${escapeHtml(name)}</strong><br>${escapeHtml(tableDate(record.date))} ${escapeHtml(formatStartTime(record.start_time) || "")} · ${escapeHtml(record.walk_grade || "")}`,
+        const spotKey = `${lat.toFixed(5)},${lon.toFixed(5)}`;
+        if (!spots.has(spotKey)) spots.set(spotKey, { lat, lon, items: [] });
+        spots.get(spotKey).items.push({ key, name, date: record.date, start_time: record.start_time, grade: record.walk_grade || "" });
+      });
+      let shownWalks = 0;
+      spots.forEach((spot) => {
+        const count = spot.items.length;
+        shownWalks += count;
+        const line = (i) => `<strong>${escapeHtml(i.name)}</strong><br>${escapeHtml(tableDate(i.date))} ${escapeHtml(formatStartTime(i.start_time) || "")} · ${escapeHtml(i.grade)}`;
+        const marker = count > 1
+          ? L.marker([spot.lat, spot.lon], { icon: L.divIcon({ className: "walk-pin-count", html: `<span>${count}</span>`, iconSize: [30, 30], iconAnchor: [15, 15] }) })
+          : L.marker([spot.lat, spot.lon]);
+        marker.bindTooltip(
+          count > 1 ? `<strong>${count} walks at this meeting point</strong><br>${spot.items.map(line).join("<br>")}` : line(spot.items[0]),
           { direction: "top" }
         );
-        marker.on("click", () => openDetailCard(key));
+        if (count > 1) {
+          marker.bindPopup(`<div class="map-pop"><strong>${count} walks at this meeting point</strong>${spot.items.map((i) => `<button type="button" class="map-pop-walk" data-open-walk="${escapeHtml(i.key)}">${escapeHtml(i.name)} · ${escapeHtml(tableDate(i.date))}</button>`).join("")}</div>`);
+          marker.on("popupopen", (e) => {
+            e.popup.getElement().querySelectorAll("[data-open-walk]").forEach((b) => b.addEventListener("click", () => {
+              walkMap.closePopup();
+              openDetailCard(b.dataset.openWalk);
+            }, { once: true }));
+          });
+        } else {
+          marker.on("click", () => openDetailCard(spot.items[0].key));
+        }
         marker.addTo(walkMapLayer);
-        points.push([lat, lon]);
+        points.push([spot.lat, spot.lon]);
       });
       // Measure and centre once the panel is visible; the map may have been created while hidden
       const fit = () => {
@@ -3972,7 +4002,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       };
       fit();
       setTimeout(fit, 150);
-      const shown = `${points.length} walk${points.length === 1 ? "" : "s"} on the map`;
+      const shown = `${shownWalks} walk${shownWalks === 1 ? "" : "s"} on the map`;
       note.textContent = missing ? `${shown}. ${missing} without a meeting point are not shown.` : `${shown}. Tap a pin for the walk.`;
     }
     // Keep the map sized correctly when the window or orientation changes
