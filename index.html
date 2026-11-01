@@ -2549,6 +2549,37 @@
     body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .split-layout { grid-template-columns: 1fr; }
     body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-column { position: static; max-height: none; }
   }
+  /* Walker picker on phones and tablets: swipeable months, bigger day buttons, weekdays inside each month */
+  .picker-weekdays-inline { display: none; }
+  @media (max-width: 1100px) {
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-column > .picker-weekdays { display: none; }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-weekdays-inline { display: grid; margin-bottom: 4px; }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-weekdays-inline span { font-size: 0.72rem; }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .split-layout { grid-template-columns: minmax(0, 1fr); }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-column { position: static; max-height: none; overflow: visible; min-width: 0; width: 100%; box-sizing: border-box; }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-months { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-day { height: 34px; font-size: 0.82rem; }
+  }
+  @media (max-width: 700px) {
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-months {
+      display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 0; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-months::-webkit-scrollbar { display: none; }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-month { flex: 0 0 100%; min-width: 0; width: 100%; box-sizing: border-box; scroll-snap-align: start; margin-top: 0; }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-day { height: 42px; font-size: 0.95rem; }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-weekdays-inline span { font-size: 0.8rem; }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-column { padding: 10px 8px; }
+  }
+  /* Walker View: admin-only actions and the draft count stay hidden; Download and the filters remain */
+  body:not([data-view="leader"]):not([data-view="admin"]) .wo-zone-primary,
+  body:not([data-view="leader"]):not([data-view="admin"]) #draft-count { display: none !important; }
+  @media (max-width: 700px) {
+    body:not([data-view="leader"]):not([data-view="admin"]) #walker-filters, body:not([data-view="leader"]):not([data-view="admin"]) #walker-filters.table-filters { grid-template-columns: 1fr !important; }
+    body:not([data-view="leader"]):not([data-view="admin"]) .wo-zone { min-width: 0; }
+    body:not([data-view="leader"]):not([data-view="admin"]) .filters-bar { flex-direction: column !important; align-items: stretch !important; flex-wrap: wrap !important; width: 100%; }
+    body:not([data-view="leader"]):not([data-view="admin"]) .filters-bar .table-filters { width: 100% !important; }
+    body:not([data-view="leader"]):not([data-view="admin"]) .filter-clear-group { width: 100% !important; justify-content: space-between !important; }
+  }
   /* ===================== end picker layout ===================== */
   /* ===================== LEADER PICKER LAYOUT (Leader and Admin Views) ===================== */
   .leader-layout-header { display: none; }
@@ -4199,6 +4230,10 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           const title = document.createElement("div");
           title.className = "picker-month-title";
           title.textContent = `${monthNames[mo]} ${y}`;
+          const wd = document.createElement("div");
+          wd.className = "picker-weekdays picker-weekdays-inline";
+          wd.setAttribute("aria-hidden", "true");
+          wd.innerHTML = "<span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>";
           const grid = document.createElement("div");
           grid.className = "picker-grid";
           for (let i = 0; i < first.getDay(); i++) {
@@ -4232,6 +4267,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
             grid.appendChild(btn);
           }
           block.appendChild(title);
+          block.appendChild(wd);
           block.appendChild(grid);
           host.appendChild(block);
         }
