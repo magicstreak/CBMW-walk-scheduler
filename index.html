@@ -2649,6 +2649,42 @@
   }
   body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked .slot-short { display: none !important; }
   body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked.cancelled .slot-long { text-decoration: line-through; color: #64748b; }
+  /* Leader and Admin on phones: the side month bars go; the month arrows sit beside the month name instead */
+  @media (max-width: 700px) {
+    body:is([data-view="leader"], [data-view="admin"]) .month-side { display: none !important; }
+    body:is([data-view="leader"], [data-view="admin"]) .calendar-title-row .month-arrow { display: inline-flex !important; width: 36px !important; height: 36px !important; }
+    body:is([data-view="leader"], [data-view="admin"]) .calendar-grid-wrap { flex: 0 0 100% !important; min-width: 0; }
+  }
+  /* Leader and Admin on phones and tablets: slots are compact dots with the time; the grade legend sits by the Calendar / List switch */
+  @media (max-width: 1100px) {
+    body:is([data-view="leader"], [data-view="admin"]) .slot {
+      --c: #94a3b8; display: flex !important; align-items: center; gap: 4px; min-height: 18px !important; height: auto !important;
+      padding: 2px 3px !important; background: transparent !important; border: none !important; box-shadow: none !important;
+      font-size: 0.64rem; color: #1f2937 !important; white-space: nowrap; overflow: hidden; min-width: 0;
+    }
+    body:is([data-view="leader"], [data-view="admin"]) .slot.grade-E { --c: var(--color-E); }
+    body:is([data-view="leader"], [data-view="admin"]) .slot.grade-M { --c: var(--color-M); }
+    body:is([data-view="leader"], [data-view="admin"]) .slot.grade-MS { --c: var(--color-MS); }
+    body:is([data-view="leader"], [data-view="admin"]) .slot.grade-S { --c: var(--color-S); }
+    body:is([data-view="leader"], [data-view="admin"]) .slot.grade-VS { --c: var(--color-VS); }
+    body:is([data-view="leader"], [data-view="admin"]) .slot::before {
+      content: "" !important; display: block !important; flex: 0 0 9px; width: 9px; height: 9px; border-radius: 50%; background: var(--c) !important; padding: 0 !important; position: static !important;
+    }
+    body:is([data-view="leader"], [data-view="admin"]) .slot.available::before { background: #fff !important; box-shadow: inset 0 0 0 2px var(--c); }
+    body:is([data-view="leader"], [data-view="admin"]) .slot.draft::before { box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px #f59e0b; }
+    body:is([data-view="leader"], [data-view="admin"]) .slot.available > *,
+    body:is([data-view="leader"], [data-view="admin"]) .slot.past > *,
+    body:is([data-view="leader"], [data-view="admin"]) .slot.booked > .slot-long,
+    body:is([data-view="leader"], [data-view="admin"]) .slot-grade-txt,
+    body:is([data-view="leader"], [data-view="admin"]) .slot-short br { display: none !important; }
+    body:is([data-view="leader"], [data-view="admin"]) .slot.booked > .slot-short { display: inline !important; font-weight: 700; font-size: 0.64rem; }
+    body:is([data-view="leader"], [data-view="admin"]) .slot.booked.cancelled > .slot-short { text-decoration: line-through; color: #64748b; }
+    body:is([data-view="leader"], [data-view="admin"]) .slot.past { opacity: 0.45; }
+    body:is([data-view="leader"], [data-view="admin"]) .week-row > .day-cell.quiet-day { flex: 0.7 1 0; }
+    body:is([data-view="leader"], [data-view="admin"]) .week-row > .day-cell.quiet-day .day-number { font-size: 0.68rem; margin-bottom: 2px; }
+    body:is([data-view="leader"], [data-view="admin"]) #leader-layout-header { flex-wrap: wrap; gap: 10px; align-items: center; }
+    body:is([data-view="leader"], [data-view="admin"]) #leader-layout-header .legend-wrap { margin: 0; display: flex !important; }
+  }
   /* ===================== end picker layout ===================== */
   /* ===================== REQUESTS AND MESSAGES PANE (Leader and Admin Views) ===================== */
   .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
@@ -5187,7 +5223,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
     /* Booked slots keep the full name for desktop; phones show the grade and start time (see CSS) */
     function setSlotLabel(el, longText, grade, startTime) {
       const time = String(startTime || "");
-      el.innerHTML = `<span class="slot-long">${escapeHtml(longText)}</span><span class="slot-short">${escapeHtml(grade || "")}<br>${escapeHtml(time)}</span>`;
+      el.innerHTML = `<span class="slot-long">${escapeHtml(longText)}</span><span class="slot-short"><span class="slot-grade-txt">${escapeHtml(grade || "")}</span><br><span class="slot-time-txt">${escapeHtml(time)}</span></span>`;
       el.title = longText;
     }
 
@@ -6767,6 +6803,18 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       if (e.key === "Escape" && document.body.classList.contains("day-sheet-open")) closeDaySheet();
     });
 
+    // Leader and Admin on phones and tablets: the grade legend sits beside the Calendar / List switch
+    const calendarLegendEl = document.querySelector(".legend-wrap:not(.picker-legend-wrap)");
+    const calendarToolsEl = document.querySelector(".calendar-tools-group");
+    function placeLegendForPhones() {
+      const header = document.getElementById("leader-layout-header");
+      if (!calendarLegendEl || !header || !calendarToolsEl) return;
+      const small = window.matchMedia("(max-width: 1100px)").matches && currentView !== "walker";
+      if (small && calendarLegendEl.parentElement !== header) header.appendChild(calendarLegendEl);
+      else if (!small && calendarLegendEl.parentElement === header) calendarToolsEl.appendChild(calendarLegendEl);
+    }
+    window.matchMedia("(max-width: 1100px)").addEventListener("change", placeLegendForPhones);
+
     document.getElementById("msg-pane-toggle").addEventListener("click", (e) => {
       const btn = e.currentTarget;
       const body = document.getElementById("msg-pane-body");
@@ -7822,6 +7870,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         document.body.dataset.view = view;
         renderBookingRequestsPanel();
         renderMessagesPane();
+        placeLegendForPhones();
         document.getElementById("page-title").textContent = view === "walker" ? "Walk Programme" : "Programme Planner";
         placeGradeFilter();
         if (view !== "walker") setWalkerRange("", "");
