@@ -2695,6 +2695,23 @@
     .msg-form-actions .btn { flex: 1; }
   }
   /* ===================== end requests pane ===================== */
+  /* Day sheet: a busy day opened as a large list of its slots (Leader and Admin, phones and tablets) */
+  .day-sheet { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); z-index: 1100; display: flex; align-items: flex-end; justify-content: center; }
+  .day-sheet[hidden] { display: none !important; }
+  .day-sheet-card { background: #fff; width: min(100%, 560px); max-height: 86vh; overflow-y: auto; box-sizing: border-box; border-radius: 18px 18px 0 0; padding: 16px 16px 24px; box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.2); }
+  @media (min-width: 701px) { .day-sheet { align-items: center; } .day-sheet-card { border-radius: 18px; } }
+  .day-sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .day-sheet-head h3 { margin: 0; font-size: 1.15rem; color: #1f3b2c; }
+  .day-sheet-close { width: 40px; height: 40px; border: none; border-radius: 50%; background: #f1f5f9; font-size: 1.5rem; line-height: 1; color: #334155; cursor: pointer; flex: none; }
+  .day-sheet-hint { margin: 4px 0 12px; font-size: 0.85rem; color: #64748b; }
+  .day-sheet-list { display: grid; gap: 10px; }
+  .day-sheet-slot { display: block; width: 100%; min-height: 60px; box-sizing: border-box; padding: 10px 14px; text-align: left; background: #fff; border: 1px solid #e2e8f0; border-left: 6px solid var(--slot-c, #94a3b8); border-radius: 12px; font: inherit; cursor: pointer; }
+  .day-sheet-slot:active { background: #f1f5f9; }
+  .day-sheet-slot.past { opacity: 0.55; }
+  .day-sheet-slot-main { display: block; font-weight: 700; font-size: 1rem; color: #1f2937; overflow-wrap: anywhere; }
+  .day-sheet-slot-sub { display: block; font-size: 0.85rem; color: #64748b; margin-top: 2px; }
+  body.day-sheet-open { overflow: hidden; }
+
   /* Leader and Admin on phones and tablets: days with nothing on them are narrower, so the busy days have room */
   .week-row { display: contents; }
   @media (max-width: 1100px) {
@@ -4789,6 +4806,14 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
               renderAdminTable();
             });
           }
+          // Leader and Admin on phones and tablets: tapping an empty part of a busy day opens that day as a large list
+          if (currentView !== "walker" && slotsContainer.children.length) {
+            dayCell.addEventListener("click", (e) => {
+              if (e.target.closest(".slot")) return; // slot taps are handled by the slot itself
+              if (!window.matchMedia("(max-width: 1100px)").matches) return;
+              openDaySheet(dayCell, specificDate);
+            });
+          }
           // Days with no walks, slots or social events: narrower on phones and tablets (Leader and Admin)
           if (!slotsContainer.children.length) dayCell.classList.add("quiet-day");
           daysGrid.appendChild(dayCell);
@@ -6681,6 +6706,65 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         : `<option value="">No upcoming walks</option>`;
       document.getElementById("msg-text").focus();
     }
+
+    /* ========================================================= DAY SHEET (Leader and Admin, phones and tablets) =========================================================
+       Tapping a busy day opens it as a large list of its slots. Each row passes the tap on to the calendar slot. */
+    function openDaySheet(dayCell, date) {
+      let sheet = document.getElementById("day-sheet");
+      if (!sheet) {
+        sheet = document.createElement("div");
+        sheet.id = "day-sheet";
+        sheet.className = "day-sheet";
+        sheet.hidden = true;
+        sheet.innerHTML = `<div class="day-sheet-card" role="dialog" aria-modal="true" aria-labelledby="day-sheet-title">
+          <div class="day-sheet-head"><h3 id="day-sheet-title"></h3><button type="button" class="day-sheet-close" aria-label="Close">&times;</button></div>
+          <p class="day-sheet-hint">Tap a slot to book it, or to open a walk.</p>
+          <div class="day-sheet-list" id="day-sheet-list"></div>
+        </div>`;
+        document.body.appendChild(sheet);
+        sheet.addEventListener("click", (e) => {
+          if (e.target === sheet || e.target.closest(".day-sheet-close")) closeDaySheet();
+        });
+      }
+      sheet.querySelector("#day-sheet-title").textContent = date.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+      const list = sheet.querySelector("#day-sheet-list");
+      list.innerHTML = "";
+      dayCell.querySelectorAll(".slot").forEach((orig) => {
+        const grade = ([...orig.classList].find((c) => c.startsWith("grade-")) || "").slice(6);
+        const row = document.createElement("button");
+        row.type = "button";
+        row.className = "day-sheet-slot" + (orig.classList.contains("past") ? " past" : "");
+        if (grade) row.style.setProperty("--slot-c", `var(--color-${grade})`);
+        let main, sub;
+        if (orig.classList.contains("available")) {
+          main = "Available";
+          sub = `Grade ${grade} · tap to book`;
+        } else if (orig.classList.contains("social")) {
+          main = orig.textContent.replace(/\s+/g, " ").trim();
+          sub = "Social event";
+        } else {
+          main = orig.querySelector(".slot-long")?.textContent.trim() || orig.title || "Walk";
+          const timeLine = (orig.querySelector(".slot-short")?.innerText || "").split("\n").slice(1).join(" ").trim();
+          sub = [grade && `Grade ${grade}`, timeLine].filter(Boolean).join(" · ");
+        }
+        row.innerHTML = `<span><span class="day-sheet-slot-main">${escapeHtml(main)}</span><span class="day-sheet-slot-sub">${escapeHtml(sub)}</span></span>`;
+        row.addEventListener("click", () => {
+          closeDaySheet();
+          orig.click();
+        });
+        list.appendChild(row);
+      });
+      sheet.hidden = false;
+      document.body.classList.add("day-sheet-open");
+      sheet.querySelector(".day-sheet-close").focus();
+    }
+    function closeDaySheet() {
+      document.getElementById("day-sheet")?.setAttribute("hidden", "");
+      document.body.classList.remove("day-sheet-open");
+    }
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && document.body.classList.contains("day-sheet-open")) closeDaySheet();
+    });
 
     document.getElementById("msg-pane-toggle").addEventListener("click", (e) => {
       const btn = e.currentTarget;
