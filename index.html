@@ -2611,24 +2611,6 @@
     body:not([data-view="leader"]):not([data-view="admin"]) .picker-open-btn { order: -1; height: 40px; box-sizing: border-box; margin: 0 8px 0 0 !important; padding: 0 14px; flex: 0 0 auto; }
     body:not([data-view="leader"]):not([data-view="admin"]) .walker-mode-header .walker-mode-switch { height: 40px; box-sizing: border-box; align-items: center; flex: 0 0 auto; }
     body:not([data-view="leader"]):not([data-view="admin"]) .walker-mode-header .walker-mode-btn { height: 30px; padding: 0 12px; }
-    body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked {
-      background: transparent !important; border: none !important; box-shadow: none !important; text-shadow: none !important;
-      min-height: 0 !important; height: auto !important; padding: 2px 1px !important; width: 100%; min-width: 0; box-sizing: border-box;
-      display: flex !important; align-items: center; gap: 3px; font-size: 0.66rem !important; color: #1f2937 !important; overflow: hidden;
-    }
-    body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked::before {
-      content: ""; display: block !important; flex: 0 0 7px; width: 7px; height: 7px; border-radius: 50%; background: #94a3b8;
-    }
-    body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked.grade-E::before { background: var(--color-E); }
-    body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked.grade-M::before { background: var(--color-M); }
-    body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked.grade-MS::before { background: var(--color-MS); }
-    body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked.grade-S::before { background: var(--color-S); }
-    body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked.grade-VS::before { background: var(--color-VS); }
-    body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked .slot-long {
-      display: block !important; flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; color: #1f2937;
-    }
-    body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked .slot-short { display: none !important; }
-    body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked.cancelled .slot-long { text-decoration: line-through; color: #64748b; }
   }
   /* Filter bar: a toggle shows whether the filters are open or closed, and how many are applied */
   .filters-state {
@@ -2648,6 +2630,25 @@
   @media (max-width: 1100px) {
     body:not([data-view="leader"]):not([data-view="admin"]) .filters-bar .filters-state { order: -1; align-self: flex-start; }
   }
+  /* Walker View month calendar, all screen sizes: a dot in the grade colour with the walk name */
+  body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked {
+    background: transparent !important; border: none !important; box-shadow: none !important; text-shadow: none !important;
+    min-height: 0 !important; height: auto !important; padding: 2px 1px !important; width: 100%; min-width: 0; box-sizing: border-box;
+    display: flex !important; align-items: center; gap: 3px; font-size: 0.66rem !important; color: #1f2937 !important; overflow: hidden;
+  }
+  body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked::before {
+    content: ""; display: block !important; flex: 0 0 7px; width: 7px; height: 7px; border-radius: 50%; background: #94a3b8;
+  }
+  body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked.grade-E::before { background: var(--color-E); }
+  body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked.grade-M::before { background: var(--color-M); }
+  body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked.grade-MS::before { background: var(--color-MS); }
+  body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked.grade-S::before { background: var(--color-S); }
+  body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked.grade-VS::before { background: var(--color-VS); }
+  body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked .slot-long {
+    display: block !important; flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; color: #1f2937;
+  }
+  body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked .slot-short { display: none !important; }
+  body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked.cancelled .slot-long { text-decoration: line-through; color: #64748b; }
   /* ===================== end picker layout ===================== */
   /* ===================== REQUESTS AND MESSAGES PANE (Leader and Admin Views) ===================== */
   .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
