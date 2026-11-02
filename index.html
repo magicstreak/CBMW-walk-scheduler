@@ -2169,6 +2169,11 @@
     .offers-table td[data-label="Comments"],
     .offers-table th[data-admin-sort="notes"],
     .offers-table td[data-label="Notes"] { min-width: 150px; }
+    /* Admin View: a draft walk with notes has its Notes cell highlighted */
+    body[data-view="admin"] .offers-table td.notes-flag {
+      background: #fcd34d !important; color: #78350f; font-weight: 700; box-shadow: inset 4px 0 0 #b45309;
+    }
+    body[data-view="admin"] .offers-table tbody tr.walk-row-clickable:hover > td.notes-flag { background: #fbbf24 !important; }
     .offers-table td { overflow-wrap: anywhere; }
 
 
@@ -5607,7 +5612,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           <td class="hide-in-walker" data-label="Leader">${escapeHtml(record.leader_name || "-")}</td>
           <td class="hide-in-walker" data-label="Pueblo">${escapeHtml(displayPueblo || "-")}</td>
           <td class="hide-in-walker" data-label="Comments">${escapeHtml(record.comments || "-")}</td>
-          <td class="notes-col" data-label="Notes">${escapeHtml(record.notes || "-")}</td>
+          <td class="notes-col${bookingStatus(record) === "draft" && String(record.notes || "").trim() ? " notes-flag" : ""}" data-label="Notes">${escapeHtml(record.notes || "-")}</td>
           <td class="action-cancel">
             <button class="btn btn-success edit-walk-btn" type="button">Edit</button>
             <button class="btn cancel-walk-btn ${isCancelled(record) ? "reinstate" : "cancel"}" type="button">${isCancelled(record) ? "Reinstate walk" : "Cancel walk"}</button>
