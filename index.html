@@ -67,6 +67,10 @@
       margin-bottom: 32px;
       width: 100%;
     }
+    /* Walker view: centre the title and view buttons on the full width (the logo sits to the left, not in the way) */
+    body:not([data-view="leader"]):not([data-view="admin"]) .page-header { padding-left: 0; min-height: 0; margin-bottom: 12px; }
+    /* Leader and admin views: no fixed header height, so less empty space above the identify row and the lists */
+    body[data-view="leader"] .page-header, body[data-view="admin"] .page-header { min-height: 0; margin-bottom: 8px; }
 
     .page-header h1 {
       font-size: 2rem;
@@ -109,13 +113,26 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 24px;
+      margin-bottom: 8px;
     }
 
     .calendar-header h2 {
       margin: 0;
       font-size: 1.5rem;
       font-weight: 700;
+    }
+    /* Heading centred; the Hide calendar and month controls sit on the same row, on the right */
+    .calendar-header { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
+    .calendar-header h2 { grid-column: 2; text-align: center; }
+    /* Previous and next month arrows either side of the month heading */
+    .calendar-title-row { grid-column: 2; display: flex; align-items: center; justify-content: center; gap: 12px; }
+    .calendar-title-row .month-arrow { flex: 0 0 auto !important; order: 0 !important; width: 40px !important; height: 40px !important; padding: 0 !important; font-size: 1.2rem; line-height: 1; border-radius: 8px; }
+    .calendar-tools-group { grid-column: 3; justify-self: end; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .calendar-tools-group .walker-calendar-tools { margin: 0; }
+    .calendar-tools-group .legend-wrap { margin: 0; }
+    @media (max-width: 640px) {
+      .calendar-header { grid-template-columns: 1fr; gap: 8px; }
+      .calendar-title-row, .calendar-tools-group { grid-column: 1; justify-self: center; }
     }
 
     .nav-btn {
@@ -139,7 +156,7 @@
       position: relative;
       display: flex;
       justify-content: flex-end;
-      margin-bottom: 14px;
+      margin-bottom: 8px;
     }
     .legend-link {
       background: #fff;
@@ -391,9 +408,8 @@
     /* Leader and Admin views: drafts are white with a dashed outline and a DRAFT label; live walks keep the solid grade colour. */
     body[data-view="leader"] .slot.booked.draft:not(.cancelled),
     body[data-view="admin"] .slot.booked.draft:not(.cancelled) {
-      background: #ffffff !important;
-      color: #1e293b;
-      border: 2px dashed #64748b;
+      color: #ffffff;
+      border: 2px solid #f59e0b;
       border-left-width: 6px;
       text-shadow: none;
       box-shadow: none;
@@ -409,28 +425,39 @@
       right: 0;
       padding: 1px 5px;
       border-radius: 0 6px 0 6px;
-      background: #475569;
-      color: #ffffff;
+      background: #f59e0b;
+      color: #451a03;
       font-size: 0.55rem;
       font-weight: 800;
       letter-spacing: 0.06em;
       line-height: 1.3;
     }
-    body[data-view="leader"] .slot.booked.draft.grade-E:not(.cancelled) { border-color: var(--color-E); border-left-width: 6px; }
+    body[data-view="leader"] .slot.booked.draft.grade-E:not(.cancelled) { border-color: #f59e0b #f59e0b #f59e0b var(--color-E); border-left-width: 6px; }
     body[data-view="leader"] .slot.booked.draft.grade-E:not(.cancelled),
-    body[data-view="admin"] .slot.booked.draft.grade-E:not(.cancelled) { border-color: var(--color-E); border-left-width: 6px; }
-    body[data-view="leader"] .slot.booked.draft.grade-M:not(.cancelled) { border-color: var(--color-M); border-left-width: 6px; }
+    body[data-view="admin"] .slot.booked.draft.grade-E:not(.cancelled) { border-color: #f59e0b #f59e0b #f59e0b var(--color-E); border-left-width: 6px; }
+    body[data-view="leader"] .slot.booked.draft.grade-M:not(.cancelled) { border-color: #f59e0b #f59e0b #f59e0b var(--color-M); border-left-width: 6px; }
     body[data-view="leader"] .slot.booked.draft.grade-M:not(.cancelled),
-    body[data-view="admin"] .slot.booked.draft.grade-M:not(.cancelled) { border-color: var(--color-M); border-left-width: 6px; }
-    body[data-view="leader"] .slot.booked.draft.grade-MS:not(.cancelled) { border-color: var(--color-MS); border-left-width: 6px; }
+    body[data-view="admin"] .slot.booked.draft.grade-M:not(.cancelled) { border-color: #f59e0b #f59e0b #f59e0b var(--color-M); border-left-width: 6px; }
+    body[data-view="leader"] .slot.booked.draft.grade-MS:not(.cancelled) { border-color: #f59e0b #f59e0b #f59e0b var(--color-MS); border-left-width: 6px; }
     body[data-view="leader"] .slot.booked.draft.grade-MS:not(.cancelled),
-    body[data-view="admin"] .slot.booked.draft.grade-MS:not(.cancelled) { border-color: var(--color-MS); border-left-width: 6px; }
-    body[data-view="leader"] .slot.booked.draft.grade-S:not(.cancelled) { border-color: var(--color-S); border-left-width: 6px; }
+    body[data-view="admin"] .slot.booked.draft.grade-MS:not(.cancelled) { border-color: #f59e0b #f59e0b #f59e0b var(--color-MS); border-left-width: 6px; }
+    body[data-view="leader"] .slot.booked.draft.grade-S:not(.cancelled) { border-color: #f59e0b #f59e0b #f59e0b var(--color-S); border-left-width: 6px; }
     body[data-view="leader"] .slot.booked.draft.grade-S:not(.cancelled),
-    body[data-view="admin"] .slot.booked.draft.grade-S:not(.cancelled) { border-color: var(--color-S); border-left-width: 6px; }
-    body[data-view="leader"] .slot.booked.draft.grade-VS:not(.cancelled) { border-color: var(--color-VS); border-left-width: 6px; }
+    body[data-view="admin"] .slot.booked.draft.grade-S:not(.cancelled) { border-color: #f59e0b #f59e0b #f59e0b var(--color-S); border-left-width: 6px; }
+    body[data-view="leader"] .slot.booked.draft.grade-VS:not(.cancelled) { border-color: #f59e0b #f59e0b #f59e0b var(--color-VS); border-left-width: 6px; }
     body[data-view="leader"] .slot.booked.draft.grade-VS:not(.cancelled),
-    body[data-view="admin"] .slot.booked.draft.grade-VS:not(.cancelled) { border-color: var(--color-VS); border-left-width: 6px; }
+    body[data-view="admin"] .slot.booked.draft.grade-VS:not(.cancelled) { border-color: #f59e0b #f59e0b #f59e0b var(--color-VS); border-left-width: 6px; }
+    /* Drafts are filled with the grade colour like live walks; the amber outline and DRAFT tag mark them */
+    body[data-view="leader"] .slot.booked.draft.grade-E:not(.cancelled),
+    body[data-view="admin"] .slot.booked.draft.grade-E:not(.cancelled) { background: var(--color-E); }
+    body[data-view="leader"] .slot.booked.draft.grade-M:not(.cancelled),
+    body[data-view="admin"] .slot.booked.draft.grade-M:not(.cancelled) { background: var(--color-M); }
+    body[data-view="leader"] .slot.booked.draft.grade-MS:not(.cancelled),
+    body[data-view="admin"] .slot.booked.draft.grade-MS:not(.cancelled) { background: var(--color-MS); }
+    body[data-view="leader"] .slot.booked.draft.grade-S:not(.cancelled),
+    body[data-view="admin"] .slot.booked.draft.grade-S:not(.cancelled) { background: var(--color-S); }
+    body[data-view="leader"] .slot.booked.draft.grade-VS:not(.cancelled),
+    body[data-view="admin"] .slot.booked.draft.grade-VS:not(.cancelled) { background: var(--color-VS); }
 
     /* ========================================================= BUTTONS ========================================================= */
     .btn {
@@ -938,6 +965,9 @@
     .offers-table .expand-toggle[aria-expanded="true"] .chev-up { display: block; }
     .offers-table .expand-toggle[aria-expanded="true"] .chev-down { display: none; }
     .offers-table tbody tr.walk-row-clickable { cursor: pointer; }
+    /* Leader and Admin: draft walks in the Walk Offers list get a faint amber background */
+    body:is([data-view="leader"], [data-view="admin"]) .offers-table tbody tr.draft-row > td { background: #fef3c7; }
+    body:is([data-view="leader"], [data-view="admin"]) .offers-table tbody tr.draft-row:hover > td { background: #fde68a; }
     .offers-table tbody tr.walk-row-clickable:hover > td { background: #f5faf6; }
     .offers-table .expand-toggle[aria-expanded="true"] { background: #dbeafe; }
     .offer-details-row > td {
@@ -1237,6 +1267,9 @@
       color: var(--text);
     }
 
+    /* "Showing n of n" sits above the Clear filters button, at the right end of the filter row */
+    .filter-clear-group { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+    .table-filters .filter-clear-group .filter-count { margin-left: 0; }
     .table-filters .filter-count {
       margin-left: auto;
       font-size: 0.85rem;
@@ -1705,6 +1738,10 @@
     .walk-section-title:first-child { margin-top: 0; }
     .leader-line { display: block; }
     .leader-identify { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 8px 16px 0; color: #4b5563; font-size: 0.95rem; }
+    /* Leader view: once identified, the email box hides and only "I am logged in as <name>" shows, top left */
+    .leader-identify.locked { align-self: stretch; width: 100%; box-sizing: border-box; margin: 8px 0 0 0; padding: 0 16px; justify-content: flex-end; text-align: right; }
+    .leader-identify.locked label, .leader-identify.locked input { display: none; }
+    .leader-identify.locked #leader-identify-msg { font-weight: 600; color: var(--primary); }
     .leader-identify input { padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 6px; min-width: 240px; }
     .leader-identify[hidden] { display: none; }
     .leader-line + .leader-line { margin-top: 4px; }
@@ -1763,7 +1800,8 @@
     .preview-banner { margin: 0 0 12px; padding: 10px 14px; border-radius: 8px; background: #fff7e0; border: 1px solid #f0c36d; color: #6b4b00; font-size: 0.92rem; }
     /* Preview: drafts on the calendar are hatched and labelled so they are not mistaken for live walks */
     body.previewing .slot.booked.draft { background: repeating-linear-gradient(45deg, #f1f5f9 0 6px, #e2e8f0 6px 12px); border: 2px dashed #64748b; }
-    body.previewing .slot.booked.draft::before { content: "DRAFT · "; font-weight: 700; font-size: 0.7rem; letter-spacing: 0.04em; color: #475569; }
+    /* Walker preview: no DRAFT label on the calendar, as walkers do not see draft labels */
+    body.previewing .slot.booked.draft::before { content: none; display: none; }
     .walk-card-inline { padding: 16px 20px 20px; color: #1f2937; background: #fff; }
     .walk-card-inline .walk-quote { margin-bottom: 14px; }
     .day-cell.selectable-day { cursor: pointer; }
@@ -1875,7 +1913,7 @@
       align-items: center;
       gap: 10px;
       flex-wrap: wrap;
-      margin-bottom: 14px;
+      margin-bottom: 8px;
       font-size: 0.85rem;
       font-weight: 600;
       color: var(--text-muted);
@@ -1902,7 +1940,7 @@
     .offers-table tr.walker-date-group:first-child th { border-top: none; }
     /* Summer programme walks in the walker list: yellow edge, like the calendar */
     tr.summer-row td:first-child { box-shadow: inset 5px 0 0 #eab308; }
-    .summer-badge { background: #fde68a; color: #713f12; }
+    .summer-badge { background: #fde68a; color: #713f12; white-space: nowrap; }
     tr.summer-row .summer-edit-btn { padding: 6px 12px; font-size: 0.85rem; }
     .summer-details { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 2px; }
     .summer-time { font-weight: 600; color: var(--text-muted); font-size: 0.85rem; }
@@ -1918,7 +1956,6 @@
     body[data-view="leader"] .walker-mode-header,
     body[data-view="admin"] .walker-mode-header { display: none; }
     body.embed-week .walker-mode-header { display: none !important; }
-    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="list"] .calendar-container,
     body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="day"] .calendar-container,
     body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="map"] .calendar-container { display: none; }
     /* Walker View, Map mode: the map replaces the walk list */
@@ -2075,8 +2112,6 @@
     @media (max-width: 640px) { .offers-table .walker-image-col { display: none !important; } }
     /* Walker View on wider screens: fixed layout so the header always spans the full table.
        Date and Grade keep fixed widths; Walk name and Description share the rest equally. */
-      /* All widths: date/time badge centred both ways, same 152x104 tile as the photo */
-      body[data-view="walker"] .offers-table td[data-label="Date"].date-time-cell { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; width: 152px; height: 104px; max-width: 152px; padding: 0 6px; box-sizing: border-box; margin: 8px 0; background: #eef2f0; border-radius: 10px; }
     @media (min-width: 641px) {
       body[data-view="walker"] .offers-table { table-layout: fixed; }
       body[data-view="walker"] .offers-table th[data-admin-sort="walk_grade"],
@@ -2085,8 +2120,6 @@
       body[data-view="walker"] .offers-table td.walker-only-col { display: none !important; }
       body[data-view="walker"] .offers-table .walker-desc-inline { display: block; margin-top: 4px; }
       body[data-view="walker"] .offers-table thead .sort-indicator { display: none; }
-      body[data-view="walker"] .offers-table td[data-label="Date"].date-time-cell { width: 152px; height: 104px; align-self: center; padding: 0 6px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: #eef2f0; border-radius: 10px; white-space: normal; }
-      body[data-view="walker"] .offers-table td[data-label="Date"].date-time-cell .dt-line { width: 100%; margin: 0; text-align: center; }
 
       body[data-view="walker"] .offers-table td[data-label="Date"] strong { display: block; font-size: 0.875rem; font-weight: 800; color: #111827; }
       body[data-view="walker"] .offers-table td[data-label="Date"] .dt-line:not(:first-child) span { display: block; font-size: 0.875rem; font-weight: 800; color: #111827; line-height: 1.1; }
@@ -2136,6 +2169,11 @@
     .offers-table td[data-label="Comments"],
     .offers-table th[data-admin-sort="notes"],
     .offers-table td[data-label="Notes"] { min-width: 150px; }
+    /* Admin View: a draft walk with notes has its Notes cell highlighted */
+    body[data-view="admin"] .offers-table td.notes-flag {
+      background: #fcd34d !important; color: #78350f; font-weight: 700; box-shadow: inset 4px 0 0 #b45309;
+    }
+    body[data-view="admin"] .offers-table tbody tr.walk-row-clickable:hover > td.notes-flag { background: #fbbf24 !important; }
     .offers-table td { overflow-wrap: anywhere; }
 
 
@@ -2379,22 +2417,675 @@
         .list-request-btn { margin: 2px 0; }
     td.action-cancel .btn[hidden], td.action-cancel span[hidden] { display: none !important; }
     .list-request-pending { font-size: 0.8rem; font-weight: 700; color: #92400e; background: #fef3c7; border-left: 4px solid #d97706; padding: 2px 8px; border-radius: 4px; }
-    </style>
+    
+  /* ===================== MODERN DRAFT: softer cards, pill controls, cleaner calendar ===================== */
+  body { background: #f3f5f4; }
+  .page-header h1 { letter-spacing: -0.02em; }
+  .page-header p { color: #6b7a72; }
+  .leader-identify { color: #374151; }
+  .calendar-container, .admin-container, .walks-container {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 8px 24px rgba(15, 23, 42, 0.05);
+    border: 1px solid #e8ecea;
+  }
+  .calendar-header h2 { font-size: 1.45rem; font-weight: 700; letter-spacing: -0.02em; }
+  .nav-btn {
+    border-radius: 999px;
+    border: 1px solid #dfe5e2;
+    padding: 8px 16px;
+    font-weight: 600;
+    box-shadow: 0 1px 1px rgba(15, 23, 42, 0.04);
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .nav-btn:hover { background: #f1f6f3; border-color: #c7d8cd; }
+  .month-arrow { border-radius: 999px !important; width: 38px !important; height: 38px !important; }
+  .legend-wrap .legend-link {
+    border-radius: 999px;
+    border: 1px solid #dfe5e2;
+    background: #fff;
+    padding: 6px 12px;
+  }
+  .weekdays > div {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #8a9690;
+    padding: 6px 0;
+  }
+  .days-grid { gap: 8px; }
+  .day-cell {
+    border: 1px solid #e8ecea;
+    border-radius: 14px;
+    padding: 8px;
+    background: #fff;
+    transition: box-shadow 0.15s, border-color 0.15s;
+  }
+  .day-cell:hover { box-shadow: 0 4px 14px rgba(15, 23, 42, 0.07); border-color: #d5ddd8; }
+  .day-cell.empty { background: #fafbfa; border: 1px dashed #eef1ef; }
+  .day-number { font-size: 0.8rem; font-weight: 600; color: #6b7a72; margin-bottom: 6px; }
+  .slots-container { gap: 4px; }
+  .slot {
+    border-radius: 9px;
+    padding: 4px 8px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    border: 0;
+    background: #f4f6f5;
+    color: #374151;
+  }
+  .slot.available.grade-E, .slot.booked.grade-E { border-left: 3px solid var(--color-E); }
+  .slot.available.grade-M, .slot.booked.grade-M { border-left: 3px solid var(--color-M); }
+  .slot.available.grade-MS, .slot.booked.grade-MS { border-left: 3px solid var(--color-MS); }
+  .slot.available.grade-S, .slot.booked.grade-S { border-left: 3px solid var(--color-S); }
+  .slot.available.grade-VS, .slot.booked.grade-VS { border-left: 3px solid var(--color-VS); }
+  .slot.available:hover { background: #eaf3ee; }
+  .calendar-container .walk-card-header, .detail-card .walk-card-header { border-radius: 20px 20px 0 0; }
+  .detail-card { border-radius: 20px; }
+  .walk-card-body { color: #1f2937; }
+  .walk-stat { border-radius: 14px; background: #f0f6f2; }
+  .walk-section-title { color: #6b7a72; letter-spacing: 0.08em; }
+  .page-header h1 { color: #1c2b23; }
+  /* ===================== end modern draft ===================== */
+  /* ===================== MODERN LAYOUT: segmented mode switch, toolbar-style calendar header ===================== */
+  .walker-mode-switch {
+    display: inline-flex;
+    padding: 4px;
+    gap: 2px;
+    background: #eaf0ec;
+    border-radius: 999px;
+  }
+  .walker-mode-btn {
+    border: 0;
+    background: transparent;
+    border-radius: 999px;
+    padding: 7px 16px;
+    font-weight: 600;
+    color: #4b5a52;
+  }
+  .walker-mode-btn:hover { border-color: transparent; background: rgba(255, 255, 255, 0.7); }
+  .walker-mode-btn[aria-pressed="true"] { background: #fff; color: var(--primary); box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12); }
+  /* Calendar header as a toolbar: month and arrows grouped together, controls on the right */
+  .calendar-header { padding-bottom: 14px; margin-bottom: 12px; border-bottom: 1px solid #eef2ef; }
+  .calendar-title-row { gap: 6px; }
+  .calendar-title-row .month-arrow { background: #f4f7f5; }
+  .calendar-tools-group { gap: 8px; flex-wrap: nowrap; }
+  .calendar-header { display: flex; flex-direction: column; align-items: stretch; gap: 10px; }
+  .calendar-header .calendar-tools-group { grid-column: auto; justify-self: auto; align-self: flex-end; }
+  .calendar-title-row { justify-content: center; }
+  /* ===================== end modern layout ===================== */
+  /* ===================== SPLIT LAYOUT: calendar and list side by side (Walker, List mode) ===================== */
+  .split-layout { display: block; width: 100%; box-sizing: border-box; }
+  body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="list"] .split-layout {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); gap: 20px; align-items: start;
+  }
+  body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="list"] .split-layout .calendar-container { margin: 0; }
+  body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="list"] .split-layout .admin-container { min-width: 0; }
+  @media (max-width: 1100px) {
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="list"] .split-layout { grid-template-columns: 1fr; }
+  }
+  /* ===================== end split layout ===================== */
+  /* ===================== PICKER LAYOUT: stacked months on the left, list on the right ===================== */
+  .picker-column { display: none; }
+  body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .calendar-container { display: none; }
+  body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .split-layout {
+    display: grid; grid-template-columns: minmax(0, 230px) minmax(0, 1fr); gap: 20px; align-items: start;
+  }
+  body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-column {
+    display: block; background: #fff; border-radius: 14px; padding: 12px 10px; position: sticky; top: 16px;
+    max-height: calc(100vh - 32px); overflow-y: auto; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  }
+  .picker-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .picker-heading { font-weight: 700; color: #1f3b2c; font-size: 0.95rem; }
+  .picker-weekdays, .picker-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; text-align: center; }
+  .picker-weekdays span { font-size: 0.64rem; font-weight: 700; color: #94a3b8; padding: 0; }
+  .picker-month { margin-top: 8px; }
+  .picker-month-title { font-weight: 700; font-size: 0.8rem; color: #1f2937; margin-bottom: 2px; }
+  .picker-day {
+    height: 24px; border: none; background: transparent; border-radius: 6px; font: inherit; font-size: 0.74rem;
+    color: #334155; cursor: pointer; padding: 0; position: relative;
+  }
+  .picker-day:hover { background: #f1f5f9; }
+  .picker-day.past { color: #cbd5e1; }
+  .picker-day.today { box-shadow: inset 0 0 0 1px #94a3b8; }
+  .picker-day.has-walk { background: #dcf0e3; color: #1f3b2c; font-weight: 700; box-shadow: inset 0 0 0 1px #b7dcc4; }
+  .picker-day.selected { background: #1f3b2c; color: #fff; }
+  @media (max-width: 1100px) {
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .split-layout { grid-template-columns: 1fr; }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-column { position: static; max-height: none; }
+  }
+  /* Walker picker on phones and tablets: swipeable months, bigger day buttons, weekdays inside each month */
+  .picker-weekdays-inline { display: none; }
+  @media (max-width: 1100px) {
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-column > .picker-weekdays { display: none; }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-weekdays-inline { display: grid; margin-bottom: 4px; }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-weekdays-inline span { font-size: 0.72rem; }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .split-layout { grid-template-columns: minmax(0, 1fr); }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-column { position: static; max-height: none; overflow: visible; min-width: 0; width: 100%; box-sizing: border-box; }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-months { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-day { height: 34px; font-size: 0.82rem; }
+  }
+  @media (max-width: 700px) {
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-months {
+      display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 0; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-months::-webkit-scrollbar { display: none; }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-month { flex: 0 0 100%; min-width: 0; width: 100%; box-sizing: border-box; scroll-snap-align: start; margin-top: 0; }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-day { height: 42px; font-size: 0.95rem; }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-weekdays-inline span { font-size: 0.8rem; }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-column { padding: 10px 8px; }
+  }
+  /* Walker View: admin-only actions and the draft count stay hidden; Download and the filters remain */
+  body:not([data-view="leader"]):not([data-view="admin"]) .wo-zone-primary,
+  body:not([data-view="leader"]):not([data-view="admin"]) #draft-count { display: none !important; }
+  /* While previewing as walker, keep the "Back to Leader/Admin View" button reachable */
+  body.previewing:not([data-view="leader"]):not([data-view="admin"]) .wo-zone-primary { display: flex !important; }
+  body.previewing:not([data-view="leader"]):not([data-view="admin"]) #add-walk-to-schedule,
+  body.previewing:not([data-view="leader"]):not([data-view="admin"]) #add-social-event { display: none !important; }
+  body.previewing:not([data-view="leader"]):not([data-view="admin"]) #preview-walker-btn { display: inline-flex !important; }
+  @media (max-width: 700px) {
+    body:not([data-view="leader"]):not([data-view="admin"]) #walker-filters, body:not([data-view="leader"]):not([data-view="admin"]) #walker-filters.table-filters { grid-template-columns: 1fr !important; }
+    body:not([data-view="leader"]):not([data-view="admin"]) .wo-zone { min-width: 0; }
+    body:not([data-view="leader"]):not([data-view="admin"]) .filters-bar { flex-direction: column !important; align-items: stretch !important; flex-wrap: wrap !important; width: 100%; }
+    body:not([data-view="leader"]):not([data-view="admin"]) .filters-bar .table-filters { width: 100% !important; }
+    body:not([data-view="leader"]):not([data-view="admin"]) .filter-clear-group { width: 100% !important; justify-content: space-between !important; }
+  }
+  /* Walker List view on phones and tablets: the date picker opens as a popup calendar from a button */
+  .picker-open-btn, .picker-close { display: none; }
+  @media (max-width: 700px) {
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-open-btn {
+      display: inline-flex; align-items: center; gap: 6px; margin: 0 0 10px; padding: 9px 14px; border-radius: 999px;
+      border: 1px solid #cbd5e1; background: #fff; font: inherit; font-size: 0.92rem; font-weight: 600; color: #1f3b2c; cursor: pointer;
+    }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-open-btn[aria-expanded="true"] { border-color: #2d5b3e; box-shadow: 0 0 0 2px #dcf0e3; }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-close {
+      display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border: none; border-radius: 50%;
+      background: #f1f5f9; font-size: 1.3rem; line-height: 1; color: #334155; cursor: pointer; margin-left: 6px;
+    }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-column { display: none !important; }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"].picker-open .picker-column {
+      display: block !important; position: fixed !important; left: 50%; top: 50%; transform: translate(-50%, -50%);
+      width: min(94vw, 440px); max-height: 88vh; overflow-y: auto; z-index: 1000; box-sizing: border-box;
+      border-radius: 16px; padding: 14px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+    }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"].picker-open::before {
+      content: ""; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); z-index: 999;
+    }
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"].picker-open .picker-months { gap: 14px; }
+  }
+  /* Walker View on phones and tablets: the date button sits first, level with the Month / List / Map pills.
+     Scheduled walks in the month calendar show a dot in the grade colour and the walk name, truncated. */
+  @media (max-width: 1100px) {
+    body:not([data-view="leader"]):not([data-view="admin"]) .walker-mode-header { align-items: center; flex-wrap: nowrap; }
+    body:not([data-view="leader"]):not([data-view="admin"]) .picker-open-btn { order: -1; height: 40px; box-sizing: border-box; margin: 0 8px 0 0 !important; padding: 0 14px; flex: 0 0 auto; }
+    body:not([data-view="leader"]):not([data-view="admin"]) .walker-mode-header .walker-mode-switch { height: 40px; box-sizing: border-box; align-items: center; flex: 0 0 auto; }
+    body:not([data-view="leader"]):not([data-view="admin"]) .walker-mode-header .walker-mode-btn { height: 30px; padding: 0 12px; }
+  }
+  /* Filter bar: a toggle shows whether the filters are open or closed, and how many are applied */
+  .filters-state {
+    display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; flex: none; white-space: nowrap;
+    border: 1px solid #cbd5e1; border-radius: 999px; background: #fff; color: #1e293b; font: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer;
+  }
+  .filters-state:focus-visible { outline: 2px solid #2d5b3e; outline-offset: 2px; }
+  .filters-state[aria-expanded="false"] { background: #f8fafc; color: #475569; }
+  /* Header: shows how many filters are applied, whatever the filter bar's state */
+  .header-filter-badge { display: inline-flex; align-items: center; font-size: 0.78rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: #2d5b3e; color: #fff; white-space: nowrap; }
+  .header-filter-badge[hidden] { display: none !important; }
+  .filters-state-chev { display: inline-block; transition: transform 0.15s ease; }
+  .filters-state[aria-expanded="false"] .filters-state-chev { transform: rotate(-90deg); }
+  body .filters-bar.filters-collapsed #walker-filters { display: none !important; }
+  /* Filter strip: every control lines up on one baseline. Labels keep their space (hidden on the other fields), so the From / To labels do not push the row out of line */
+  body .wo-zone-filters .filters-bar { align-items: flex-end !important; }
+  body .wo-zone-filters .filter-clear-group { margin-left: 12px; }
+  body #walker-filters .filter-field > label { display: block !important; visibility: hidden; font-size: 0.72rem; line-height: 1.1; margin: 0 0 4px 2px; }
+  body #walker-filters .walker-date-range > label { visibility: visible; }
+  @media (max-width: 700px) {
+    body:not([data-view="leader"]):not([data-view="admin"]) #walker-filters .filter-field:not(.walker-date-range) > label,
+    body:is([data-view="leader"], [data-view="admin"]) #walker-filters .filter-field:not(.walker-date-range) > label { display: none !important; }
+  }
+  /* Date range: visible From / To labels */
+  body #walker-filters .walker-date-range > label { display: block !important; font-size: 0.72rem; font-weight: 600; color: #64748b; margin: 0 0 4px 2px; }
+  @media (max-width: 1100px) {
+    body:not([data-view="leader"]):not([data-view="admin"]) .filters-bar .filters-state { order: -1; align-self: flex-start; }
+  }
+  /* Walker View month calendar, all screen sizes: a dot in the grade colour with the walk name */
+  body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked {
+    background: transparent !important; border: none !important; box-shadow: none !important; text-shadow: none !important;
+    min-height: 0 !important; height: auto !important; padding: 2px 1px !important; width: 100%; min-width: 0; box-sizing: border-box;
+    display: flex !important; align-items: center; gap: 3px; font-size: 0.66rem !important; color: #1f2937 !important; overflow: hidden;
+  }
+  body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked::before {
+    content: ""; display: block !important; flex: 0 0 7px; width: 7px; height: 7px; border-radius: 50%; background: #94a3b8;
+  }
+  body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked.grade-E::before { background: var(--color-E); }
+  body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked.grade-M::before { background: var(--color-M); }
+  body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked.grade-MS::before { background: var(--color-MS); }
+  body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked.grade-S::before { background: var(--color-S); }
+  body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked.grade-VS::before { background: var(--color-VS); }
+  body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked .slot-long {
+    display: block !important; flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; color: #1f2937;
+  }
+  body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked .slot-short { display: none !important; }
+  body:not([data-view="leader"]):not([data-view="admin"]) .day-cell .slot.booked.cancelled .slot-long { text-decoration: line-through; color: #64748b; }
+  /* Leader and Admin on phones: the side month bars go; the month arrows sit beside the month name instead */
+  @media (max-width: 700px) {
+    body:is([data-view="leader"], [data-view="admin"]) .month-side { display: none !important; }
+    body:is([data-view="leader"], [data-view="admin"]) .calendar-title-row .month-arrow { display: inline-flex !important; width: 36px !important; height: 36px !important; }
+    body:is([data-view="leader"], [data-view="admin"]) .calendar-grid-wrap { flex: 0 0 100% !important; min-width: 0; }
+  }
+  /* Leader and Admin on phones and tablets: slots are compact dots with the time; the grade legend sits by the Calendar / List switch */
+  @media (max-width: 1100px) {
+    body:is([data-view="leader"], [data-view="admin"]) .slot {
+      --c: #94a3b8; display: flex !important; align-items: center; gap: 4px; min-height: 18px !important; height: auto !important;
+      padding: 2px 3px !important; background: transparent !important; border: none !important; box-shadow: none !important;
+      font-size: 0.64rem; color: #1f2937 !important; white-space: nowrap; overflow: hidden; min-width: 0;
+    }
+    body:is([data-view="leader"], [data-view="admin"]) .slot.grade-E { --c: var(--color-E); }
+    body:is([data-view="leader"], [data-view="admin"]) .slot.grade-M { --c: var(--color-M); }
+    body:is([data-view="leader"], [data-view="admin"]) .slot.grade-MS { --c: var(--color-MS); }
+    body:is([data-view="leader"], [data-view="admin"]) .slot.grade-S { --c: var(--color-S); }
+    body:is([data-view="leader"], [data-view="admin"]) .slot.grade-VS { --c: var(--color-VS); }
+    body:is([data-view="leader"], [data-view="admin"]) .slot::before {
+      content: "" !important; display: block !important; flex: 0 0 9px; width: 9px; height: 9px; border-radius: 50%; background: var(--c) !important; padding: 0 !important; position: static !important;
+    }
+    body:is([data-view="leader"], [data-view="admin"]) .slot.available::before { background: #fff !important; box-shadow: inset 0 0 0 2px var(--c); }
+    body:is([data-view="leader"], [data-view="admin"]) .slot.draft::before { box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px #f59e0b; }
+    body:is([data-view="leader"], [data-view="admin"]) .slot.available > *,
+    body:is([data-view="leader"], [data-view="admin"]) .slot.past > *,
+    body:is([data-view="leader"], [data-view="admin"]) .slot.booked > .slot-long,
+    body:is([data-view="leader"], [data-view="admin"]) .slot-grade-txt,
+    body:is([data-view="leader"], [data-view="admin"]) .slot-short br { display: none !important; }
+    body:is([data-view="leader"], [data-view="admin"]) .slot.booked > .slot-short { display: inline !important; font-weight: 700; font-size: 0.64rem; }
+    body:is([data-view="leader"], [data-view="admin"]) .slot.booked.cancelled > .slot-short { text-decoration: line-through; color: #64748b; }
+    body:is([data-view="leader"], [data-view="admin"]) .slot.past { opacity: 0.45; }
+    body:is([data-view="leader"], [data-view="admin"]) .week-row > .day-cell.quiet-day { flex: 0.7 1 0; }
+    body:is([data-view="leader"], [data-view="admin"]) .week-row > .day-cell.quiet-day .day-number { font-size: 0.68rem; margin-bottom: 2px; }
+    body:is([data-view="leader"], [data-view="admin"]) #leader-layout-header { flex-wrap: wrap; gap: 10px; align-items: center; }
+    body:is([data-view="leader"], [data-view="admin"]) #leader-layout-header .legend-wrap { margin: 0; display: flex !important; }
+  }
+  /* Map: several walks at one meeting point share a pin with a count */
+  .walk-pin-count { background: #2d5b3e; color: #fff; border: 2px solid #fff; border-radius: 50%; box-shadow: 0 1px 4px rgba(0,0,0,0.35); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; }
+  .walk-pin-count span { line-height: 1; }
+  .map-pop { min-width: 180px; font-size: 0.9rem; }
+  .map-pop-walk { display: block; width: 100%; margin-top: 6px; text-align: left; padding: 6px 8px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; font: inherit; cursor: pointer; }
+  .map-pop-walk:hover { background: #f1f5f9; }
+  /* ===================== end picker layout ===================== */
+  /* ===================== REQUESTS AND MESSAGES PANE (Leader and Admin Views) ===================== */
+  .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  #walk-messages-pane[hidden], #walk-messages-pane [hidden] { display: none !important; }
+  body[data-view="walker"] #walk-messages-pane { display: none !important; }
+  .msg-pane { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; margin: 0 0 16px; overflow: hidden; }
+  .msg-pane-toggle { all: unset; box-sizing: border-box; width: 100%; display: flex; align-items: center; gap: 10px; padding: 12px 16px; cursor: pointer; font-family: inherit; }
+  .msg-pane-toggle:focus-visible { outline: 2px solid #2d5b3e; outline-offset: -2px; }
+  .msg-pane-title { font-weight: 700; color: #1f3b2c; font-size: 0.98rem; }
+  .msg-pane-count { font-size: 0.8rem; font-weight: 600; background: #fef3c7; color: #92400e; border-radius: 999px; padding: 2px 10px; }
+  .msg-pane-count:empty { display: none; }
+  .msg-pane-chev { margin-left: auto; color: #64748b; transition: transform 0.2s ease; }
+  .msg-pane-toggle[aria-expanded="true"] .msg-pane-chev { transform: rotate(180deg); }
+  .msg-pane-body { padding: 0 16px 16px; border-top: 1px solid #eef2f6; }
+  .msg-pane-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding-top: 12px; }
+  .msg-chips { display: inline-flex; background: #f1f5f2; border-radius: 999px; padding: 3px; }
+  .msg-chip { border: none; background: transparent; border-radius: 999px; padding: 5px 12px; font: inherit; font-size: 0.85rem; font-weight: 600; color: #475569; cursor: pointer; }
+  .msg-chip[aria-pressed="true"] { background: #2d5b3e; color: #fff; }
+  .msg-type-wrap select, #msg-form select, #msg-form input, #msg-form textarea { font: inherit; font-size: 0.9rem; padding: 7px 10px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; }
+  .msg-pane-bar .btn { margin-left: auto; }
+  .msg-form { margin-top: 12px; padding: 12px; background: #f8faf9; border: 1px solid #e2e8f0; border-radius: 10px; }
+  .msg-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+  .msg-form label { display: flex; flex-direction: column; gap: 4px; font-size: 0.82rem; font-weight: 600; color: #334155; }
+  .msg-form select, .msg-form input { width: 100%; box-sizing: border-box; }
+  .msg-full { margin-top: 10px; }
+  .msg-full textarea { width: 100%; box-sizing: border-box; resize: vertical; }
+  .msg-form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+  .msg-list { display: grid; gap: 10px; margin-top: 12px; }
+  .msg-item { border: 1px solid #e2e8f0; border-left: 4px solid #2d5b3e; border-radius: 10px; padding: 10px 12px; background: #fff; }
+  .msg-item.is-done { border-left-color: #cbd5e1; background: #fafafa; }
+  .msg-item.is-done .msg-text, .msg-item.is-done .msg-walk { color: #64748b; }
+  .msg-item-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .msg-type { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #2d5b3e; background: #e6f0ea; border-radius: 6px; padding: 2px 7px; }
+  .msg-walk { font-size: 0.92rem; color: #1f2937; }
+  .msg-status { margin-left: auto; font-size: 0.75rem; font-weight: 700; border-radius: 999px; padding: 2px 9px; }
+  .msg-status.open { background: #fef3c7; color: #92400e; }
+  .msg-status.done { background: #e2e8f0; color: #475569; }
+  .msg-text { margin: 8px 0 4px; font-size: 0.92rem; color: #1f2937; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .msg-meta { font-size: 0.8rem; }
+  .msg-actions { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+  .msg-empty { margin: 12px 0 0; }
+  @media (max-width: 700px) {
+    .msg-pane-bar .btn { margin-left: 0; width: 100%; }
+    .msg-type-wrap select { width: 100%; }
+    .msg-form-actions .btn { flex: 1; }
+  }
+  /* ===================== end requests pane ===================== */
+  /* Day sheet: a busy day opened as a large list of its slots (Leader and Admin, phones and tablets) */
+  .day-sheet { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); z-index: 1100; display: flex; align-items: flex-end; justify-content: center; }
+  .day-sheet[hidden] { display: none !important; }
+  .day-sheet-card { background: #fff; width: min(100%, 560px); max-height: 86vh; overflow-y: auto; box-sizing: border-box; border-radius: 18px 18px 0 0; padding: 16px 16px 24px; box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.2); }
+  @media (min-width: 701px) { .day-sheet { align-items: center; } .day-sheet-card { border-radius: 18px; } }
+  .day-sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .day-sheet-head h3 { margin: 0; font-size: 1.15rem; color: #1f3b2c; }
+  .day-sheet-close { width: 40px; height: 40px; border: none; border-radius: 50%; background: #f1f5f9; font-size: 1.5rem; line-height: 1; color: #334155; cursor: pointer; flex: none; }
+  .day-sheet-hint { margin: 4px 0 12px; font-size: 0.85rem; color: #64748b; }
+  .day-sheet-list { display: grid; gap: 10px; }
+  .day-sheet-slot { display: block; width: 100%; min-height: 60px; box-sizing: border-box; padding: 10px 14px; text-align: left; background: #fff; border: 1px solid #e2e8f0; border-left: 6px solid var(--slot-c, #94a3b8); border-radius: 12px; font: inherit; cursor: pointer; }
+  .day-sheet-slot:active { background: #f1f5f9; }
+  .day-sheet-slot.past { opacity: 0.55; }
+  .day-sheet-slot-main { display: block; font-weight: 700; font-size: 1rem; color: #1f2937; overflow-wrap: anywhere; }
+  .day-sheet-slot-sub { display: block; font-size: 0.85rem; color: #64748b; margin-top: 2px; }
+  body.day-sheet-open { overflow: hidden; }
+
+  /* Leader and Admin on phones and tablets: days with nothing on them are narrower, so the busy days have room */
+  .week-row { display: contents; }
+  @media (max-width: 1100px) {
+    body:is([data-view="leader"], [data-view="admin"]) .weekdays { display: none; }
+    body:is([data-view="leader"], [data-view="admin"]) .days-grid { display: flex; flex-direction: column; gap: 6px; }
+    body:is([data-view="leader"], [data-view="admin"]) .week-row { display: flex; gap: 6px; align-items: stretch; }
+    body:is([data-view="leader"], [data-view="admin"]) .week-row > .day-cell { flex: 3 1 0; min-width: 0; }
+    body:is([data-view="leader"], [data-view="admin"]) .week-row > .day-cell.quiet-day,
+    body:is([data-view="leader"], [data-view="admin"]) .week-row > .day-cell.empty { flex: 1 1 0; min-width: 0; padding: 6px 4px; }
+    body:is([data-view="leader"], [data-view="admin"]) .day-cell:not(.quiet-day) .day-number::before { content: attr(data-dow) " "; font-weight: 700; color: #2d5b3e; }
+  }
+
+
+  /* ===================== LEADER PICKER LAYOUT (Leader and Admin Views) ===================== */
+  .leader-layout-header { display: none; }
+  body:is([data-view="leader"],[data-view="admin"]) .leader-layout-header { display: flex; justify-content: center; margin: 0 0 16px; }
+  body:is([data-view="leader"],[data-view="admin"])[data-leader-layout="picker"] .calendar-container { display: none; }
+  body:is([data-view="leader"],[data-view="admin"])[data-leader-layout="picker"] .split-layout {
+    display: grid; grid-template-columns: minmax(0, 230px) minmax(0, 1fr); gap: 20px; align-items: start;
+  }
+  body:is([data-view="leader"],[data-view="admin"])[data-leader-layout="picker"] .picker-column {
+    display: block; background: #fff; border-radius: 14px; padding: 12px 10px; position: sticky; top: 16px;
+    max-height: calc(100vh - 32px); overflow-y: auto; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  }
+  @media (max-width: 1100px) {
+    body:is([data-view="leader"],[data-view="admin"])[data-leader-layout="picker"] .split-layout { grid-template-columns: 1fr; }
+    body:is([data-view="leader"],[data-view="admin"])[data-leader-layout="picker"] .picker-column { position: static; max-height: none; }
+  }
+  /* ===================== end leader picker layout ===================== */
+  /* Leader View: instruction line removed */
+  /* Leader and Admin views: no "Hide calendar" button and no grade legend */
+  body[data-view="leader"] #calendar-collapse, body[data-view="admin"] #calendar-collapse,
+  body[data-view="leader"] .legend-wrap, body[data-view="admin"] .legend-wrap { display: none !important; }
+  #page-instruction { display: none !important; }
+  /* ===================== LEADER: clearer available slots and day summaries ===================== */
+  body:is([data-view="leader"], [data-view="admin"]) .slot.available {
+    background: #fff; border: 1px dashed #94a3b8; color: #1f3b2c !important; font-weight: 600;
+    display: flex; justify-content: space-between; align-items: center; gap: 6px;
+  }
+  /* Open slots in Leader and Admin View use the plain outline; the grade colour stays on the grade chip */
+  body:is([data-view="leader"], [data-view="admin"]) .slot.available { border-color: #cbd5e1; border-left-width: 1px; }
+  body:is([data-view="leader"], [data-view="admin"]) .slot.available[class] { border-left-color: #cbd5e1; }
+  /* Open slots are shaded in a pale tint of their grade colour */
+  body:is([data-view="leader"], [data-view="admin"]) .slot.available[class].grade-E { background: color-mix(in srgb, var(--color-E) 14%, #ffffff); }
+  body:is([data-view="leader"], [data-view="admin"]) .slot.available[class].grade-M { background: color-mix(in srgb, var(--color-M) 14%, #ffffff); }
+  body:is([data-view="leader"], [data-view="admin"]) .slot.available[class].grade-MS { background: color-mix(in srgb, var(--color-MS) 14%, #ffffff); }
+  body:is([data-view="leader"], [data-view="admin"]) .slot.available[class].grade-S { background: color-mix(in srgb, var(--color-S) 14%, #ffffff); }
+  body:is([data-view="leader"], [data-view="admin"]) .slot.available[class].grade-VS { background: color-mix(in srgb, var(--color-VS) 10%, #ffffff); }
+  body:is([data-view="leader"], [data-view="admin"]) .slot.available[class]:hover { filter: brightness(0.96); }
+  body:is([data-view="leader"], [data-view="admin"]) .slot.available:hover { background: #eaf3ee; border-style: solid; }
+  body:is([data-view="leader"], [data-view="admin"]) .slot-label { overflow: hidden; text-overflow: ellipsis; flex: 1 1 auto; font-weight: 600; font-size: 0.74rem; color: #334155; }
+  body:is([data-view="leader"], [data-view="admin"]) .slot-grade {
+    display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 18px; padding: 0 5px; border-radius: 5px;
+    background: #64748b; color: #fff; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.02em; flex-shrink: 0;
+  }
+  body:is([data-view="leader"], [data-view="admin"]) .slot.available.grade-E .slot-grade { background: var(--color-E); }
+  body:is([data-view="leader"], [data-view="admin"]) .slot.available.grade-M .slot-grade { background: var(--color-M); }
+  body:is([data-view="leader"], [data-view="admin"]) .slot.available.grade-MS .slot-grade { background: var(--color-MS); }
+  body:is([data-view="leader"], [data-view="admin"]) .slot.available.grade-S .slot-grade { background: var(--color-S); }
+  body:is([data-view="leader"], [data-view="admin"]) .slot.available.grade-VS .slot-grade { background: var(--color-VS); }
+  body:is([data-view="leader"], [data-view="admin"]) .slot-add { display: none; font-weight: 700; color: #2d5b3e; flex-shrink: 0; }
+  body:is([data-view="leader"], [data-view="admin"]) .slot.available:hover .slot-add { display: inline; }
+  /* ===================== end leader slot changes ===================== */
+  /* ===================== LEADER: month side bars on the calendar ===================== */
+  .month-side { display: none; }
+  body:is([data-view="leader"], [data-view="admin"]) .month-side {
+    display: flex; align-items: center; justify-content: center; flex: 0 0 40px; border: none; border-radius: 12px;
+    background: #eef4f0; color: #1f3b2c; font-size: 1.3rem; font-weight: 700; cursor: pointer; padding: 0;
+  }
+  body:is([data-view="leader"], [data-view="admin"]) .month-side:hover { background: #dcebe2; }
+  body:is([data-view="leader"], [data-view="admin"]) .calendar-sandwich { display: flex; align-items: stretch; gap: 10px; }
+  body:is([data-view="leader"], [data-view="admin"]) .calendar-grid-wrap { flex: 1 1 auto; min-width: 0; }
+  body:is([data-view="leader"], [data-view="admin"]) .calendar-title-row .month-arrow { display: none; }
+  @media (max-width: 650px) {
+    body:is([data-view="leader"], [data-view="admin"]) .month-side { flex-basis: 30px; }
+  }
+  /* Walker View, Month mode: the same side bars as the Leader calendar */
+  body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="month"] .month-side {
+    display: flex; align-items: center; justify-content: center; flex: 0 0 40px; border: none; border-radius: 12px;
+    background: #eef4f0; color: #1f3b2c; font-size: 1.3rem; font-weight: 700; cursor: pointer; padding: 0;
+  }
+  body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="month"] .month-side:hover { background: #dcebe2; }
+  body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="month"] .calendar-sandwich { display: flex; flex-wrap: nowrap; align-items: stretch; gap: 10px; }
+  body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="month"] .calendar-grid-wrap { flex: 1 1 auto; min-width: 0; }
+  body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="month"] .calendar-title-row .month-arrow { display: none; }
+  @media (max-width: 650px) {
+    body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="month"] .month-side { flex-basis: 30px; }
+  }
+  /* ===================== end leader month side bars ===================== */
+  /* Walker View: grade legend above the date picker. Same popup as the calendar legend. */
+  .picker-legend-wrap { display: none; justify-content: flex-start; margin: 0 0 10px; }
+  body:not([data-view="leader"]):not([data-view="admin"])[data-walker-mode="picker"] .picker-legend-wrap { display: flex; }
+  .admin-header-actions .picker-legend-wrap { margin: 0; align-items: center; }
+  .picker-legend-wrap .legend-container { right: 0; left: auto; min-width: 240px; top: calc(100% + 6px); }
+  /* ===================== end picker legend ===================== */
+
+    /* ===== Walk Offers header and filter refresh ===== */
+    /* Primary actions stay solid; secondary actions are outlined; destructive action is quiet text */
+    #export-pdf.btn-success, #export-csv.btn-success {
+      background: #ffffff; color: #2d5b3e; border: 1px solid #2d5b3e; box-shadow: none;
+    }
+    #export-pdf.btn-success:hover, #export-csv.btn-success:hover { background: #eef6f0; }
+    #clear-all.btn-danger {
+      background: transparent; color: #b91c1c; border: 1px solid transparent; box-shadow: none;
+      padding-left: 10px; padding-right: 10px;
+    }
+    #clear-all.btn-danger:hover { background: #fef2f2; border-color: #fecaca; }
+    /* Preview: a single toggle pill, filled while Preview is on */
+    #preview-walker-btn {
+      background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 999px; font-weight: 600;
+    }
+    #preview-walker-btn[aria-pressed="true"] { background: #2d5b3e; color: #ffffff; border-color: #2d5b3e; }
+    /* Show past walks: a compact switch */
+    .past-walks-toggle {
+      display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid #cbd5e1;
+      border-radius: 999px; background: #ffffff; font-weight: 600; font-size: 0.85rem; color: #334155; cursor: pointer;
+      user-select: none;
+    }
+    .past-walks-toggle input { appearance: none; -webkit-appearance: none; width: 30px; height: 18px; border-radius: 999px;
+      background: #cbd5e1; position: relative; margin: 0; cursor: pointer; transition: background 0.15s; flex: 0 0 auto; }
+    .past-walks-toggle input::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px;
+      border-radius: 50%; background: #ffffff; transition: transform 0.15s; }
+    .past-walks-toggle input:checked { background: #2d5b3e; }
+    .past-walks-toggle input:checked::after { transform: translateX(12px); }
+    /* Filters: one tidy row with fixed proportions */
+    .table-filters {
+      display: grid;
+      grid-template-columns: minmax(180px, 2fr) repeat(4, minmax(110px, 1fr)) repeat(2, minmax(130px, 1fr));
+      gap: 10px 12px; align-items: end;
+    }
+    .table-filters .filter-field { min-width: 0; }
+    .table-filters .filter-field.grow { flex: none; }
+    .table-filters .filter-field input, .table-filters .filter-field select { width: 100%; min-width: 0; box-sizing: border-box; }
+    .table-filters .filter-clear-group { align-items: flex-end; }
+    @media (max-width: 1000px) {
+      .table-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .table-filters .filter-clear-group { grid-column: 1 / -1; align-items: flex-start; }
+    }
+
+    /* ===== Walk Offers: second refresh ===== */
+    /* Filters open from a button in Leader and Admin view, with an active-count badge */
+    body:is([data-view="leader"], [data-view="admin"]) .filters-toggle {
+      display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px;
+      border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; color: #1e293b;
+      font: inherit; font-weight: 600; font-size: 0.9rem; cursor: pointer;
+    }
+    body:is([data-view="leader"], [data-view="admin"]) .filters-toggle::after { content: "▾"; font-size: 0.8rem; }
+    body:is([data-view="leader"], [data-view="admin"]).filters-open .filters-toggle::after { content: "▴"; }
+    body:is([data-view="leader"], [data-view="admin"]) .filters-toggle .filters-badge {
+      background: #2d5b3e; color: #fff; border-radius: 999px; font-size: 0.72rem; padding: 1px 7px; min-width: 18px; text-align: center;
+    }
+    .filters-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+    .filters-bar .filter-clear-group { margin-left: auto; flex-direction: row; align-items: center; gap: 12px; }
+    .filters-bar .filter-count { margin-left: 0; font-size: 0.85rem; color: var(--text-muted); white-space: nowrap; }
+    /* Search: magnifier icon inside the field */
+    #admin-filter-search { padding-left: 34px !important; background-repeat: no-repeat !important; background-position: 11px center !important;
+      background-size: 16px 16px !important;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M21 21l-4.3-4.3'/%3E%3C/svg%3E") !important; }
+    /* Dates match the selects */
+    .table-filters input[type="date"] { height: 40px; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 8px;
+      padding: 0 10px; background: #fff; font: inherit; font-size: 0.9rem; color: #1e293b; }
+    /* Collapse: labelled text button */
+    .collapse-button { width: auto; height: 40px; padding: 0 12px; gap: 6px; font-weight: 600; font-size: 0.85rem; color: #1e293b; }
+    .collapse-button .collapse-icon { display: inline-block; transition: transform 0.15s; }
+    .collapse-button[aria-expanded="false"] .collapse-icon { transform: rotate(180deg); }
+    .collapse-button::after { content: "Hide"; }
+    .collapse-button[aria-expanded="false"]::after { content: "Show"; }
+    /* Title row: one baseline, badge aligned to it */
+    .admin-header { align-items: center; }
+    .admin-header h3 { margin: 0; line-height: 1.2; }
+    #draft-count { margin: 0 0 0 8px; }
+
+    /* Action ribbon (retired): kept only so older markup does not break */
+    .actions-toggle { display: none; }
+    body:is([data-view="leader"], [data-view="admin"]) .actions-toggle {
+      display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px;
+      border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; color: #1e293b;
+      font: inherit; font-weight: 600; font-size: 0.9rem; cursor: pointer;
+    }
+    body:is([data-view="leader"], [data-view="admin"]) .actions-toggle::after { content: "▴"; font-size: 0.8rem; }
+    body:is([data-view="leader"], [data-view="admin"]) .actions-toggle[aria-expanded="false"]::after { content: "▾"; }
+    .admin-actions-ribbon.collapsed > :not(.actions-toggle) { display: none !important; }
+
+    /* ===== Walk Offers: three zones ===== */
+    .admin-header { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .admin-header .collapse-button { margin-left: auto; }
+    /* The whole button must stay upright; only its arrow turns when the section is collapsed */
+    #walk-offers-collapse { transform: none !important; }
+    .wo-zone { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .wo-zone-primary { margin-bottom: 12px; }
+    .wo-zone-data { margin-bottom: 12px; }
+    .wo-zone-data #clear-all.btn-danger { margin-left: auto; }
+    .wo-zone-filters {
+      display: block; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 16px; margin-bottom: 4px;
+    }
+    .wo-zone-filters .filters-toggle { margin-bottom: 10px; }
+    .filters-footer { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 12px; padding-top: 12px; border-top: 1px dashed #cbd5e1; }
+    .filters-footer .past-walks-toggle { margin-right: auto; }
+    .filters-footer .filter-clear-group { display: flex; align-items: center; gap: 12px; margin-left: 0; }
+    .filters-footer .filter-count { margin-left: 0; font-size: 0.85rem; color: var(--text-muted); white-space: nowrap; }
+    /* Phone, Walker View: the filter panel opens from its button */
+    @media (max-width: 640px) {
+      body:not([data-view="leader"]):not([data-view="admin"]) .wo-zone-filters { background: transparent; border: 0; padding: 0; }
+
+    }
+    .filters-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+    .filters-head .filter-clear-group { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+    .filters-head .filters-toggle { display: inline-flex; }
+    .wo-zone-filters .filters-toggle { display: inline-flex; }
+
+    /* ===== Walk Offers: icons, button hierarchy and even field heights ===== */
+    #admin-filter-grade { padding-left: 34px !important; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 20l6-10 4 6 3-4 5 8z'/%3E%3C/svg%3E") no-repeat 11px center / 16px 16px, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center / 14px 14px, #fff !important; }
+    #admin-filter-leader { padding-left: 34px !important; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='8' r='3.5'/%3E%3Cpath d='M2.5 20c.6-3.4 3.2-5.5 6.5-5.5s5.9 2.1 6.5 5.5'/%3E%3Ccircle cx='17' cy='9' r='2.5'/%3E%3Cpath d='M16 14.6c2.6.2 4.6 1.9 5.2 4.4'/%3E%3C/svg%3E") no-repeat 11px center / 16px 16px, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center / 14px 14px, #fff !important; }
+    #admin-filter-pueblo { padding-left: 34px !important; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 21s-6-5.3-6-10a6 6 0 0 1 12 0c0 4.7-6 10-6 10z'/%3E%3Ccircle cx='12' cy='11' r='2.2'/%3E%3C/svg%3E") no-repeat 11px center / 16px 16px, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center / 14px 14px, #fff !important; }
+    #admin-filter-status { padding-left: 34px !important; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='8'/%3E%3Cpath d='M12 8v4l2.5 2'/%3E%3C/svg%3E") no-repeat 11px center / 16px 16px, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center / 14px 14px, #fff !important; }
+    .table-filters select, .table-filters input[type="date"], .table-filters input[type="search"] { height: 40px; box-sizing: border-box; }
+    .table-filters select { appearance: none; -webkit-appearance: none; padding-right: 32px; border: 1px solid #cbd5e1; border-radius: 8px; background-color: #fff; font: inherit; font-size: 0.9rem; color: #1e293b; }
+    /* Buttons: Add is the main action; Download is a tinted secondary; Export and Clear All step down */
+    #export-pdf.btn-success { background: #eef6f0; color: #2d5b3e; border: 1px solid #cfe5d6; box-shadow: none; }
+    #export-pdf.btn-success:hover { background: #dcebe2; }
+    #export-csv.btn-success { background: #ffffff; color: #2d5b3e; border: 1px solid #cbd5e1; }
+    .wo-zone-primary #add-walk-to-schedule, .wo-zone-primary #add-social-event { height: 40px; }
+
+    /* ===== Walk Offers: icons on actions and title ===== */
+    #add-walk-to-schedule::before { content: ""; display: inline-block; width: 16px; height: 16px; margin-right: 6px; vertical-align: -3px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d=%22M12 5v14M5 12h14%22/%3E%3C/svg%3E") center / contain no-repeat; }
+    #add-social-event::before { content: ""; display: inline-block; width: 16px; height: 16px; margin-right: 6px; vertical-align: -3px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x=%223%22 y=%224%22 width=%2218%22 height=%2218%22 rx=%222%22/%3E%3Cpath d=%22M16 2v4M8 2v4M3 10h18M12 14v4M10 16h4%22/%3E%3C/svg%3E") center / contain no-repeat; }
+    #preview-walker-btn::before { content: ""; display: inline-block; width: 16px; height: 16px; margin-right: 6px; vertical-align: -3px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%231e293b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d=%22M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z%22/%3E%3Ccircle cx=%2212%22 cy=%2212%22 r=%223%22/%3E%3C/svg%3E") center / contain no-repeat; }
+    #export-pdf::before { content: ""; display: inline-block; width: 16px; height: 16px; margin-right: 6px; vertical-align: -3px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%232d5b3e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d=%22M12 3v12M7 10l5 5 5-5M5 21h14%22/%3E%3C/svg%3E") center / contain no-repeat; }
+    #export-csv::before { content: ""; display: inline-block; width: 16px; height: 16px; margin-right: 6px; vertical-align: -3px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%232d5b3e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x=%223%22 y=%223%22 width=%2218%22 height=%2218%22 rx=%222%22/%3E%3Cpath d=%22M3 9h18M3 15h18M9 3v18%22/%3E%3C/svg%3E") center / contain no-repeat; }
+    #clear-all::before { content: ""; display: inline-block; width: 16px; height: 16px; margin-right: 6px; vertical-align: -3px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23b91c1c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d=%22M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14%22/%3E%3C/svg%3E") center / contain no-repeat; }
+    #admin-filter-clear::before { content: ""; display: inline-block; width: 16px; height: 16px; margin-right: 6px; vertical-align: -3px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d=%22M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5%22/%3E%3C/svg%3E") center / contain no-repeat; }
+    #filters-toggle::before { content: ""; display: inline-block; width: 16px; height: 16px; margin-right: 6px; vertical-align: -3px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%231e293b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d=%22M4 6h16M4 12h16M4 18h16%22/%3E%3Ccircle cx=%228%22 cy=%226%22 r=%222%22 fill=%22%23fff%22/%3E%3Ccircle cx=%2216%22 cy=%2212%22 r=%222%22 fill=%22%23fff%22/%3E%3Ccircle cx=%2210%22 cy=%2218%22 r=%222%22 fill=%22%23fff%22/%3E%3C/svg%3E") center / contain no-repeat; }
+    #walk-offers-title::before { content: ""; display: inline-block; width: 20px; height: 20px; margin-right: 6px; vertical-align: -3px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%232d5b3e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x=%223%22 y=%224%22 width=%2218%22 height=%2217%22 rx=%222%22/%3E%3Cpath d=%22M16 2v4M8 2v4M3 10h18%22/%3E%3C/svg%3E") center / contain no-repeat; }
+    #walk-offers-title::before { margin-right: 8px; }
+    #walk-offers-title { display: inline-flex; align-items: center; }
+
+    /* ===== Walk Offers: single title row, pill controls, one filter row ===== */
+    .admin-header { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; }
+    .admin-header > h3 { padding-right: 14px; border-right: 1px solid #e2e8f0; }
+    .wo-zone-primary, .wo-zone-data { margin: 0; gap: 8px; }
+    .wo-zone-data { padding-left: 14px; border-left: 1px solid #e2e8f0; }
+    .admin-header .collapse-button { margin-left: auto; }
+    .wo-zone-primary .btn, .wo-zone-data .btn, #preview-walker-btn { height: 36px; border-radius: 999px !important; padding: 0 14px; font-size: 0.85rem; font-weight: 600; box-shadow: none; }
+    #add-social-event.btn-success { background: #fff; color: #2d5b3e; border: 1px solid #2d5b3e; }
+    #preview-walker-btn { background: #fff; color: #1e293b; border: 1px solid #cbd5e1 !important; }
+    #preview-walker-btn[aria-pressed="true"] { background: #2d5b3e; color: #fff; border-color: #2d5b3e !important; }
+    #export-pdf.btn-success, #export-csv.btn-success { background: #fff; color: #1e293b; border: 1px solid #cbd5e1; }
+    #export-pdf.btn-success:hover, #export-csv.btn-success:hover { background: #f8fafc; }
+    #clear-all.btn-danger { background: #fef2f2 !important; color: #b91c1c !important; border: 1px solid #fecaca !important; }
+    #clear-all.btn-danger:hover { background: #fee2e2 !important; }
+    #draft-count { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px !important; margin: 0 0 0 auto !important; }
+    #draft-count::before { content: ""; width: 14px; height: 14px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2392400e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx=%2212%22 cy=%2212%22 r=%229%22/%3E%3Cpath d=%22M12 7v5l3 2%22/%3E%3C/svg%3E") center / contain no-repeat; }
+    .wo-zone-filters { background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 14px; padding: 8px 10px; }
+    .filters-head { margin-bottom: 8px; }
+    .table-filters { gap: 8px !important; align-items: center !important; }
+    .table-filters input[type="search"], .table-filters select, .table-filters input[type="date"] { border-radius: 999px !important; background-color: #fff !important; height: 36px !important; }
+    .table-filters .filter-field label { display: none; }
+    #admin-filter-clear { display: inline-flex; align-items: center; height: 36px; padding: 0 14px; border-radius: 999px; background: #2d5b3e; color: #fff; border: 0; font-weight: 600; font-size: 0.85rem; white-space: nowrap; }
+    #admin-filter-clear::before { content: ""; display: inline-block; width: 14px; height: 14px; margin-right: 6px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d=%22M3 4h18l-7 9v6l-4-2v-4z%22/%3E%3C/svg%3E") center / contain no-repeat; }
+    #admin-filter-clear:hover { background: #244a32; }
+
+
+    /* ===== Walk Offers: filter strip on one line, with small labels above the fields ===== */
+    .wo-zone-filters .filters-bar { display: flex; align-items: center; gap: 12px; flex-wrap: nowrap; margin: 0; }
+    .wo-zone-filters .table-filters { flex: 1 1 auto; min-width: 0; margin: 0; padding: 0; align-self: center; }
+    .wo-zone-filters .table-filters {
+      display: grid;
+      grid-template-columns: minmax(120px, 2fr) repeat(4, minmax(86px, 1fr)) repeat(2, minmax(100px, 1fr)) !important;
+      align-items: end !important;
+      gap: 10px !important;
+    }
+    .table-filters .filter-field label { display: none !important; font-size: 0.72rem; font-weight: 600; color: #64748b; margin: 0 0 4px 2px; }
+    .table-filters .walker-search-field label { display: none !important; }
+    .wo-zone-filters .filter-clear-group { display: flex; align-items: center; gap: 10px; margin-left: auto; flex: none; }
+    .wo-zone-filters .filter-count { margin: 0; font-size: 0.85rem; color: var(--text-muted); white-space: nowrap; }
+    #admin-filter-clear { height: 36px; }
+    @media (max-width: 1100px) {
+      .wo-zone-filters .table-filters { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+      .table-filters .filter-field.grow, #admin-filter-clear { grid-column: auto; }
+    }
+    /* Filters are always shown in every view */
+    #walker-filters, body #walker-filters { display: grid !important; }
+    /* Review: changed fields are marked by the amber border set when the review opens */
+  /* Leader View on laptop-width screens: shallower day cells so a month fits on one screen */
+  @media (min-width: 1101px) {
+    body[data-view="leader"] .calendar-container { padding-top: 14px; padding-bottom: 14px; }
+    body[data-view="leader"] .days-grid { gap: 4px; }
+    body[data-view="leader"] .day-cell { min-height: 0; padding: 4px; border-radius: 8px; }
+    body[data-view="leader"] .day-number { font-size: 0.75rem; margin-bottom: 2px; line-height: 1.2; }
+    body[data-view="leader"] .slots-container { gap: 2px; }
+    body[data-view="leader"] .slot { padding: 1px 6px; font-size: 0.68rem; line-height: 1.15; border-radius: 5px; }
+    body[data-view="leader"] .slot.booked > .slot-short { font-size: 0.62rem; }
+    body[data-view="leader"] .slot .badge,
+    body[data-view="leader"] .slot .grade-pill { padding: 0 5px; font-size: 0.6rem; line-height: 1.5; }
+  }
+</style>
 </head>
 
 <body>
-  <!-- ======================================================= HEADER ======================================================= -->
-  <header class="page-header">
-    <img class="page-logo" src="data:image/png;base64,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" alt="Costa Blanca Mountain Walkers logo" />
-    <h1 id="page-title">Walk Programme</h1>
-    <p id="page-instruction">Click on a slot to schedule or edit a walk.</p>
-  </header>
   <!-- Leader View: the leader enters their email. They can then act only on walks they own (temporary, until proper sign-in) -->
   <div id="leader-identify" class="leader-identify" hidden>
     <label for="leader-email">I am</label>
     <input id="leader-email" type="email" placeholder="Your email address" aria-label="Your email address" autocomplete="email" />
     <span id="leader-identify-msg" aria-live="polite" hidden></span>
   </div>
+
+  <!-- ======================================================= HEADER ======================================================= -->
+  <header class="page-header">
+    <img class="page-logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAMAAAAOusbgAAAAwFBMVEXp5QrV3eIeWzIANBwDXQhTdGqcqNB0k541UJ1nim4AMAVTaqcWN5i6zMYAPCEANgumsiGSnEyNqqUDVlV5isRpjhZIeBv///+5ww9fc2llecS90L4tXFGWlpb/AADz8qcAQhl2qpgAAH8A/wB/Pz9VVQBVqlWqf3//f3//f/8AAAAiQZn5+vkGSyUXOJYAQhoVVjEAOxIuaEiIqZZWhWsTNaPl6+rJ18+vxbhzmoZQaK9Ed1qZtaU7clNoknujvK6Fw/CjAAAAQHRSTlP///URCv7//v/+YP///vCe///+A////wH/CP///wUB/7IHAgEEAwMGAgIA///+//79/v7+/v///v7+//7+/v7+PE2U8gAAE4JJREFUeNrVWwt72zayJWBRJCVRkhUnadJ2u3vf1wRJEOBTfP3/f7VnQFCiHNuxk+69X/G1sSVLOJiZMw8AQ+fx/2k4fy3g1erDnR2r1f8NMBCfQbq7W/1LgT/czTh3m3mQ1Pbd1b8GeJr3bnM4cKnaIB+01l6e572S/LCZ0D+s/mxgY0mAcpXrrtN6GNrWxWjzocEbJ68Fulna3Z8J/GFClQDVQ6ukUnneAF7rbshbBQ3gZef1kPy/7CL/DGADC9SuGxRJXAka5TSm3+um5TzXo+755u5t0N8FxhxfNnulx0FJtwNQGeqg5zKehoS9m47WUnlKtviYPLwJ2vmubX/fcHfsWtnWAB0DFadZmqZxnKbmR5al+E/2TYg/ayWDUXOCvvspYHx7s3dHrbhH07aAyVIjadqGYRW2qTwNMUmP1cgcS6tymRP0yujqB4Hpywc1jlx2QtSEGse97g1ympNxq6wV4bQSRSqQQyXKIHZrL97843WhndfFjXWtOGA1h0KVSmUpqhnYTQXLcqEzejmISkH0LCaLBHII8/3rQjuvyLs6tHUQa8BKWNMdRRkDGIATsO4B7ImBXtL7Ko0lyd3Xomz52MnD51eQX5F4E59G2QrRSRiWM0ELiAFQXVVdZ51ZB34IIenNPIW120rUsq1I6Lt3AmOlBxUO8QgNppnMe8kqwQAh6g6TG+CqwzuVgIZTJaoawDETQ6bzOI0HIXI56nTzIrLzAu6XQ14pJUQDJQeQ1o2B4aZShK1ghtWi2TMGKNg1rUXbCQmDi1zRn9OM12KMm1pu3iXxh8fVvqmxbAY6kVIrMWbgT03kwhgyErIMBZN44cawR1gKiaWJfBR5pnJJHy95W6nDO4DvHlep7qBmWBcma2DKXHFIK8jGXUM/Y0WhspG0jqYSIdkYuhCkfvyJuWmqmHB52B/eDAw6p7WOK6g5U52OMXnIIFw2gsFw3UzXAEamkDKm9KCHcswkK6FwmFYEWQUNiTZOZSgaWeWHNwITbtfAeFg0UbeDyEgJ8FeybtXAW03AzC4DARsMYGAY1limjQjB8ibD6rSAAEBevQHYyNtApW1K6tQMJM4hHOm3qoFooqNqTSGgc9iA3oDqWw9EhsBcCI6fykTzGfnuu8Crxw97rWNWIhykPdavKDJUFcIInzKDzE8VUaxkGPQLq72eckXc00olTJSlDVwuHXKLrJ5Bfgp89/nQdNCzymJOblJD0ZWk6BEQrAx+BdL64exHCY0o8s/rdSnKDqEckaseELwztwUp4VDgBCHLin/rz85TQh/yGrxqMzCjpojQwF4asQBRM1WYa731E4uJMf2abNdgn0eBNXOFQCaj4E2LhdxaBKqKV0/t7Dxx4A0+hDCYycpERFJ0Dg+hgUDIttEMuRw7vOlD7pOENUBFGBtLrKd8ko6iz8ds9ZrEWFYcqoHCFSKi1HmamZA8IIxAWnZ+DpXem1TwUIoG5lDegG+VKhRTBoUCpW6emvkJ8P40KDECxxVln2V5JT1RElEaAxs9A+tD92tvm0Du3QPFujgDsRl8ubY1gyyrOOw3pnh7FhiKbse4nLIPaOxmGp6rYDpeiYfnYKPE95q8+erlzUNCKo/WYHEctwpxj/KkrVaQz8MnZl4C/20V13K0n8/Ajh7uDHpD78x/DjZKtg2H9YcHL8vXiVHAFjZKyZdEZ3Exlxaq0YeXgD88HlA/TiEHIZGQK2I21Ly+EffyIvFq1+2B06xlFpyTSQcUAyioz4UoDVbGtdoskZ0bRtdQ9HWdQK6N0rc34ibRLH7i+/7266nN4qrP+vNuQt6tKer1ualM+KTsXmhV8y/PSrz6su96zyp6fzwiv/f5U9xkR8DHaGe8CLJ73tYLxzhvsgBRZUJODLKZhzt8VjbX+ZJfzjV0bNxOIiWYD35yPtFC01vcJLqn3wsnKKzEJ/IY2QxxK8NAaftRgzxp+ujYwl+Ekvj1jMRf+Ih60hrGOe4nQzcWd7Jr4dxD1uLeKSwuJWwq6OEzHD88/4L8W3ozE8im9LBwZucqcK7lVKtC0XadcGdvZ+1KWMXWcYuocOlfwuVx37uebhQtMne5JRj+xphlyier7JiRyHffSLz6332tZoG5UTT9ItZWhMhgQWQnoRdHAj4FwWn7dX1qlCT+6HHdzWZJotKGj1mINIDI+TVZOHPMulPdLHDs/LKfPlyx2b5WSvwAJuD9IjmH3nl3biRULVGnICsHD7sLHc6ozKwUHycpyprX/D/+/RaYfLhtBL/RDgwMmyUTkYpgQj7iB+CRonw/2W0bmBe75TV2TChDmmucgZnNLPIiMqbvroHzYmNZy1k7Mx+UoDh47xYTse6d+wKxynEwa1FEvuu6vibcKvC2ebxe80x5C89jdjppRYZC29PhFpio1bTkfUvfq0nRie8c/YJUCGGBXNwfoQP33sHYniBly/Lc973MO5+kXAKfp83O1cqjkKO8tfG/PR46VZczG/Y22hiOFgkAo4JSgOPAjxFDAscM92uPLL32+CkqvLTf+k3q7RYRbm2ZLSeuIle0zYVezqzpC7XsxxbMgknJsMTmycAYxwCKbgj33EJ81yNpPW6ALwGVKhAav0y2i8tR6VnXjg3TeePavP3RKkaJ84XSEemVkO/9gpTsRkVR7LZtpk6+J72j46Du8fzz4Pn4S7SbRbaB/5Nj3DTtFrp2bKWl+668CTWw8G/borBuTHD30HIBQztBYt5OPNmeEq9vt7t7AnbPyejtdpPfTUnTsiae6IVwpHR7N+WoSdX/yTuJ7cCkaW45+NU9/hL4FtsoeJvA3o5v5915yP5kVz8poOpUbXdft/iYDeQLYu+PU2CQAlWDNbJjo4dWZvd51XQgQCuX5IsMdpHAkhDNiYoLbbGQB8WJyQWA23NCq/OLK708GwpnXVeV6g5XiVcwMeozkxCRDydO/0rBsih8QBtssjSJHRXLgsA/pQ2FyWTbZ6i7YI9JQVPUSSIrjSVshoV0/MpqeLHX6tnEs7dv5xnIeY6gk/Ent1hWBMnZTY3rQuXy4RhE28JEl8K332Z1tiAOHAqqnYzsTPGyU1W4jB4osy5eMWmcfDmgCLKIEMSv3kJ4HWJakQDVp+jiTu8+lDeZQoo8yDcX4MdHfvFia+LsxBblDia7J3+CoheRaSvWPgoPC+yfE/rIFNICaxBEL7VkTlwiI0zsmtxJaj5Z4xLeqvVtnVVAi+5SYMxZCtZfcz+oDUKTamZPMNlxylGzIquaQsgVmEjdL7kVlw/Td+G5ZkDh8OVF8tkKhiI6XEbnAinTBRkWS07YaRkO05HJ7u8mdjnGm9qZ1HP44DZsJcHROd7fu+4WS3Ccq4f6ZWmqumoJHDjFLOzOlpzrX5chBDUflDuz2nqTXMaYVkzC7aJtcJxSQrS7ajqJWEmpGsiLtICUCUDawSW7p4liEggVsxz53ecJmHIiigAL/OmW1OQbsK97f4/8eImFESONUHnLymsRuoscP3LmcSRiX2k9+VOOKlfOkcsA20g9e/pQ3m4dCN69mDgJxXl3Ef3K9ALuDsTjPaUuq4TSCLT/xQRNpNq+WQJr18YPy75Ms0UxnUQWOLoUr9tkG1k3AskuWQzVykzGSduzP9kkD2Dw+PFNwMmW+UbVAL7gMjoBOE+nAWfBZpMSsLWOfesC/PECfOrfBIxv/jHZbOcfbTQSdjxg6+RHu+1cA4PWEaUJUjXlZcK/AP/yLPAlVD8FJk1u//gDdR1VAbvJgW8GW2PyufoOIv94ZRe8MDpPtaYNTGRjb6nqvD3dkCvNJ8og8jACX+/gnsm9SQvi6SjX6wl5F7m7xDgyKtDg/h4sc71bViNL3JArz4fn3Im8xTdgJkcGKHS3pXh2UBzZ2XILTrDbFibm7W7dify4uwAjcn0TQJQwhxpMRFa9QC627s5/AVeYLLq7MPJcrpObssv5aIF5xx8/X4B7FNUTCeZtIk1EbnP2aJ+IUoImciMmXhznZeJi/nptlryeE/IUMrsSlcCi2KMk0aaL6igGZ4BbAmhNB2q7tVnJK7hCXDJI4pOrhbTUhOllJZfWpvZZpEXk4yab/M3uIkJgWfKw9fqMV+dk/Rru5YAG0WxLAZtRGLe1D7dFFxtv0iIVAuV0FmDLsswrb2HYlpWv4wobwoAoQnaGgwN/O1FnlkcKLx+uhQCV1aqulmUZHM4/i/cOg2wXXJZrj83cmr1JCbdprzUX/GnIL+npo60E1kn5buR1Ei0Vtd7ZOsDOajbni2KPKoGmn0sQa+SO7dbi/cg3Xzr7dls0B8QrqWdgvJ7Ydam9WxG9X9dAXmr+UgZ8spUcuHU6XHcSQIZbV9bVP9qDHwZFiZ8aMJY924jnfWAeDIstjEkTubc4A6QTb/DaP//UQMDj8RJ4YeJZ4rv+snmSMk17TdR/2CU/NxjtA4FtJUpDxsf5XHHemMfj5QgkoxsAnaanMvqpAYERhmtRcXvZjSDlXg7M5zOQg2610XXGtbk9S/G5dfJTwGycbq6Uds2l/rDQtAW2uh6A1ojp9tCcykc/gYxKhdO1gOKhELUym1RZ889PTvb+h9eyquiDZV2WLd1L0ingjwNji+pldE+maxGGopQIhnnQXI72nMtR5jC4ws28Lq9ER70eXTpl5R9WdEXXuaTqOpUAzuxp0+rpkaI09MK67KhSiR2H/4PIiJxgllc1UteyrrAX5UL31/O1i6rpTDEPRJ81YiR5y8Ecrlcs+SFkVEtBCr8VxGklSGA68rlQa3F6i2qgjsmj+ICApWMOjVPTwQ+ZGfVhZ+5EXXimymSrUhK43j9zUA6RT3kuWrqj6/h00eXRl3/Ap7CXhARZLUqFf0KVZuY8sV7ePV2B/2bOUcGIRmV069SYu1gki3cjA5furjjd82mK9xVRuum7/efVs7cwB2+g25+UrrpB8MDc3Brk5P24dNdE9zhCt3TtXNH9z93jc8DmYhGLVHQBEsq0AziveipG2HsCCXhFl0Ye3bSlqhIMVSQo2wb6sLzku7nw2uSjFCEBj+AWU5IhCMQpZ+X5rchUm9IVm4evZ5CBGmcUAsJIdzB/e+GKb/Xf+w78ajJzUV3H+FFnQw5z1W9VN23Z6dJYUtjQ1GaQuQ3Fw3jMby+vb4ARRSq6XMwUI0ajWiRDU1tA8MJl6lNxH6hTJpZ1K0vBiJwttTFo0ebd/vfVi9e40305YzKVMsMyDW4rtYzp4p0q+9dht4wukMmiA60d4agWuelHur3s+vbGfPV5rxsOMxv1VmA0FF+LgK61XCbW2+Ql7MTAdr8h8zdtT+mcMzGOdAutRBWH6sn18VNg6sVoXUOPUgTU60OhpI0Hav5A+mBelHwDPnUJlGIEjU0vTi7GTJqGKEQQWZZxN3zTF+E87fLZyEoNtGKTmEE0VNfSQziRSNHUJcYeztFthROZ3gRN7RrSnMMzojTMQ7fPYKhs9P7377ZjUHuC1BYZ/xKUKxicOZ+6QGpmdlMPW6rnHh7WABXViTpByJrUVmb6JzuIzxU1Oai8Tr9pivi28wUE66vYICsVQ9EVY5VwqUuiCmJqtInVcPqVTS2ZZVnVOpem96VV+DSTVMWabWbI4VaEGz6D+2x30yG3yIi3pegZ+STNJsJUBzK2rYpSKcVNf6J5FY+CUV7QGfV1lSpgiH7Qs3IruXlDy82MDG2P5lqOckUpqQlmUDKg5iUkOdNmZGpHWp1SacfikPqRUEbwmHIvygiUqzBy/jzuCx1shBxQDpc5uRQK7p5yuTRloBI1r5E+SfiYd24sWBYKeaLGE9Q32O6qtCpNB18JSjyP+1LP3kGZxjnq2QkwFRVMHhGNYe5AeL2oMmqfoHQXxogUnVANtdpQddeEoseuANYK46Z+qW3vpS7FAw9zMEODH8PEFzJd7cFBOmQaaHSctjywIjxYC+6KXCO2U1VOqV/RlzudvtSo6LzUDLqJR41Fs54axVJDGsT/EWGwElR863qq/7VoiH2CFGS6c8jvMur4aXk4vNwg6bzcDrpvQg5pNHUOaSaNLJMyqUBhrLRHBxVghWkiq0kTXJrGzDEOQnX4x4stoc7LDbBfDn3YUD6lziETCnuyIkIvvIbiSmxbiETTEQGpnS8f4NNqnFpR480rTbCvtcDa1tua+nizVAbQeiko14DESthuX+roaxSxHQUPRRJllhrU1If6Q723Bvygas0VdiANdVsgSoQZNV4ygeQ1bS5Tk0kqSEzdSHE7UqdsW+t48/nVdmPne+3VPCdo6gtzqYlNxjmyAStBcdurEoesp+hKPYRDZWDHTn23wdr5XkP5h008AJpraswjbOqy5iqG5i/d7KYHRQ2h6etuu7o/bL7bUv69HnrT3B3no24xI5XI2lUmPJv/TdsLdUsGHXyKNdTJflL7zRua6L//1ABBb3ivR0yrGkp5ZTXqIW/bvu/bYehq896YKz717m8ev9fG/tbnJDDLZ/OUxOjlAM91vTwOwjIaF28HumuU6dt/fMuDEm97MuTOPqHRN12nA3okQ8oeaZEeR6HHNRrdnQZlnpF44/MZb34WZnomZXooBTB61I0+6QYLOZ3oaRF6HOZdT+K84+kfO+fdZnP4OwKjVH2Pfzk/zI/gvOv5n/c977S6Tm2wLo8cvf+Rp/c/4UUPd61un7K6+4GnvP5iz7T9lYH/CQ7SyeGvvKIRAAAAAElFTkSuQmCC" alt="Costa Blanca Mountain Walkers logo" />
+    <h1 id="page-title">Walk Programme</h1>
+    <p id="page-instruction">Click on a slot to schedule or edit a walk.</p>
+  </header>
   <!-- ======================================================= VIEW TOGGLE ======================================================= -->
   <div class="view-toggle-container">
     <div class="view-segment" role="radiogroup" aria-label="View mode">
@@ -2409,11 +3100,13 @@
   <!-- ======================================================= WALKER MODE HEADER (Walker View only) ======================================================= -->
   <div class="walker-mode-header" id="walker-mode-header">
     <div class="walker-mode-switch" role="group" aria-label="Walker calendar mode">
-      <button type="button" class="walker-mode-btn" data-walker-mode-btn="list" aria-pressed="true">List</button>
       <button type="button" class="walker-mode-btn" data-walker-mode-btn="month" aria-pressed="false">Month</button>
-      <button type="button" class="walker-mode-btn" data-walker-mode-btn="day" aria-pressed="false">Day</button>
+      <button type="button" class="walker-mode-btn" data-walker-mode-btn="picker" aria-pressed="true">List</button>
       <button type="button" class="walker-mode-btn" data-walker-mode-btn="map" aria-pressed="false">Map</button>
     </div>
+    <button type="button" class="picker-open-btn" id="picker-open-btn" aria-expanded="false" aria-controls="picker-column">
+      <span>Date:</span> <span id="picker-open-label">All upcoming</span> <span aria-hidden="true">&#9662;</span>
+    </button>
     <div class="walker-day-picker" id="walker-day-picker" hidden>
       <label for="walker-day-input">Date</label>
       <input type="date" id="walker-day-input" />
@@ -2425,52 +3118,76 @@
     <div id="walker-map-canvas" role="region" aria-label="Map of walk meeting points"></div>
   </div>
   <!-- ======================================================= CALENDAR ======================================================= -->
+  <!-- ======================================================= LEADER LAYOUT TOGGLE (Leader View only) ======================================================= -->
+  <div class="leader-layout-header" id="leader-layout-header">
+    <div class="walker-mode-switch" role="group" aria-label="Leader layout">
+      <button type="button" class="walker-mode-btn" data-leader-layout="stacked" aria-pressed="true">Calendar</button>
+      <button type="button" class="walker-mode-btn" data-leader-layout="picker" aria-pressed="false">List</button>
+    </div>
+  </div>
+  <div class="split-layout">
+  <!-- ======================================================= PICKER COLUMN (Walker View, Picker mode) ======================================================= -->
+  <aside class="picker-column" id="picker-column" aria-label="Pick a date">
+    <div class="picker-head">
+      <span class="picker-heading">Pick a date</span>
+      <button type="button" class="nav-btn" id="picker-clear">All upcoming</button>
+      <button type="button" class="picker-close" id="picker-close" aria-label="Close date picker">&times;</button>
+    </div>
+    <div class="picker-weekdays" aria-hidden="true"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>
+    <div class="picker-months" id="picker-months"></div>
+  </aside>
   <div class="calendar-container">
     <div class="calendar-header">
-      <h2 id="calendar-title">Month Year</h2>
-    </div>
-    <div class="walker-calendar-tools">
-      <label for="walker-goto-month" class="walker-only">Go to month</label>
-      <input type="month" id="walker-goto-month" class="walker-only" />
-      <button type="button" class="nav-btn" id="calendar-collapse" aria-expanded="true">Hide calendar</button>
-    </div>
-
-    <div class="legend-wrap">
-      <button type="button" class="legend-link" aria-label="Grade legend" aria-describedby="grade-legend">
-        <span class="legend-swatches" aria-hidden="true">
-          <span style="background: var(--color-E)"></span>
-          <span style="background: var(--color-M)"></span>
-          <span style="background: var(--color-MS)"></span>
-          <span style="background: var(--color-S)"></span>
-          <span style="background: var(--color-VS)"></span>
-        </span>
-      </button>
-      <div class="legend-container" id="grade-legend" role="tooltip">
-        <div class="legend-item">
-          <div class="legend-dot" style="background: var(--color-E)"></div>
-          E · Easy
+      <div class="calendar-title-row">
+        <button type="button" class="nav-btn month-arrow" id="prev-month" aria-label="Previous month">&larr;</button>
+        <h2 id="calendar-title">Month Year</h2>
+        <button type="button" class="nav-btn month-arrow" id="next-month" aria-label="Next month">&rarr;</button>
+      </div>
+      <div class="calendar-tools-group">
+        <div class="walker-calendar-tools">
+          <label for="walker-goto-month" class="walker-only">Go to month</label>
+          <input type="month" id="walker-goto-month" class="walker-only" />
+          <button type="button" class="nav-btn" id="calendar-collapse" aria-expanded="true">Hide calendar</button>
         </div>
-        <div class="legend-item">
-          <div class="legend-dot" style="background: var(--color-M)"></div>
-          M · Moderate
+      <div class="legend-wrap">
+        <button type="button" class="legend-link" aria-label="Grade legend" aria-describedby="grade-legend">
+          <span class="legend-swatches" aria-hidden="true">
+            <span style="background: var(--color-E)"></span>
+            <span style="background: var(--color-M)"></span>
+            <span style="background: var(--color-MS)"></span>
+            <span style="background: var(--color-S)"></span>
+            <span style="background: var(--color-VS)"></span>
+          </span>
+        </button>
+        <div class="legend-container" id="grade-legend" role="tooltip">
+          <div class="legend-item">
+            <div class="legend-dot" style="background: var(--color-E)"></div>
+            E · Easy
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background: var(--color-M)"></div>
+            M · Moderate
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background: var(--color-MS)"></div>
+            MS · Moderately Strenuous
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background: var(--color-S)"></div>
+            S · Strenuous
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background: var(--color-VS)"></div>
+            VS · Very Strenuous
+          </div>
+          <button type="button" class="walk-levels-link" data-open-levels>Full walk levels, scrambling and terrain</button>
         </div>
-        <div class="legend-item">
-          <div class="legend-dot" style="background: var(--color-MS)"></div>
-          MS · Moderately Strenuous
-        </div>
-        <div class="legend-item">
-          <div class="legend-dot" style="background: var(--color-S)"></div>
-          S · Strenuous
-        </div>
-        <div class="legend-item">
-          <div class="legend-dot" style="background: var(--color-VS)"></div>
-          VS · Very Strenuous
-        </div>
-        <button type="button" class="walk-levels-link" data-open-levels>Full walk levels, scrambling and terrain</button>
+      </div>
       </div>
     </div>
+
     <div class="calendar-sandwich">
-      <button type="button" class="nav-btn nav-side" id="prev-month" aria-label="Previous month">&larr;</button>
+      <button type="button" class="month-side month-side-prev" aria-label="Previous month">&larr;</button>
       <div class="calendar-grid-wrap">
       <div class="weekdays">
         <div>Sun</div>
@@ -2483,43 +3200,121 @@
       </div>
       <div class="days-grid" id="days-grid"></div>
       </div>
-      <button type="button" class="nav-btn nav-side" id="next-month" aria-label="Next month">&rarr;</button>
+      <button type="button" class="month-side month-side-next" aria-label="Next month">&rarr;</button>
     </div>
   </div>
   <!-- ======================================================= ADMIN ======================================================= -->
   <div class="admin-container" id="admin-container">
     <div class="preview-banner" id="preview-banner" hidden>Preview: this is how the walks will look to walkers. Drafts are shown with their status and are not visible to walkers. Nothing can be changed here.</div>
+    <section id="walk-messages-pane" class="msg-pane" aria-label="Requests and messages">
+      <button type="button" class="msg-pane-toggle" id="msg-pane-toggle" aria-expanded="false" aria-controls="msg-pane-body">
+        <span class="msg-pane-title">Requests and messages</span>
+        <span class="msg-pane-count" id="msg-pane-count"></span>
+        <span class="msg-pane-chev" aria-hidden="true">&#9662;</span>
+      </button>
+      <div class="msg-pane-body" id="msg-pane-body" hidden>
+        <div class="msg-pane-bar">
+          <div class="msg-chips" role="group" aria-label="Filter by status">
+            <button type="button" class="msg-chip" data-msg-status="open" aria-pressed="true">Open</button>
+            <button type="button" class="msg-chip" data-msg-status="done" aria-pressed="false">Done</button>
+            <button type="button" class="msg-chip" data-msg-status="all" aria-pressed="false">All</button>
+          </div>
+          <label class="msg-type-wrap"><span class="visually-hidden">Filter by type</span>
+            <select id="msg-type-filter">
+              <option value="">All types</option>
+              <option value="date">Change date</option>
+              <option value="time">Change time</option>
+              <option value="leader">Change leader</option>
+              <option value="walk">Change walk</option>
+              <option value="other">Other</option>
+            </select>
+          </label>
+          <button type="button" class="btn btn-small btn-primary" id="msg-new-btn">New request</button>
+        </div>
+        <form id="msg-form" class="msg-form" hidden>
+          <div class="msg-form-grid">
+            <label>Type
+              <select id="msg-type" required>
+                <option value="date">Change date</option>
+                <option value="time">Change time</option>
+                <option value="leader">Change leader</option>
+                <option value="walk">Change walk</option>
+                <option value="other">Other</option>
+              </select>
+            </label>
+            <label>Walk
+              <select id="msg-walk" required></select>
+            </label>
+            <label>Proposed date (optional)
+              <input type="date" id="msg-date" />
+            </label>
+            <label>Proposed time (optional)
+              <input type="time" id="msg-time" />
+            </label>
+          </div>
+          <label class="msg-full">Request
+            <textarea id="msg-text" rows="3" required maxlength="600" placeholder="e.g. Please move this walk to Sunday 15 Nov because of the fiesta"></textarea>
+          </label>
+          <div class="msg-form-actions">
+            <button type="button" class="btn btn-small" id="msg-cancel">Cancel</button>
+            <button type="submit" class="btn btn-small btn-primary">Send request</button>
+          </div>
+        </form>
+        <div id="msg-list" class="msg-list"></div>
+      </div>
+    </section>
     <section id="booking-requests-panel" hidden style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:12px 16px; margin:0 0 16px">
       <h3 style="margin:0 0 4px">Change requests from leaders <span class="muted" id="booking-requests-count"></span></h3>
       <div id="booking-requests-list"></div>
     </section>
     <div class="admin-header">
       <h3 id="walk-offers-title">Upcoming Walks</h3>
-      <span id="draft-count" hidden style="font-size:0.9rem; background:#fef3c7; color:#92400e; padding:2px 10px; border-radius:999px; font-weight:600; margin-left:8px; align-self:center"></span>
-      <div style="display: flex; gap: 8px; flex-wrap: wrap">
-
-        <div class="admin-header-right">
-      <div class="admin-header-actions" style="display: flex; gap: 8px; flex-wrap: wrap">
+      <span class="header-filter-badge" id="header-filter-badge" hidden></span>
+      <!-- Zone 1: primary actions -->
+      <div class="wo-zone wo-zone-primary">
         <button class="btn btn-success" id="add-walk-to-schedule" hidden>Add Walk</button>
         <button class="btn btn-success" id="add-social-event" hidden>Add Event</button>
         <button class="btn" id="preview-walker-btn" aria-pressed="false" hidden>Preview</button>
-        <label class="past-walks-toggle" id="past-walks-label" hidden><input type="checkbox" id="past-walks-check" /> Show past walks</label>
-        <button class="btn btn-success" id="export-pdf">Download</button>
-        <button class="btn btn-success" id="export-csv" hidden>Export to CSV</button>
-        <button class="btn btn-danger" id="clear-all" hidden>
-          Clear All Bookings
-        </button>
-        </div>
       </div>
-      <button type="button" class="collapse-button" id="walk-offers-collapse" aria-expanded="true" aria-label="Collapse walk offers">
-        <span class="collapse-icon">⌃</span>
+
+      <!-- Zone 2: data management -->
+      <div class="wo-zone wo-zone-data">
+        <div class="legend-wrap picker-legend-wrap">
+      <button type="button" class="legend-link" aria-label="Grade legend" aria-describedby="picker-grade-legend">
+        <span class="legend-swatches" aria-hidden="true">
+          <span style="background: var(--color-E)"></span>
+          <span style="background: var(--color-M)"></span>
+          <span style="background: var(--color-MS)"></span>
+          <span style="background: var(--color-S)"></span>
+          <span style="background: var(--color-VS)"></span>
+        </span>
       </button>
+      <div class="legend-container" id="picker-grade-legend" role="tooltip">
+        <div class="legend-item"><div class="legend-dot" style="background: var(--color-E)"></div>E · Easy</div>
+        <div class="legend-item"><div class="legend-dot" style="background: var(--color-M)"></div>M · Moderate</div>
+        <div class="legend-item"><div class="legend-dot" style="background: var(--color-MS)"></div>MS · Moderately Strenuous</div>
+        <div class="legend-item"><div class="legend-dot" style="background: var(--color-S)"></div>S · Strenuous</div>
+        <div class="legend-item"><div class="legend-dot" style="background: var(--color-VS)"></div>VS · Very Strenuous</div>
+        <button type="button" class="walk-levels-link" data-open-levels>Full walk levels, scrambling and terrain</button>
       </div>
     </div>
+        <button class="btn btn-success" id="export-pdf">Download</button>
+        <button class="btn btn-success" id="export-csv" hidden>Export to CSV</button>
+        <label class="past-walks-toggle" id="past-walks-label" hidden><input type="checkbox" id="past-walks-check" /> Show past walks</label>
+        <button class="btn btn-danger" id="clear-all" hidden>Clear All Bookings</button>
+      </div>
+
+      <span id="draft-count" hidden style="font-size:0.9rem; background:#fef3c7; color:#92400e; padding:2px 10px; border-radius:999px; font-weight:600; margin-left:8px; align-self:center"></span>
+    </div>
     <div class="walk-offers-body">
-    <!-- ======================================================= WALK OFFERS FILTERS ======================================================= -->
-    <button type="button" class="filters-toggle" id="filters-toggle" aria-expanded="false" aria-controls="walker-filters">Filters</button>
-    <div class="table-filters" id="walker-filters">
+      <!-- Zone 3: filters (collapsible; the count stays visible when closed) -->
+      <div class="wo-zone wo-zone-filters" id="filters-zone">
+        <div class="filters-bar">
+          <button type="button" class="filters-state" id="filters-state" aria-expanded="true" aria-controls="walker-filters" data-active="false">
+            <span class="filters-state-label">Filters</span>
+            <span class="filters-state-chev" aria-hidden="true">&#9662;</span>
+          </button>
+          <div class="table-filters" id="walker-filters">
       <div class="filter-field grow walker-search-field">
         <label for="admin-filter-search">Search</label>
         <input type="search" id="admin-filter-search" placeholder="Search all columns" />
@@ -2533,6 +3328,7 @@
           <option value="MS">MS</option>
           <option value="S">S</option>
           <option value="VS">VS</option>
+          <option value="SUMMER">Summer walks</option>
         </select>
       </div>
       <div class="filter-field hide-in-walker">
@@ -2560,14 +3356,19 @@
       </div>
       <div class="filter-field walker-date-range">
         <label for="admin-filter-from">From</label>
-        <input type="date" id="admin-filter-from" />
+        <input type="date" id="admin-filter-from" title="Show walks on or after this date" />
       </div>
       <div class="filter-field walker-date-range">
         <label for="admin-filter-to">To</label>
-        <input type="date" id="admin-filter-to" />
+        <input type="date" id="admin-filter-to" title="Show walks on or before this date" />
       </div>
-      <button type="button" class="nav-btn" id="admin-filter-clear">Clear filters</button>
-      <span class="filter-count" id="admin-filter-count"></span>
+          </div>
+          <div class="filter-clear-group">
+            <span class="filter-count" id="admin-filter-count"></span>
+            <button type="button" class="nav-btn" id="admin-filter-clear">Clear filters</button>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="table-wrapper">
       <table class="offers-table">
@@ -2592,6 +3393,7 @@
     </div>
     </div>
   </div>
+  </div><!-- /split-layout -->
   <!-- =======================================================
      STATISTICS DASHBOARD
      ======================================================= -->
@@ -2992,7 +3794,7 @@
             </div>
             <div class="form-group summer-only span-3" hidden>
               <label for="social-leader"> Leader(s) </label>
-              <input type="text" id="social-leader" maxlength="100" placeholder="e.g. Martin Dunkley" />
+              <input type="text" id="social-leader" maxlength="100" placeholder="e.g. Name" />
             </div>
             <div class="form-group summer-only span-3" hidden>
               <label for="social-duration"> Duration </label>
@@ -3012,7 +3814,7 @@
             </div>
             <div class="form-group summer-only" style="grid-column: 1 / -1" hidden>
               <label for="social-contact"> Booking / contact </label>
-              <input type="text" id="social-contact" maxlength="200" placeholder="e.g. Book with Joan on +34 678 937 258 or WhatsApp" />
+              <input type="text" id="social-contact" maxlength="200" placeholder="e.g. Reserve on +34 678 937 258 or WhatsApp" />
             </div>
             <div class="form-group" style="grid-column: 1 / -1">
               <label for="social-description"> Description </label>
@@ -3179,6 +3981,8 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       walkMapLayer.clearLayers();
       const points = [];
       let missing = 0;
+      // Walks that share a meeting point become one pin with a count, so they do not hide each other
+      const spots = new Map();
       document.querySelectorAll("#admin-table-body tr[data-walk-key]").forEach((tr) => {
         const key = tr.dataset.walkKey;
         const record = globalBookings[key];
@@ -3189,13 +3993,35 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         const lat = Number(coords.latitude);
         const lon = Number(coords.longitude);
         const name = route.Route_Name || route.Walk_Name || record.walk_name || `Walk ${record.walk_number || ""}`;
-        const marker = L.marker([lat, lon]).bindTooltip(
-          `<strong>${escapeHtml(name)}</strong><br>${escapeHtml(tableDate(record.date))} ${escapeHtml(formatStartTime(record.start_time) || "")} · ${escapeHtml(record.walk_grade || "")}`,
+        const spotKey = `${lat.toFixed(5)},${lon.toFixed(5)}`;
+        if (!spots.has(spotKey)) spots.set(spotKey, { lat, lon, items: [] });
+        spots.get(spotKey).items.push({ key, name, date: record.date, start_time: record.start_time, grade: record.walk_grade || "" });
+      });
+      let shownWalks = 0;
+      spots.forEach((spot) => {
+        const count = spot.items.length;
+        shownWalks += count;
+        const line = (i) => `<strong>${escapeHtml(i.name)}</strong><br>${escapeHtml(tableDate(i.date))} ${escapeHtml(formatStartTime(i.start_time) || "")} · ${escapeHtml(i.grade)}`;
+        const marker = count > 1
+          ? L.marker([spot.lat, spot.lon], { icon: L.divIcon({ className: "walk-pin-count", html: `<span>${count}</span>`, iconSize: [30, 30], iconAnchor: [15, 15] }) })
+          : L.marker([spot.lat, spot.lon]);
+        marker.bindTooltip(
+          count > 1 ? `<strong>${count} walks at this meeting point</strong><br>${spot.items.map(line).join("<br>")}` : line(spot.items[0]),
           { direction: "top" }
         );
-        marker.on("click", () => openDetailCard(key));
+        if (count > 1) {
+          marker.bindPopup(`<div class="map-pop"><strong>${count} walks at this meeting point</strong>${spot.items.map((i) => `<button type="button" class="map-pop-walk" data-open-walk="${escapeHtml(i.key)}">${escapeHtml(i.name)} · ${escapeHtml(tableDate(i.date))}</button>`).join("")}</div>`);
+          marker.on("popupopen", (e) => {
+            e.popup.getElement().querySelectorAll("[data-open-walk]").forEach((b) => b.addEventListener("click", () => {
+              walkMap.closePopup();
+              openDetailCard(b.dataset.openWalk);
+            }, { once: true }));
+          });
+        } else {
+          marker.on("click", () => openDetailCard(spot.items[0].key));
+        }
         marker.addTo(walkMapLayer);
-        points.push([lat, lon]);
+        points.push([spot.lat, spot.lon]);
       });
       // Measure and centre once the panel is visible; the map may have been created while hidden
       const fit = () => {
@@ -3204,7 +4030,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       };
       fit();
       setTimeout(fit, 150);
-      const shown = `${points.length} walk${points.length === 1 ? "" : "s"} on the map`;
+      const shown = `${shownWalks} walk${shownWalks === 1 ? "" : "s"} on the map`;
       note.textContent = missing ? `${shown}. ${missing} without a meeting point are not shown.` : `${shown}. Tap a pin for the walk.`;
     }
     // Keep the map sized correctly when the window or orientation changes
@@ -3234,6 +4060,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           LEADER_LOOKUP = Object.values(data).sort((a, b) => Number(a.leader_id) - Number(b.leader_id));
           // Refresh the open booking modal's dropdown, keeping the current choice
           refreshLeaderOptions();
+          if (LEADER_LOOKUP.length) applySavedLeaderEmail();
           // Do not re-render the table while someone is editing a row inline
           if (!editingOfferKey) renderAdminTable();
         }, (error) => {
@@ -3262,6 +4089,11 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           renderBookingRequestsPanel();
           refreshOpenDetailCard();
         }, (error) => console.error("Unable to load booking requests:", error));
+
+        onValue(ref(db, "walk_messages"), (snapshot) => {
+          walkMessages = snapshot.val() || {};
+          renderMessagesPane();
+        }, (error) => console.error("Unable to load requests:", error));
 
         onValue(ref(db, "walk_bookings"), (snapshot) => {
           globalBookings = snapshot.val() || {};
@@ -3694,8 +4526,136 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       }
     }
     /* ========================================================= CALENDAR ========================================================= */
+      // Picker mode: a stacked 12-month picker; days with a walk are marked. Clicking a day filters the list to it.
+      let pickerDay = "";
+      function pickerHasWalkOn(dateISO) {
+        if (socialKeysForDate(dateISO).length) return true;
+        return Object.entries(globalBookings || {}).some(([k, b]) => k.startsWith(dateISO + "_") && isVisibleInView(b));
+      }
+      function renderPicker() {
+        const host = document.getElementById("picker-months");
+        if (!host) return;
+        updatePickerOpenLabel();
+        host.innerHTML = "";
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const startY = today.getFullYear();
+        const startM = today.getMonth();
+        for (let m = 0; m < 12; m++) {
+          const first = new Date(startY, startM + m, 1);
+          const y = first.getFullYear();
+          const mo = first.getMonth();
+          const block = document.createElement("div");
+          block.className = "picker-month";
+          const title = document.createElement("div");
+          title.className = "picker-month-title";
+          title.textContent = `${monthNames[mo]} ${y}`;
+          const wd = document.createElement("div");
+          wd.className = "picker-weekdays picker-weekdays-inline";
+          wd.setAttribute("aria-hidden", "true");
+          wd.innerHTML = "<span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>";
+          const grid = document.createElement("div");
+          grid.className = "picker-grid";
+          for (let i = 0; i < first.getDay(); i++) {
+            const e = document.createElement("span");
+            e.className = "picker-empty";
+            grid.appendChild(e);
+          }
+          const total = new Date(y, mo + 1, 0).getDate();
+          for (let d = 1; d <= total; d++) {
+            const dateObj = new Date(y, mo, d);
+            const iso = modeIso(dateObj);
+            const dmy = `${String(d).padStart(2, "0")}-${String(mo + 1).padStart(2, "0")}-${y}`;
+            const has = pickerHasWalkOn(dmy);
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "picker-day";
+            btn.textContent = d;
+            if (has) btn.classList.add("has-walk");
+            if (dateObj < today) btn.classList.add("past");
+            if (dateObj.getTime() === today.getTime()) btn.classList.add("today");
+            if (pickerDay === iso) btn.classList.add("selected");
+            btn.setAttribute("aria-label", `${d} ${monthNames[mo]} ${y}${has ? ", walks" : ""}`);
+            btn.setAttribute("aria-pressed", String(pickerDay === iso));
+            btn.addEventListener("click", () => {
+              pickerDay = pickerDay === iso ? "" : iso;
+              applyPickerRange();
+              updateWalkOffersTitle();
+              renderPicker();
+              renderAdminTable();
+              if (isPickerPopupView()) setPickerPopup(false);
+            });
+            grid.appendChild(btn);
+          }
+          block.appendChild(title);
+          block.appendChild(wd);
+          block.appendChild(grid);
+          host.appendChild(block);
+        }
+      }
+      function applyPickerRange() {
+        if (pickerDay) {
+          setWalkerRange(pickerDay, pickerDay);
+        } else {
+          const t = new Date();
+          t.setHours(0, 0, 0, 0);
+          setWalkerRange(modeIso(t), "");
+        }
+      }
+      // Leader View: "Calendar" = calendar stacked above the list; "Picker" = picker and list side by side
+      function setLeaderLayout(layout) {
+        document.body.dataset.leaderLayout = layout;
+        document.querySelectorAll("[data-leader-layout]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.leaderLayout === layout)));
+        if (layout === "picker") {
+          applyPickerRange();
+          renderPicker();
+        } else {
+          pickerDay = "";
+          setWalkerRange("", "");
+        }
+        updateWalkOffersTitle();
+        renderAdminTable();
+      }
+      document.querySelectorAll("[data-leader-layout]").forEach((btn) => {
+        btn.addEventListener("click", () => setLeaderLayout(btn.dataset.leaderLayout));
+      });
+      // Leader View: side bars for previous / next month; they drive the month buttons in the title row
+      document.querySelector(".month-side-prev")?.addEventListener("click", () => document.getElementById("prev-month")?.click());
+      document.querySelector(".month-side-next")?.addEventListener("click", () => document.getElementById("next-month")?.click());
+      // Phones and tablets: the date picker is a popup opened from the date button
+      const isPickerPopupView = () => currentView === "walker" && document.body.dataset.walkerMode === "picker" && window.matchMedia("(max-width: 700px)").matches;
+      function setPickerPopup(open) {
+        document.body.classList.toggle("picker-open", open && isPickerPopupView());
+        document.getElementById("picker-open-btn")?.setAttribute("aria-expanded", String(document.body.classList.contains("picker-open")));
+        if (document.body.classList.contains("picker-open")) renderPicker();
+      }
+      function updatePickerOpenLabel() {
+        const el = document.getElementById("picker-open-label");
+        if (el) el.textContent = pickerDay ? msgDateText(pickerDay) : "All upcoming";
+      }
+      document.getElementById("picker-open-btn")?.addEventListener("click", () => {
+        setPickerPopup(!document.body.classList.contains("picker-open"));
+      });
+      document.getElementById("picker-close")?.addEventListener("click", () => setPickerPopup(false));
+      document.addEventListener("click", (e) => {
+        if (!document.body.classList.contains("picker-open")) return;
+        if (e.target.closest("#picker-column") || e.target.closest("#picker-open-btn")) return;
+        setPickerPopup(false);
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && document.body.classList.contains("picker-open")) setPickerPopup(false);
+      });
+      document.getElementById("picker-clear")?.addEventListener("click", () => {
+        pickerDay = "";
+        applyPickerRange();
+        updateWalkOffersTitle();
+        renderPicker();
+        renderAdminTable();
+      });
+
       function renderCalendar() {
         hideHoverCard();
+        renderPicker();
         daysGrid.innerHTML = "";
 
         const year = currentDate.getFullYear();
@@ -3734,6 +4694,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           specificDate.setHours(0, 0, 0, 0);
 
           const dayOfWeek = specificDate.getDay();
+          dayNoDiv.dataset.dow = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][dayOfWeek];
 
           // Firebase date format: DD-MM-YYYY
           const dateISO =
@@ -3859,7 +4820,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
                 } else {
 
                   slotEl.classList.add("available");
-                  slotEl.innerText = `${grade} Available`;
+                  slotEl.innerHTML = `<span class="slot-grade">${grade}</span><span class="slot-label">Available</span><span class="slot-add" aria-hidden="true">+ Add</span>`;
 
                   slotEl.addEventListener("click", () =>
                     handleAvailableClick(dateISO, grade)
@@ -3949,7 +4910,26 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
               renderAdminTable();
             });
           }
+          // Leader and Admin on phones and tablets: tapping an empty part of a busy day opens that day as a large list
+          if (currentView !== "walker" && slotsContainer.children.length) {
+            dayCell.addEventListener("click", (e) => {
+              if (e.target.closest(".slot")) return; // slot taps are handled by the slot itself
+              if (!window.matchMedia("(max-width: 1100px)").matches) return;
+              openDaySheet(dayCell, specificDate);
+            });
+          }
+          // Days with no walks, slots or social events: narrower on phones and tablets (Leader and Admin)
+          if (!slotsContainer.children.length) dayCell.classList.add("quiet-day");
           daysGrid.appendChild(dayCell);
+        }
+        // Group the days into week rows so the empty days can be narrowed on phones and tablets
+        const allCells = Array.from(daysGrid.children);
+        daysGrid.innerHTML = "";
+        for (let i = 0; i < allCells.length; i += 7) {
+          const row = document.createElement("div");
+          row.className = "week-row";
+          allCells.slice(i, i + 7).forEach((c) => row.appendChild(c));
+          daysGrid.appendChild(row);
         }
       }
       /* ========================================================= ADMIN TABLE ========================================================= */ 
@@ -3987,17 +4967,24 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       }
     }
 
+    // Each leader named on a booking, one at a time (a booking can list two leaders as "A, B")
+    function leaderNamesOnBooking(record) {
+      return String(record?.leader_name || "").split(",").map((n) => n.trim()).filter(Boolean);
+    }
+
     // Rebuild the Leader / Pueblo dropdowns from the data, keeping the current selection
     function populateAdminFilters() {
       const records = Object.values(globalBookings).filter(Boolean);
       [
-        ["admin-filter-leader", "leader_name", "All leaders"],
+        ["admin-filter-leader", null, "All leaders"],
         ["admin-filter-pueblo", "pueblo", "All pueblos"],
       ].forEach(([id, field, allLabel]) => {
         const select = document.getElementById(id);
         if (!select) return;
         const current = select.value;
-        const values = [...new Set(records.map((r) => r[field]).filter(Boolean))]
+        const values = [...new Set(field
+          ? records.map((r) => r[field]).filter(Boolean)
+          : records.flatMap((r) => leaderNamesOnBooking(r)))]
           .sort((a, b) => a.localeCompare(b));
         select.innerHTML = "";
         select.appendChild(new Option(allLabel, "ALL"));
@@ -4031,11 +5018,11 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           if (rangeTo && iso > rangeTo) return false;
         }
         if (grade !== "ALL" && r.walk_grade !== grade) return false;
-        if (leader !== "ALL" && r.leader_name !== leader) return false;
+        if (leader !== "ALL" && !leaderNamesOnBooking(r).includes(leader)) return false;
         if (pueblo !== "ALL" && r.pueblo !== pueblo) return false;
         if (status !== "ALL" && bookingStatus(r) !== status) return false;
         if (!previewReturnView && !isVisibleInView(r)) return false;
-        if (currentView !== "walker" && !showPastWalks && isPastDate(r.date)) return false;
+        if ((currentView !== "walker" || previewReturnView) && !showPastWalks && isPastDate(r.date)) return false;
         if (search) {
           const haystack = [r.date, r.start_time, r.walk_grade, r.walk_number, r.walk_name,
             r.leader_name, r.notes, r.pueblo, r.comments].join(" ").toLowerCase();
@@ -4166,13 +5153,6 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
     // In Leader View the walk lists only show walks this leader may lead
     function leaderCanPickWalk(walkId) {
       return currentView !== "leader" || leaderMayLeadWalk(walkId);
-    }
-    // How many walks in the walks list name this leader as owner (shown under the email box)
-    function countOwnedWalks() {
-      const me = myLeader();
-      if (!me || !masterWalks) return 0;
-      const name = normaliseName(leaderFullName(me));
-      return Object.values(masterWalks).filter((w) => normaliseName(w && w.Leader) === name).length;
     }
     // A booking is theirs when they are listed as one of its leaders (walk ownership does not count)
     function leaderOwnsRecord(record) {
@@ -4310,7 +5290,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
     /* Booked slots keep the full name for desktop; phones show the grade and start time (see CSS) */
     function setSlotLabel(el, longText, grade, startTime) {
       const time = String(startTime || "");
-      el.innerHTML = `<span class="slot-long">${escapeHtml(longText)}</span><span class="slot-short">${escapeHtml(grade || "")}<br>${escapeHtml(time)}</span>`;
+      el.innerHTML = `<span class="slot-long">${escapeHtml(longText)}</span><span class="slot-short"><span class="slot-grade-txt">${escapeHtml(grade || "")}</span><br><span class="slot-time-txt">${escapeHtml(time)}</span></span>`;
       el.title = longText;
     }
 
@@ -4340,16 +5320,16 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
     function identifyLeaderByEmail() {
       const typed = String(document.getElementById("leader-email").value || "").trim().toLowerCase();
       const msg = document.getElementById("leader-identify-msg");
-      if (!typed) { myLeaderId = ""; msg.hidden = true; refreshLeaderActions(); return; }
+      const input = document.getElementById("leader-email");
+      if (!typed) { myLeaderId = ""; msg.hidden = true; input.disabled = false; document.getElementById("leader-identify").classList.remove("locked"); refreshLeaderActions(); return; }
       const match = LEADER_LOOKUP.find((l) => String(l.email_add || "").trim().toLowerCase() === typed);
       myLeaderId = match ? match.leader_id : "";
+      if (match) rememberLeaderEmail(typed);
       msg.hidden = false;
-      if (!match) {
-        msg.textContent = "No leader found with that email address.";
-      } else {
-        const owned = countOwnedWalks();
-        msg.textContent = `Showing as ${leaderFullName(match)} (${match.leader_id}). You own ${owned} walk${owned === 1 ? "" : "s"}${owned ? "" : " (no walk in the walks list has this name as its Leader)"}.`;
-      }
+      // Once identified, the email box is locked
+      input.disabled = !!match;
+      msg.textContent = match ? `I am logged in as ${leaderFullName(match)}` : "No leader found with that email address.";
+      document.getElementById("leader-identify").classList.toggle("locked", !!match);
       refreshLeaderActions();
     }
     function refreshLeaderActions() {
@@ -4361,6 +5341,34 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
     document.getElementById("leader-email").addEventListener("keydown", (e) => {
       if (e.key === "Enter") { e.preventDefault(); identifyLeaderByEmail(); }
     });
+
+    // Leader email: passed from the Leaders Hub (?email=), or remembered on this device.
+    // Used to identify the leader once the leader list has loaded.
+    const LEADER_EMAIL_KEY = "cbmw-leader-email";
+    let hubEmail = "";
+    try {
+      const hubUrl = new URL(window.location.href);
+      hubEmail = hubUrl.searchParams.get("email") || "";
+      if (hubEmail) {
+        hubUrl.searchParams.delete("email");
+        history.replaceState(null, "", hubUrl.pathname + hubUrl.search + hubUrl.hash);
+      }
+    } catch (e) {}
+    function rememberLeaderEmail(email) {
+      try { localStorage.setItem(LEADER_EMAIL_KEY, email); } catch (e) {}
+    }
+    let leaderEmailApplied = false;
+    function applySavedLeaderEmail() {
+      if (leaderEmailApplied) return;
+      leaderEmailApplied = true;
+      let email = hubEmail;
+      if (!email) { try { email = localStorage.getItem(LEADER_EMAIL_KEY) || ""; } catch (e) {} }
+      const input = document.getElementById("leader-email");
+      if (!input || !email) return;
+      input.value = email;
+      identifyLeaderByEmail();
+    }
+
 
     adminTableBody.addEventListener("click", (e) => {
       const deleteDraftBtn = e.target.closest('[data-action="delete-draft"]');
@@ -4413,22 +5421,31 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       ].map((v) => String(v ?? "").trim()).filter(Boolean);
       const detailHtml = `${details.length ? `<div class="summer-details">${escapeHtml(details.join(" · "))}</div>` : ""}${rec.description ? `<div>${escapeHtml(rec.description)}</div>` : ""}`;
       const actionHtml = isAdminView() ? '<button type="button" class="btn btn-secondary summer-edit-btn">Edit</button>' : "";
-      // Column order follows the table header: expand, date, grade, walk number, name, description (walker), leader, pueblo, comments, notes (admin/leader), actions
-      const values = [
-        "",
-        `${escapeHtml(tableDate(rec.date))}<br><span class="summer-time">${escapeHtml(formatStartTime(rec.start_time))}</span>`,
-        '<span class="badge summer-badge">Summer</span>',
-        "",
-        `<strong>${escapeHtml(rec.title || "Summer walk")}</strong>${currentView === "walker" ? `<div class="walker-desc-inline">${detailHtml}</div>` : ""}`,
-        detailHtml,
-        "",
-        escapeHtml(rec.leader || ""),
-        "",
-        "",
-        detailHtml,
-        actionHtml,
-      ];
-      tr.innerHTML = headCells.map((th, i) => `<td${th.hidden ? " hidden" : ""} data-label="${escapeHtml(th.textContent.trim())}">${values[i] ?? ""}</td>`).join("");
+      // Each cell is chosen by the column's own class, so the summer row lines up with the header in every view
+      const isWalkerView = currentView === "walker";
+      const cellFor = (th) => {
+        const c = th.classList;
+        if (c.contains("expand-column")) return "";
+        if (th.dataset.adminSort === "date") return `${escapeHtml(tableDate(rec.date))}<br><span class="summer-time">${escapeHtml(formatStartTime(rec.start_time))}</span>`;
+        if (th.dataset.adminSort === "walk_grade") return '<span class="badge summer-badge">Summer</span>';
+        if (th.dataset.adminSort === "walk_number") return "";
+        if (th.dataset.adminSort === "walk_name") return `<strong>${escapeHtml(rec.title || "Summer walk")}</strong>${isWalkerView ? `<div class="walker-desc-inline">${detailHtml}</div>` : ""}`;
+        if (c.contains("walker-only-col")) return isWalkerView ? detailHtml : "";
+        if (c.contains("walker-image-col")) return "";
+        if (th.dataset.adminSort === "leader_name") return escapeHtml(rec.leader || "");
+        if (th.dataset.adminSort === "pueblo" || th.dataset.adminSort === "comments") return "";
+        if (c.contains("notes-col")) return isWalkerView ? "" : detailHtml;
+        if (c.contains("action-cancel-head")) return actionHtml;
+        return "";
+      };
+      // Cells carry the same layout classes as their header, so the CSS that hides or places columns applies to them too
+      const layoutClasses = ["expand-column", "walkid-col", "walker-only-col", "walker-image-col", "notes-col", "hide-in-walker", "status-col"];
+      const cellClassFor = (th) => {
+        const list = layoutClasses.filter((cls) => th.classList.contains(cls));
+        if (th.classList.contains("action-cancel-head")) list.push("action-cancel");
+        return list.join(" ");
+      };
+      tr.innerHTML = headCells.map((th) => `<td class="${cellClassFor(th)}"${th.hidden ? " hidden" : ""} data-label="${escapeHtml(th.textContent.trim())}">${cellFor(th)}</td>`).join("");
       tr.addEventListener("click", () => openSocialCard(skey));
       tr.querySelector(".summer-edit-btn")?.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -4483,9 +5500,13 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         const fromNow = document.getElementById("admin-filter-from")?.value || "";
         const toNow = document.getElementById("admin-filter-to")?.value || "";
         const isoOfDmy = (d) => { const p = String(d || "").split("-"); return p.length === 3 ? `${p[2]}-${p[1]}-${p[0]}` : ""; };
-        const summerKeys = gradeNow !== "ALL" ? [] : Object.keys(globalSocial || {})
+        // Summer walks are listed only with All grades or Summer walks selected, and no Leader or Pueblo filter is set
+        const leaderNow = document.getElementById("admin-filter-leader")?.value || "ALL";
+        const puebloNow = document.getElementById("admin-filter-pueblo")?.value || "ALL";
+        const summerAllowed = (gradeNow === "ALL" || gradeNow === "SUMMER") && leaderNow === "ALL" && puebloNow === "ALL";
+        const summerKeys = !summerAllowed ? [] : Object.keys(globalSocial || {})
           .filter((k) => globalSocial[k]?.type === "summer")
-          .filter((k) => currentView === "walker" || showPastWalks || !isPastDate(globalSocial[k].date))
+          .filter((k) => (currentView === "walker" && !previewReturnView) || showPastWalks || !isPastDate(globalSocial[k].date))
           .filter((k) => {
             const iso = isoOfDmy(globalSocial[k].date);
             return iso && (!fromNow || iso >= fromNow) && (!toNow || iso <= toNow);
@@ -4574,13 +5595,14 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         tr.dataset.walkKey = key;
         tr.classList.toggle("cancelled-row", isCancelled(record));
         tr.classList.toggle("expanded-parent", expanded);
+        tr.classList.toggle("draft-row", isDraft(record));
         tr.innerHTML = `
           <td class="expand-column">
             <button type="button" class="expand-toggle" aria-expanded="${expanded}" aria-label="${expanded ? "Hide" : "Show"} details for walk ${escapeHtml(record.walk_number || "")}" title="${expanded ? "Hide details" : "Show all details"}"><svg class="chev-down" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg><svg class="chev-up" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 15 12 9 18 15"/></svg></button>
           </td>
           <td data-label="Date" class="date-time-cell">
             ${currentView === "walker" ? (() => { const bd = walkerBadgeDate(record.date); return `<div class="dt-line"><strong>${escapeHtml(bd.wd)}</strong></div><div class="dt-line"><strong>${escapeHtml(bd.day)}</strong></div><div class="dt-line"><span>${escapeHtml(formatTime12(record.start_time) || "-")}</span></div>`; })() : `<div class="dt-line"><strong>${escapeHtml(tableDate(record.date))}</strong></div><div class="dt-line"><span>${escapeHtml(formatStartTime(record.start_time) || "-")}</span></div>`}
-            ${currentView === "walker" && !previewReturnView ? "" : `<div class="dt-line dt-status status-col"><button type="button" class="status-toggle status-${bookingStatus(record)}" data-status-key="${escapeHtml(key)}" ${isAdminView() ? 'title="Click to switch between Draft and Live"' : 'title="Status is set by the admin" disabled'}>${bookingStatus(record) === "live" ? "Live" : "Draft"}</button></div>`}
+            ${currentView === "walker" && !previewReturnView ? "" : `<div class="dt-line dt-status status-col"><button type="button" class="status-toggle status-${bookingStatus(record)}" data-status-key="${escapeHtml(key)}" ${isAdminView() ? 'title="Click to switch between Draft and Live"' : 'title="Status is set by the admin" disabled'}>${bookingStatus(record) === "live" ? "Published" : "Draft"}</button></div>`}
           </td>
           <td data-label="Grade"><span class="badge ${currentView === "walker" ? "badge-mono" : ""} grade-${escapeHtml(record.walk_grade || "")}">${escapeHtml(record.walk_grade || "-")}</span></td>
           <td class="walkid-col" data-label="Walk No">${escapeHtml(record.walk_number || record.walk_id || "-")}</td>
@@ -4590,7 +5612,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           <td class="hide-in-walker" data-label="Leader">${escapeHtml(record.leader_name || "-")}</td>
           <td class="hide-in-walker" data-label="Pueblo">${escapeHtml(displayPueblo || "-")}</td>
           <td class="hide-in-walker" data-label="Comments">${escapeHtml(record.comments || "-")}</td>
-          <td class="notes-col" data-label="Notes">${escapeHtml(record.notes || "-")}</td>
+          <td class="notes-col${bookingStatus(record) === "draft" && String(record.notes || "").trim() ? " notes-flag" : ""}" data-label="Notes">${escapeHtml(record.notes || "-")}</td>
           <td class="action-cancel">
             <button class="btn btn-success edit-walk-btn" type="button">Edit</button>
             <button class="btn cancel-walk-btn ${isCancelled(record) ? "reinstate" : "cancel"}" type="button">${isCancelled(record) ? "Reinstate walk" : "Cancel walk"}</button>
@@ -4689,6 +5711,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           const routeFields = route ? [
             ["Route name", route.Route_Name],
             ["Route grade", route.Grade],
+            ["Permitted leaders", String(route.Permitted_Leaders || "").split(",").map((n) => n.trim()).filter(Boolean).join(", ")],
             [adjLabel(record, ["Distance"], "Distance"), route.Distance],
             [adjLabel(record, ["Ascent"], "Ascent"), route.Ascent],
             [adjLabel(record, ["Terrain"], "Terrain"), route.Terrain],
@@ -4752,12 +5775,12 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         const r = globalBookings[k];
         if (!r) return false;
         if (!previewReturnView && !isVisibleInView(r)) return false;
-        if (currentView !== "walker" && !showPastWalks && isPastDate(r.date)) return false;
+        if ((currentView !== "walker" || previewReturnView) && !showPastWalks && isPastDate(r.date)) return false;
         return true;
       }).length;
       const summerTotal = Object.keys(globalSocial || {})
         .filter((k) => globalSocial[k]?.type === "summer")
-        .filter((k) => currentView === "walker" || showPastWalks || !isPastDate(globalSocial[k].date))
+        .filter((k) => (currentView === "walker" && !previewReturnView) || showPastWalks || !isPastDate(globalSocial[k].date))
         .length;
       const total = bookingTotal + summerTotal;
       // Badge: how many bookings are still drafts, so the admin sees what is waiting
@@ -4771,7 +5794,34 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       if (countEl) {
         countEl.textContent = `Showing ${sortedKeys.length} of ${total}`;
       }
+      updateFilterState();
     }
+
+    // How many filters are applied, shown on the Filters toggle
+    function activeFilterCount() {
+      const val = (id, def) => document.getElementById(id)?.value ?? def;
+      let n = 0;
+      if (String(val("admin-filter-search", "")).trim()) n++;
+      if (val("admin-filter-grade", "ALL") !== "ALL") n++;
+      if (val("admin-filter-leader", "ALL") !== "ALL") n++;
+      if (val("admin-filter-pueblo", "ALL") !== "ALL") n++;
+      if (val("admin-filter-status", "ALL") !== "ALL") n++;
+      if (val("admin-filter-from", "")) n++;
+      if (val("admin-filter-to", "")) n++;
+      return n;
+    }
+    function updateFilterState() {
+      const badge = document.getElementById("header-filter-badge");
+      if (!badge) return;
+      const n = activeFilterCount();
+      badge.hidden = n === 0;
+      badge.textContent = `${n} filter${n === 1 ? "" : "s"} applied`;
+    }
+    document.getElementById("filters-state")?.addEventListener("click", (e) => {
+      const bar = e.currentTarget.closest(".filters-bar");
+      const collapsed = bar.classList.toggle("filters-collapsed");
+      e.currentTarget.setAttribute("aria-expanded", String(!collapsed));
+    });
 
     // Wait for the window to load, then attach the listener
     /* ========================================================= WALKER CARDS (hover + click) ========================================================= */
@@ -5059,12 +6109,13 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       }
     });
     // Legend: tap to open on touch screens, tap outside to close
-    const legendWrap = document.querySelector(".legend-wrap");
-    if (legendWrap) {
+    document.querySelectorAll(".legend-wrap").forEach((legendWrap) => {
       legendWrap.querySelector(".legend-link").addEventListener("click", () => legendWrap.classList.toggle("open"));
       document.addEventListener("click", (e) => {
         if (!legendWrap.contains(e.target)) legendWrap.classList.remove("open");
       });
+    });
+    if (false) {
     }
 
     /* ---------- Click card: full booking + walk details (read-only) ---------- */
@@ -5297,7 +6348,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
     /* ========================================================= BOOKING CHANGE REQUESTS =========================================================
        Leaders ask for changes or cancellations to live walks. An admin approves or rejects each one.
        Stored in booking_requests/{request_id}. The walk itself only changes on approval. */
-    const BR_LABELS = { start_time: "Start time", comments: "Programme comments", notes: "Notes for the team" };
+    const BR_LABELS = { start_time: "Start time", comments: "Programme comments", notes: "Notes for the team", leader_name: "Leaders" };
     const brLeaderName = (l) => `${l?.first_name || ""} ${l?.surname || ""}`.trim();
     const pendingRequestFor = (key) => Object.values(bookingRequests).find((r) => r && r.status === "pending" && r.booking_key === key) || null;
     function lastRejectedRequestFor(key) {
@@ -5333,12 +6384,29 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       if (!r) return "";
       return `<span class="pending-request-badge">${r.type === "cancel" ? "Cancellation pending" : "Change pending"}</span>`;
     }
+    // Leader View: the request is made by the logged-in leader, so the name is filled in and locked
+    function requesterFieldHtml(leaderOptions) {
+      if (currentView !== "leader") {
+        return `<label>Your name<select id="br-leader" required><option value="">Choose your name</option>${leaderOptions}</select></label>`;
+      }
+      const me = myLeader();
+      if (!me) {
+        return `<p class="muted">Enter your email at the top of the page first, so we know who is asking.</p>`;
+      }
+      return `<label>Your name<select id="br-leader" disabled><option value="${escapeHtml(me.leader_id)}" selected>${escapeHtml(brLeaderName(me))}</option></select></label>`;
+    }
     function bookingRequestFormHtml(key, type) {
       const d = getBookingCardData(key);
       const record = globalBookings[key] || {};
       const leaderOptions = LEADER_LOOKUP.map((l) => `<option value="${escapeHtml(l.leader_id)}">${escapeHtml(brLeaderName(l))}</option>`).join("");
       const title = type === "cancel" ? "Request cancellation" : "Request a change";
-      const fields = type === "change" ? `
+      // Leaders on the booking can be changed only to the walk's owner or permitted leaders (same rule as the booking form)
+      const allowedLeaders = permittedLeaderIds(record.walk_number) || [];
+      const currentLeaders = bookingLeaderIds(record);
+      const leaderFields = `
+          <label>Leader 1<select id="br-lead-1" required>${leaderOptionsHtml(currentLeaders[0] || "", allowedLeaders)}</select></label>
+          <label>Leader 2<select id="br-lead-2">${leaderOptionsOptionalHtml(currentLeaders[1] || "", allowedLeaders)}</select></label>`;
+      const fields = type === "change" ? `${leaderFields}
           <label>Start time<input type="text" id="br-start" value="${escapeHtml(record.start_time || "")}" /></label>
           <label>Programme comments<textarea id="br-comments" rows="2">${escapeHtml(record.comments || "")}</textarea></label>
           <label>Notes for the team<textarea id="br-notes" rows="2">${escapeHtml(record.notes || "")}</textarea></label>` : "";
@@ -5351,9 +6419,9 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           <button class="walk-card-close" type="button" data-action="close" aria-label="Close">×</button>
         </div>
         <form class="walk-card-body booking-request-form" id="booking-request-form" data-type="${type}">
-          <label>Your name<select id="br-leader" required><option value="">Choose your name</option>${leaderOptions}</select></label>
+          ${requesterFieldHtml(leaderOptions)}
           ${fields}
-          <label>Why? <textarea id="br-reason" rows="3" required></textarea></label>
+          <label>Description of required changes <textarea id="br-reason" rows="3" required placeholder="Say what should change and why, e.g. Meet at the car park by the church instead."></textarea></label>
           <div class="detail-actions">
             <button type="button" class="btn btn-secondary" data-booking-request="back">Back</button>
             <button type="submit" class="btn btn-primary">Send request</button>
@@ -5367,11 +6435,14 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       const type = form.dataset.type;
       const leader = LEADER_LOOKUP.find((l) => l.leader_id === document.getElementById("br-leader").value);
       const reason = document.getElementById("br-reason").value.trim();
-      if (!leader) return alert("Choose your name first.");
-      if (record.leader_name && record.leader_name !== brLeaderName(leader)) {
+      if (!leader) return alert(currentView === "leader" ? "Enter your email at the top of the page first." : "Choose your name first.");
+      // Leader View: the requester must be listed on the booking. Other views keep the name check.
+      if (currentView === "leader") {
+        if (!leaderOwnsRecord(record)) return alert("You can only ask for changes to bookings you lead.");
+      } else if (record.leader_name && record.leader_name !== brLeaderName(leader)) {
         return alert("You can only ask for changes to walks you lead.");
       }
-      if (!reason) return alert("Please say why.");
+      if (!reason) return alert("Please give a description of the required changes.");
       const changes = {};
       if (type === "change") {
         const next = {
@@ -5382,7 +6453,19 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         for (const k of Object.keys(next)) {
           if (next[k] !== String(record[k] ?? "").trim()) changes[k] = next[k];
         }
-        if (!Object.keys(changes).length) return alert("Nothing has changed yet.");
+        // Leaders: only owner or permitted leaders, no one twice
+        const firstId = document.getElementById("br-lead-1").value;
+        const secondId = document.getElementById("br-lead-2").value;
+        const ids = [firstId, secondId].filter(Boolean);
+        const allowedForWalk = permittedLeaderIds(record.walk_number) || [];
+        if (!firstId) return alert("Choose Leader 1.");
+        if (ids.length === 2 && ids[0] === ids[1]) return alert("Leader 2 must be different from Leader 1.");
+        if (ids.some((id) => !allowedForWalk.includes(id))) return alert("Leaders must be the walk's owner or a permitted leader.");
+        if (ids.join(",") !== bookingLeaderIds(record).map(String).join(",")) {
+          changes.leader_ids = ids;
+          changes.leader_name = ids.map((id) => leaderFullName(findLeader(id))).join(", ");
+        }
+        // The instructions box is enough on its own: the other fields may stay as they are
       }
       const before = {};
       Object.keys(changes).forEach((k) => { before[k] = record[k] ?? ""; });
@@ -5418,8 +6501,10 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         const when = rec ? `${formatWalkDate(rec.date)} • ${formatStartTime(rec.start_time)}` : "Booking no longer exists";
         const what = r.type === "cancel"
           ? "<p><strong>Asks to cancel this walk.</strong></p>"
-          : `<ul class="change-list">${Object.entries(r.changes || {}).map(([k, v]) =>
-              `<li><strong>${escapeHtml(BR_LABELS[k] || k)}:</strong> ${escapeHtml(r.before?.[k] || "(blank)")} → ${escapeHtml(v || "(blank)")}</li>`).join("")}</ul>`;
+          : !Object.keys(r.changes || {}).length ? `<p class="muted">Description only. No fields are changed.</p>`
+          : `<ul class="change-list">${Object.entries(r.changes || {}).filter(([k]) => k !== "leader_ids").map(([k, v]) => {
+              return `<li><strong>${escapeHtml(BR_LABELS[k] || k)}:</strong> ${escapeHtml(r.before?.[k] || "(blank)")} → ${escapeHtml(v || "(blank)")}</li>`;
+            }).join("")}</ul>`;
         return `<div class="booking-request-item">
           <div><strong>${escapeHtml(name)}</strong> <span class="muted">${escapeHtml(when)}${slot ? " · " + escapeHtml(slot) : ""}</span></div>
           <div class="muted">${r.type === "cancel" ? "Cancellation" : "Change"} requested by ${escapeHtml(r.requested_by_name || r.requested_by || "a leader")}</div>
@@ -5427,7 +6512,9 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           <div class="muted">Reason: ${escapeHtml(r.reason || "")}</div>
           <div class="booking-request-actions">
             ${rec
-              ? `<button type="button" class="btn btn-small btn-primary" data-br-approve="${escapeHtml(r.request_id)}">Approve</button>
+              ? `${r.type === "cancel"
+                  ? `<button type="button" class="btn btn-small btn-primary" data-br-approve="${escapeHtml(r.request_id)}">Approve cancellation</button>`
+                  : `<button type="button" class="btn btn-small btn-primary" data-br-review="${escapeHtml(r.request_id)}">Review</button>`}
             <button type="button" class="btn btn-small btn-danger" data-br-reject="${escapeHtml(r.request_id)}">Reject</button>`
               : `<button type="button" class="btn btn-small" data-br-dismiss="${escapeHtml(r.request_id)}">Dismiss (walk was removed)</button>`}
           </div>
@@ -5446,6 +6533,36 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       }
       saveBookingRequest(id, { ...r, status: "approved", reviewed_at: new Date().toISOString() });
     }
+    /* Review: the admin edit form opens with the leader's requested values filled in. Saving it approves the request,
+       and any value the admin changed from what the leader asked for is recorded as an override. Cancellations still use Approve. */
+    let brReviewId = null;
+    function openBookingReview(id) {
+      const r = bookingRequests[id];
+      if (!r || r.status !== "pending") return;
+      const rec = globalBookings[r.booking_key];
+      if (!rec) return alert("This booking no longer exists.");
+      brReviewId = id;
+      openBookingModal(rec.date, rec.walk_grade, { ...rec, ...(r.changes || {}) }, rec.walk_number);
+      document.getElementById("modal-heading").textContent = `Review change request: ${r.requested_by_name || r.requested_by || "leader"}`;
+      // Amber border on each field the leader changed
+      const fieldIds = { start_time: "input-start-time", comments: "input-comments", notes: "input-notes", leader_name: "input-leader" };
+      Object.keys(r.changes || {}).forEach((k) => {
+        const el = fieldIds[k] && document.getElementById(fieldIds[k]);
+        if (el) { el.style.border = "2px solid #f59e0b"; el.style.background = "#fffbeb"; el.title = `Leader asked for this. Was: ${r.before?.[k] || "(blank)"}`; }
+      });
+    }
+    // Called from the admin booking form on save: records the approval and any overrides
+    function finishBookingReview(payload) {
+      const r = bookingRequests[brReviewId];
+      brReviewId = null;
+      if (!r || r.status !== "pending") return;
+      const keys = Object.keys(r.changes || {}).filter((k) => k !== "leader_ids");
+      const reviewed = {};
+      keys.forEach((k) => { reviewed[k] = payload[k] ?? ""; });
+      const overrides = keys.filter((k) => String(reviewed[k] ?? "").trim() !== String(r.changes[k] ?? "").trim());
+      saveBookingRequest(r.request_id, { ...r, status: "approved", reviewed_changes: reviewed, admin_overrides: overrides, reviewed_at: new Date().toISOString() });
+    }
+
     function dismissBookingRequest(id) {
       const r = bookingRequests[id];
       if (!r || r.status !== "pending") return;
@@ -5614,9 +6731,230 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       submitBookingRequest(e.target);
     });
 
+    /* ========================================================= REQUESTS AND MESSAGES =========================================================
+       Admins and leaders post requests to change a walk (date, time, leader, walk or other).
+       Stored in walk_messages/{id}. Anyone in Leader or Admin View can mark one done or reopen it; only admins can delete. */
+    let walkMessages = {};
+    let msgStatusFilter = "open";
+    let msgTypeFilter = "";
+    const MSG_TYPES = { date: "Change date", time: "Change time", leader: "Change leader", walk: "Change walk", other: "Other" };
+    function msgAuthorName() {
+      if (currentView === "admin") return "Admin";
+      const me = LEADER_LOOKUP.find((l) => String(l?.leader_id) === String(myLeaderId));
+      return brLeaderName(me) || "A leader";
+    }
+    function msgWalkOptions() {
+      return Object.entries(globalBookings)
+        .filter(([, b]) => b && b.status === "live" && b.cancelled !== true && !isPastDate(b.date))
+        .sort(([, a], [, b]) => (convertDate(a.date)?.getTime() || 0) - (convertDate(b.date)?.getTime() || 0) || String(a.start_time || "").localeCompare(String(b.start_time || "")))
+        .map(([key, b]) => {
+          const name = getBookingCardData(key)?.name || b.walk_name || `Walk ${b.walk_number || ""}`;
+          return { key, label: `${formatWalkDate(b.date)} · ${name}${b.walk_grade ? " · " + b.walk_grade : ""}` };
+        });
+    }
+    function msgDateText(iso) {
+      if (!iso) return "";
+      const d = new Date(`${iso}T00:00`);
+      return isNaN(d) ? iso : d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
+    }
+    function msgTimeText(iso) {
+      const d = new Date(iso);
+      return isNaN(d) ? "" : d.toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+    }
+    function msgItemHtml(m) {
+      const done = m.status === "done";
+      const proposal = [m.proposed_date ? `Proposed date: ${msgDateText(m.proposed_date)}` : "", m.proposed_time ? `Proposed time: ${m.proposed_time}` : ""].filter(Boolean).join(" · ");
+      const id = escapeHtml(m.id);
+      return `<article class="msg-item${done ? " is-done" : ""}">
+        <div class="msg-item-head">
+          <span class="msg-type">${escapeHtml(MSG_TYPES[m.type] || "Other")}</span>
+          <strong class="msg-walk">${escapeHtml(m.walk_label || "Walk")}</strong>
+          <span class="msg-status ${done ? "done" : "open"}">${done ? "Done" : "Open"}</span>
+        </div>
+        <p class="msg-text">${escapeHtml(m.text || "")}</p>
+        ${proposal ? `<div class="msg-meta"><strong>${escapeHtml(proposal)}</strong></div>` : ""}
+        <div class="muted msg-meta">${escapeHtml(m.from_name || "Someone")} · ${escapeHtml(msgTimeText(m.created_at))}${done && m.done_by ? " · Done by " + escapeHtml(m.done_by) : ""}</div>
+        <div class="msg-actions">
+          ${done
+            ? `<button type="button" class="btn btn-small" data-msg-reopen="${id}">Reopen</button>`
+            : `<button type="button" class="btn btn-small btn-primary" data-msg-done="${id}">Mark done</button>`}
+          ${currentView === "admin" ? `<button type="button" class="btn btn-small btn-danger" data-msg-delete="${id}">Delete</button>` : ""}
+        </div>
+      </article>`;
+    }
+    function renderMessagesPane() {
+      const countEl = document.getElementById("msg-pane-count");
+      if (!countEl) return;
+      const all = Object.values(walkMessages).filter((m) => m && m.id)
+        .sort((a, b) => String(b.created_at || "").localeCompare(String(a.created_at || "")));
+      const openCount = all.filter((m) => m.status !== "done").length;
+      countEl.textContent = openCount ? `${openCount} open` : "";
+      document.querySelectorAll("[data-msg-status]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.msgStatus === msgStatusFilter)));
+      const list = all.filter((m) =>
+        (msgStatusFilter === "all" || (msgStatusFilter === "done" ? m.status === "done" : m.status !== "done")) &&
+        (!msgTypeFilter || m.type === msgTypeFilter));
+      document.getElementById("msg-list").innerHTML = list.length
+        ? list.map(msgItemHtml).join("")
+        : `<p class="muted msg-empty">No ${msgStatusFilter === "all" ? "" : msgStatusFilter + " "}requests${msgTypeFilter ? " of this type" : ""}.</p>`;
+    }
+    function setMsgStatus(id, status) {
+      const m = walkMessages[id];
+      if (!m) return;
+      const next = { ...m, status, updated_at: new Date().toISOString(), done_by: status === "done" ? msgAuthorName() : null };
+      walkMessages[id] = next;
+      renderMessagesPane();
+      if (isFirebaseActive) set(ref(db, "walk_messages/" + id), next);
+    }
+    function deleteMessage(id) {
+      if (currentView !== "admin" || !walkMessages[id]) return;
+      if (!confirm("Delete this request? This cannot be undone.")) return;
+      delete walkMessages[id];
+      renderMessagesPane();
+      if (isFirebaseActive) remove(ref(db, "walk_messages/" + id));
+    }
+    function openMsgForm(show) {
+      const form = document.getElementById("msg-form");
+      form.hidden = !show;
+      if (!show) return;
+      const walkSel = document.getElementById("msg-walk");
+      const opts = msgWalkOptions();
+      walkSel.innerHTML = opts.length
+        ? `<option value="">Choose a walk</option>` + opts.map((o) => `<option value="${escapeHtml(o.key)}">${escapeHtml(o.label)}</option>`).join("")
+        : `<option value="">No upcoming walks</option>`;
+      document.getElementById("msg-text").focus();
+    }
+
+    /* ========================================================= DAY SHEET (Leader and Admin, phones and tablets) =========================================================
+       Tapping a busy day opens it as a large list of its slots. Each row passes the tap on to the calendar slot. */
+    function openDaySheet(dayCell, date) {
+      let sheet = document.getElementById("day-sheet");
+      if (!sheet) {
+        sheet = document.createElement("div");
+        sheet.id = "day-sheet";
+        sheet.className = "day-sheet";
+        sheet.hidden = true;
+        sheet.innerHTML = `<div class="day-sheet-card" role="dialog" aria-modal="true" aria-labelledby="day-sheet-title">
+          <div class="day-sheet-head"><h3 id="day-sheet-title"></h3><button type="button" class="day-sheet-close" aria-label="Close">&times;</button></div>
+          <p class="day-sheet-hint">Tap a slot to book it, or to open a walk.</p>
+          <div class="day-sheet-list" id="day-sheet-list"></div>
+        </div>`;
+        document.body.appendChild(sheet);
+        sheet.addEventListener("click", (e) => {
+          if (e.target === sheet || e.target.closest(".day-sheet-close")) closeDaySheet();
+        });
+      }
+      sheet.querySelector("#day-sheet-title").textContent = date.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+      const list = sheet.querySelector("#day-sheet-list");
+      list.innerHTML = "";
+      dayCell.querySelectorAll(".slot").forEach((orig) => {
+        const grade = ([...orig.classList].find((c) => c.startsWith("grade-")) || "").slice(6);
+        const row = document.createElement("button");
+        row.type = "button";
+        row.className = "day-sheet-slot" + (orig.classList.contains("past") ? " past" : "");
+        if (grade) row.style.setProperty("--slot-c", `var(--color-${grade})`);
+        let main, sub;
+        if (orig.classList.contains("available")) {
+          main = "Available";
+          sub = `Grade ${grade} · tap to book`;
+        } else if (orig.classList.contains("social")) {
+          main = orig.textContent.replace(/\s+/g, " ").trim();
+          sub = "Social event";
+        } else {
+          main = orig.querySelector(".slot-long")?.textContent.trim() || orig.title || "Walk";
+          const timeLine = (orig.querySelector(".slot-short")?.innerText || "").split("\n").slice(1).join(" ").trim();
+          sub = [grade && `Grade ${grade}`, timeLine].filter(Boolean).join(" · ");
+        }
+        row.innerHTML = `<span><span class="day-sheet-slot-main">${escapeHtml(main)}</span><span class="day-sheet-slot-sub">${escapeHtml(sub)}</span></span>`;
+        row.addEventListener("click", () => {
+          closeDaySheet();
+          orig.click();
+        });
+        list.appendChild(row);
+      });
+      sheet.hidden = false;
+      document.body.classList.add("day-sheet-open");
+      sheet.querySelector(".day-sheet-close").focus();
+    }
+    function closeDaySheet() {
+      document.getElementById("day-sheet")?.setAttribute("hidden", "");
+      document.body.classList.remove("day-sheet-open");
+    }
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && document.body.classList.contains("day-sheet-open")) closeDaySheet();
+    });
+
+    // Leader and Admin on phones and tablets: the grade legend sits beside the Calendar / List switch
+    const calendarLegendEl = document.querySelector(".legend-wrap:not(.picker-legend-wrap)");
+    const calendarToolsEl = document.querySelector(".calendar-tools-group");
+    function placeLegendForPhones() {
+      const header = document.getElementById("leader-layout-header");
+      if (!calendarLegendEl || !header || !calendarToolsEl) return;
+      const small = window.matchMedia("(max-width: 1100px)").matches && currentView !== "walker";
+      if (small && calendarLegendEl.parentElement !== header) header.appendChild(calendarLegendEl);
+      else if (!small && calendarLegendEl.parentElement === header) calendarToolsEl.appendChild(calendarLegendEl);
+    }
+    window.matchMedia("(max-width: 1100px)").addEventListener("change", placeLegendForPhones);
+
+    document.getElementById("msg-pane-toggle").addEventListener("click", (e) => {
+      const btn = e.currentTarget;
+      const body = document.getElementById("msg-pane-body");
+      body.hidden = !body.hidden;
+      btn.setAttribute("aria-expanded", String(!body.hidden));
+    });
+    document.querySelectorAll("[data-msg-status]").forEach((b) => b.addEventListener("click", () => {
+      msgStatusFilter = b.dataset.msgStatus;
+      renderMessagesPane();
+    }));
+    document.getElementById("msg-type-filter").addEventListener("change", (e) => {
+      msgTypeFilter = e.target.value;
+      renderMessagesPane();
+    });
+    document.getElementById("msg-new-btn").addEventListener("click", () => {
+      openMsgForm(document.getElementById("msg-form").hidden);
+    });
+    document.getElementById("msg-cancel").addEventListener("click", () => openMsgForm(false));
+    document.getElementById("msg-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const walkKey = document.getElementById("msg-walk").value;
+      const text = document.getElementById("msg-text").value.trim();
+      if (!walkKey) return alert("Please choose a walk.");
+      if (!text) return alert("Please describe the request.");
+      const opt = msgWalkOptions().find((o) => o.key === walkKey);
+      const id = `msg_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+      const data = {
+        id,
+        type: document.getElementById("msg-type").value,
+        booking_key: walkKey,
+        walk_label: opt ? opt.label : walkKey,
+        proposed_date: document.getElementById("msg-date").value || null,
+        proposed_time: document.getElementById("msg-time").value || null,
+        text,
+        status: "open",
+        from_name: msgAuthorName(),
+        from_role: currentView,
+        created_at: new Date().toISOString(),
+      };
+      walkMessages[id] = data;
+      if (isFirebaseActive) set(ref(db, "walk_messages/" + id), data);
+      e.target.reset();
+      openMsgForm(false);
+      msgStatusFilter = "open";
+      renderMessagesPane();
+    });
+    document.getElementById("msg-list").addEventListener("click", (e) => {
+      const done = e.target.closest("[data-msg-done]");
+      const reopen = e.target.closest("[data-msg-reopen]");
+      const del = e.target.closest("[data-msg-delete]");
+      if (done) setMsgStatus(done.dataset.msgDone, "done");
+      if (reopen) setMsgStatus(reopen.dataset.msgReopen, "open");
+      if (del) deleteMessage(del.dataset.msgDelete);
+    });
+
     document.getElementById("booking-requests-panel").addEventListener("click", (e) => {
       const ok = e.target.closest("[data-br-approve]");
+      const rv = e.target.closest("[data-br-review]");
       const no = e.target.closest("[data-br-reject]");
+      if (rv) openBookingReview(rv.dataset.brReview);
       if (ok) approveBookingRequest(ok.dataset.brApprove);
       if (no) rejectBookingRequest(no.dataset.brReject);
       const gone = e.target.closest("[data-br-dismiss]");
@@ -5740,10 +7078,24 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
 
       const button = document.getElementById("submit-booking");
       refreshLeaderOptions();
+      syncLeaderInputsEnabled();
       refreshWalkDetailsPanel();
       modal.classList.add("active");
     }
+    // Leaders can be entered only once the Walk Number matches a walk in the master list
+    function syncLeaderInputsEnabled() {
+      const key = (document.getElementById("input-walk-no")?.value || "").trim();
+      const valid = !!key && !!masterWalks && Object.prototype.hasOwnProperty.call(masterWalks, key);
+      ["input-leader", "input-leader-2"].forEach((id) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.disabled = !valid;
+        el.title = valid ? "" : "Choose a valid Walk Number first";
+      });
+    }
+
     function closeModal() {
+      brReviewId = null;
       modal.classList.remove("active");
     
     }
@@ -5754,6 +7106,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       document.getElementById("input-walk-no").addEventListener("input", () => {
         const nameInput = document.getElementById("input-walk-name");
         refreshLeaderOptions();
+        syncLeaderInputsEnabled();
         nameInput.dataset.autofilled = "true";
         validateBookingWalkGrade(false);
         refreshWalkDetailsPanel();
@@ -5863,6 +7216,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           payload.owner = existingRecord.owner;
         }
         saveBookingRecord(compositeKey, payload);
+        if (brReviewId) finishBookingReview(payload);
         closeModal();
       },
     );
@@ -6445,11 +7799,13 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       /* ========================================================= CALENDAR NAVIGATION ========================================================= */ document
       .getElementById("prev-month")
       .addEventListener("click", () => {
+        currentDate.setDate(1); // avoids rolling over on the 31st (e.g. 31 Oct + 1 month = 1 Dec)
         currentDate.setMonth(currentDate.getMonth() - 1);
         renderCalendar();
         afterMonthChange();
       });
     document.getElementById("next-month").addEventListener("click", () => {
+      currentDate.setDate(1); // avoids rolling over on the 31st (e.g. 31 Oct + 1 month = 1 Dec)
       currentDate.setMonth(currentDate.getMonth() + 1);
       renderCalendar();
       afterMonthChange();
@@ -6465,7 +7821,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
          List: all upcoming walks (today onwards), calendar hidden.
          Month: the displayed month's walks, calendar shown.
          Day: the selected day's walks, calendar shown; click a day to choose it. */
-      let walkerMode = "list";
+      let walkerMode = "picker";
       let walkerDay = "";
       const modeIso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
       const gradeFieldHome = (() => {
@@ -6490,6 +7846,14 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
           const today = new Date();
           today.setHours(0, 0, 0, 0);
           setWalkerRange(modeIso(today), "");
+        } else if (walkerMode === "picker") {
+          if (pickerDay) {
+            setWalkerRange(pickerDay, pickerDay);
+          } else {
+            const t = new Date();
+            t.setHours(0, 0, 0, 0);
+            setWalkerRange(modeIso(t), "");
+          }
         } else if (walkerMode === "month") {
           const first = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
           const last = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
@@ -6562,6 +7926,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         const from = currentView;
         setView("walker");
         previewReturnView = from;
+        document.getElementById("past-walks-label").hidden = false; // keep the Show past walks tick box in preview
         syncViewRadio(from);
         updatePreviewControls();
         renderCalendar();
@@ -6584,6 +7949,8 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
         document.getElementById("calendar-collapse").textContent = "Hide calendar";
         document.body.dataset.view = view;
         renderBookingRequestsPanel();
+        renderMessagesPane();
+        placeLegendForPhones();
         document.getElementById("page-title").textContent = view === "walker" ? "Walk Programme" : "Programme Planner";
         placeGradeFilter();
         if (view !== "walker") setWalkerRange("", "");
@@ -6612,10 +7979,8 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       });
     document.getElementById("preview-walker-btn").addEventListener("click", togglePreviewAsWalker);
     document.getElementById("past-walks-check").addEventListener("change", (e) => togglePastWalks(e.target.checked));
-    document.getElementById("filters-toggle").addEventListener("click", (e) => {
-      const open = document.body.classList.toggle("filters-open");
-      e.currentTarget.setAttribute("aria-expanded", String(open));
-    });
+
+
     document.querySelectorAll("[data-walker-mode-btn]").forEach((btn) => {
       btn.addEventListener("click", () => setWalkerMode(btn.dataset.walkerModeBtn));
     });
@@ -6660,6 +8025,7 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
       const title = document.getElementById("walk-offers-title");
       if (isEmbedWeek() && currentView === "walker") { title.textContent = "This week's walks"; return; }
       if (currentView !== "walker") { title.textContent = "Walk Offers"; return; }
+      if (walkerMode === "picker") { title.textContent = pickerDay ? `Walks on ${new Date(pickerDay + "T00:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}` : "Upcoming Walks"; return; }
       if (walkerMode === "list") { title.textContent = "Upcoming Walks"; return; }
       if (walkerMode === "map") { title.textContent = "Walk Map"; return; }
       if (walkerMode === "month") { title.textContent = `Walks in ${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`; return; }
@@ -6676,14 +8042,14 @@ const authReady = Promise.allSettled(authSignIns).then((results) => {
     /* Walk Offers: collapse / expand in every view (button or title) */
     (function () {
       const container = document.getElementById("admin-container");
-      const btn = document.getElementById("walk-offers-collapse");
+      const btn = document.getElementById("walk-offers-collapse"); // retired button; collapse still works from the title
       const title = container.querySelector(".admin-header h3");
       const toggle = () => {
         const collapsed = container.classList.toggle("collapsed");
-        btn.setAttribute("aria-expanded", String(!collapsed));
-        btn.setAttribute("aria-label", collapsed ? "Expand walk offers" : "Collapse walk offers");
+        btn?.setAttribute("aria-expanded", String(!collapsed));
+        btn?.setAttribute("aria-label", collapsed ? "Expand walk offers" : "Collapse walk offers");
       };
-      btn.addEventListener("click", toggle);
+      btn?.addEventListener("click", toggle);
       title.addEventListener("click", toggle);
       title.style.cursor = "pointer";
     })();
